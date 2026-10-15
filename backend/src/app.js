@@ -6,78 +6,60 @@ const rateLimit = require("express-rate-limit");
 
 const stationsRouter = require("./routes/stations");
 const referenceRouter = require("./routes/reference");
-const { getDatasetMeta } = require("./services/stations-service");
+const service = require("./services/stations-service");
 const { sendError } = require("./lib/errors");
 
 const SERVICE_NAME = "ev-charging-stations-api";
-const SERVICE_VERSION = "1.0.0";
+const SERVICE_VERSION = "2.0.0";
 
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
-const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 300;
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 100;
 
 const app = express();
 app.disable("x-powered-by");
 
 /**
- * Vercel terminates TLS at its edge and forwards the real client address in
- * X-Forwarded-For. Without this, Express reports the proxy address as req.ip and
- * every caller on the internet shares a single rate-limit bucket.
+ * Vercel overwrites X-Forwarded-For with the real client address, so one trusted hop
+ * gives a per-client req.ip there. Without a proxy in front (plain `npm start`), callers
+ * could spoof the header; see README.
  */
-app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS) || 1);
+app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS ?? 1));
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({ origin: "*", methods: ["GET", "HEAD", "OPTIONS"] }));
 
 const limiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   limit: RATE_LIMIT_MAX,
-  standardHeaders: true,
+  standardHeaders: false,
   legacyHeaders: false,
-  // express-rate-limit v7 validates the client-address derivation; behind a
-  // single trusted proxy hop req.ip is the real caller.
   validate: { trustProxy: true },
-  message: {
-    success: false,
-    error: {
-      code: "RATE_LIMIT_EXCEEDED",
-      message: `Rate limit exceeded: ${RATE_LIMIT_MAX} requests per ${Math.round(
-        RATE_LIMIT_WINDOW_MS / 60000
-      )} minutes per client. Retry after the number of seconds in the Retry-After header.`,
-    },
-  },
 });
-
 app.use("/v1", limiter);
 
 function endpointIndex() {
   return [
-    { method: "GET", path: "/v1/stations", description: "Paginated station directory with filters" },
-    { method: "GET", path: "/v1/stations/near", description: "Radius search around a coordinate" },
-    { method: "GET", path: "/v1/stations/{id}", description: "Single station by integer id" },
-    { method: "GET", path: "/v1/states", description: "Station totals per state and union territory" },
+    { method: "GET", path: "/v1/stations", description: "Station directory with filters and paging" },
+    { method: "GET", path: "/v1/stations/near", description: "Stations within a radius of a point, nearest first" },
+    { method: "GET", path: "/v1/stations/{id}", description: "One station by id (evs_ + 10 hex digits)" },
+    { method: "GET", path: "/v1/states", description: "Station counts per state and union territory" },
+    { method: "GET", path: "/v1/cities", description: "Cities with stations, optionally for one state" },
     { method: "GET", path: "/v1/operators", description: "Charge point operators with station counts" },
-    { method: "GET", path: "/v1/connectors", description: "Charging standard reference dictionary" },
-    { method: "GET", path: "/v1/meta", description: "Dataset provenance, coverage and counts" },
-    { method: "GET", path: "/health", description: "Liveness probe" },
+    { method: "GET", path: "/v1/connectors", description: "Charging standards, vehicles served and counts" },
+    { method: "GET", path: "/v1/meta", description: "Dataset source, attribution and counts" },
+    { method: "GET", path: "/health", description: "Liveness check" },
   ];
 }
 
 app.get("/", (req, res) => {
-  const meta = getDatasetMeta();
-  return res.status(200).json({
+  const meta = service.getDatasetMeta();
+  return res.json({
     success: true,
     data: {
       name: "India EV Charging Station Directory API",
       version: SERVICE_VERSION,
-      description:
-        "Keyless REST API for Indian public electric vehicle charging stations, connectors and power ratings.",
-      dataset_status: meta.dataset_status,
-      dataset_provenance: meta.provenance,
+      stations: meta.counts.stations,
+      snapshot: meta.source.snapshot_label,
+      attribution: meta.attribution,
       documentation: "/docs",
       playground: "/playground",
       endpoints: endpointIndex().map((e) => e.path),
@@ -86,21 +68,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  const meta = getDatasetMeta();
-  return res.status(200).json({
+  const meta = service.getDatasetMeta();
+  res.set("Cache-Control", "no-store");
+  return res.json({
     status: "ok",
     service: SERVICE_NAME,
     version: SERVICE_VERSION,
+    stations_indexed: meta.counts.stations,
+    snapshot: meta.source.snapshot_label,
     uptime_seconds: Math.floor(process.uptime()),
-    stations_indexed: meta.total_stations,
-    dataset_status: meta.dataset_status,
     timestamp: new Date().toISOString(),
   });
 });
 
-/** GET /v1 — self-describing index so callers can discover routes without docs. */
 app.get("/v1", (req, res) => {
-  return res.status(200).json({
+  return res.json({
     success: true,
     data: {
       name: "India EV Charging Station Directory API",
@@ -116,23 +98,13 @@ app.use("/v1", stationsRouter);
 app.use("/v1", referenceRouter);
 
 app.use((req, res) => {
-  return sendError(
-    res,
-    404,
-    "ROUTE_NOT_FOUND",
-    `The requested endpoint '${req.originalUrl}' does not exist. See /v1 for the endpoint index.`
-  );
+  return sendError(res, 404, "ROUTE_NOT_FOUND", `No endpoint at '${req.path}'. See /v1 for the endpoint index.`);
 });
 
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
   console.error("Unhandled server error:", error);
-  return sendError(
-    res,
-    500,
-    "INTERNAL_SERVER_ERROR",
-    "An unexpected error occurred while processing your request."
-  );
+  return sendError(res, 500, "INTERNAL_SERVER_ERROR", "An unexpected error occurred while processing your request.");
 });
 
 module.exports = app;
