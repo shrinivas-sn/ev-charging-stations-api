@@ -15,9 +15,11 @@ Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 4 done
 
 ## Next up (start here)
 
-1. Phase 5 starts at Task 5.1 (vercel.json: bom1, includeFiles). Re-read the Vercel brief's TTL first (PLAN Phase 5 "Re-check first").
-2. Phase 5 (rest): Task 5.2 CI + weekly BEE check, api.json and README.
-3. Phase 6: review, preview deploy, smoke test. No merge to main without the owner.
+Follow `PLAN.md` (fresh plan for the remaining work, written 15/10/2026; the Phases 1–4 plan is archived at `DOCS/WORK/2026-10-15/PLAN-bee-rebuild-phases-1-4.md`).
+
+1. Phase 5 — Task 5.1: `vercel.json` (bom1, `includeFiles: backend/data/**`), test first. Then 5.2 check-upstream script, 5.3 CI + weekly BEE workflow, 5.4 api.json/README/DECISIONS (also fixes a docs string that would fail `docs-route-parity`).
+2. Phase 6: review, smoke script, push the branch for a Vercel **preview**, guide checks. Ends with a STOP for the owner.
+3. Phase 7 (only after the owner says "merge to main"): PR + merge, production gates, hub records, close the plan.
 
 Mobile-check (Task 4.5) done: no blockers or majors, see `MOBILE.md`. Probe with one viewport per browser launch (cache issue noted there). Preview: `PORT=3920 npm start`, then `API_PROXY_TARGET=http://localhost:3920 npx vite preview --port 4180` in frontend/ (ports 3000/5173 belong to the previous agent).
 
