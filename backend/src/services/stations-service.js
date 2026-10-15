@@ -7,6 +7,42 @@
 
 const path = require("node:path");
 const reference = require("../lib/reference");
+const { ApiError } = require("../lib/errors");
+
+const STATION_ID = /^evs_[0-9a-f]{10}$/;
+const VEHICLES = ["car", "two_three_wheeler"];
+const OWNERSHIPS = ["govt", "private"];
+const CURRENTS = ["ac", "dc"];
+const LOCATION_QUALITIES = ["ok", "suspect", "any"];
+
+/** Colloquial or former names; a query matches whichever spellings the data uses. */
+const CITY_ALIAS_PAIRS = [
+  ["bangalore", "bengaluru"],
+  ["bombay", "mumbai"],
+  ["calcutta", "kolkata"],
+  ["madras", "chennai"],
+  ["gurgaon", "gurugram"],
+  ["mysore", "mysuru"],
+  ["mangalore", "mangaluru"],
+  ["belgaum", "belagavi"],
+  ["hubli", "hubballi"],
+  ["trivandrum", "thiruvananthapuram"],
+  ["cochin", "kochi"],
+  ["baroda", "vadodara"],
+  ["poona", "pune"],
+  ["allahabad", "prayagraj"],
+  ["pondicherry", "puducherry"],
+  ["simla", "shimla"],
+  ["trichy", "tiruchirappalli"],
+  ["vizag", "visakhapatnam"],
+  ["panjim", "panaji"],
+  ["benares", "varanasi"],
+];
+const CITY_ALIASES = new Map();
+for (const [a, b] of CITY_ALIAS_PAIRS) {
+  CITY_ALIASES.set(a, b);
+  CITY_ALIASES.set(b, a);
+}
 
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 
@@ -74,15 +110,100 @@ function paginate(items, page, limit) {
   };
 }
 
-function getStations(query = {}) {
+function unknownValue(param, received, validValues, extra = {}) {
+  const code = `UNKNOWN_${param.toUpperCase()}`;
+  return new ApiError(404, code, `No ${param.replace(/_/g, " ")} matches '${received}'.`, {
+    parameter: param,
+    received,
+    ...(validValues ? { valid_values: validValues } : {}),
+    ...extra,
+  });
+}
+
+function pickEnum(param, raw, values) {
+  if (raw === null) return null;
+  const value = raw.toLowerCase();
+  if (!values.includes(value)) throw unknownValue(param, raw, values);
+  return value;
+}
+
+/**
+ * Turns parsed text values into filter terms. An unknown value is a 404 that lists the
+ * valid values (or, for cities and districts, points at /v1/cities).
+ */
+function resolveFilters(values) {
   const { stations } = load();
-  const page = query.page || 1;
-  const limit = query.limit || DEFAULT_LIMIT;
+  const filters = { labels: {} };
+
+  if (values.state !== null && values.state !== undefined) {
+    const state = reference.resolveStateQuery(values.state);
+    if (!state) throw unknownValue("state", values.state, reference.states().map((s) => s.name));
+    filters.stateCode = state.code;
+    filters.labels.state = state.name;
+  }
+
+  const inState = (s) => !filters.stateCode || s.state_code === filters.stateCode;
+  const hint = `/v1/cities${filters.stateCode ? `?state=${filters.stateCode}` : ""}`;
+
+  if (values.district !== null && values.district !== undefined) {
+    const key = reference.compactKey(values.district);
+    const match = stations.find((s) => s._districtKey === key && inState(s));
+    if (!match) throw unknownValue("district", values.district, null, { hint });
+    filters.districtKey = key;
+    filters.labels.district = match.district;
+  }
+
+  if (values.city !== null && values.city !== undefined) {
+    const key = reference.compactKey(values.city);
+    const keys = [key, CITY_ALIASES.get(key)].filter(Boolean);
+    const matches = stations.filter((s) => keys.includes(s._cityKey) && inState(s));
+    if (matches.length === 0) throw unknownValue("city", values.city, null, { hint });
+    filters.cityKeys = keys;
+    filters.labels.city = [...new Set(matches.map((s) => s.city))].sort();
+    const states = [...new Set(matches.map((s) => s.state_code))].sort();
+    if (states.length > 1) filters.labels.city_ambiguous_states = states;
+  }
+
+  if (values.operator !== null && values.operator !== undefined) {
+    const operator = reference.resolveOperatorQuery(values.operator);
+    if (!operator) throw unknownValue("operator", values.operator, reference.operators().map((o) => o.canonical).sort());
+    filters.operator = operator.canonical;
+    filters.labels.operator = operator.canonical;
+  }
+
+  filters.ownership = pickEnum("ownership", values.ownership ?? null, OWNERSHIPS);
+  filters.vehicle = pickEnum("vehicle", values.vehicle ?? null, VEHICLES);
+  const current = pickEnum("current", values.current ?? null, CURRENTS);
+  filters.current = current ? current.toUpperCase() : null;
+
+  if (values.connector !== null && values.connector !== undefined) {
+    const id = reference.resolveStandardQuery(values.connector);
+    if (!id) throw unknownValue("connector", values.connector, reference.standards().map((s) => s.id));
+    filters.connector = id;
+  }
+
+  filters.minPowerKw = values.min_power_kw ?? null;
+  filters.locationQuality = pickEnum("location_quality", values.location_quality ?? null, LOCATION_QUALITIES) || "any";
+  return filters;
+}
+
+function getStations(values = {}) {
+  const { stations } = load();
+  const filters = resolveFilters(values);
+  const page = values.page || 1;
+  const limit = values.limit || DEFAULT_LIMIT;
   const { slice, meta } = paginate(stations, page, limit);
-  return { data: slice.map((s) => projectStation(s)), meta: { ...meta, ...sourceMeta() } };
+  return { data: slice.map((s) => projectStation(s)), meta: { ...meta, filters_applied: filters.labels, ...sourceMeta() } };
 }
 
 function getStationById(id) {
+  if (!STATION_ID.test(id)) {
+    throw new ApiError(400, "INVALID_STATION_ID", `'${id}' is not a station id. Ids look like evs_1a2b3c4d5e.`, {
+      parameter: "id",
+      received: id,
+      expected: "evs_ followed by 10 lowercase hex digits",
+    });
+  }
   const station = load().byId.get(id);
   return station ? projectStation(station, { withSource: true }) : null;
 }

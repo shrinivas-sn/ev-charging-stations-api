@@ -97,6 +97,26 @@ app.get("/v1", (req, res) => {
 app.use("/v1", stationsRouter);
 app.use("/v1", referenceRouter);
 
+const KNOWN_PATHS = [
+  "/",
+  "/health",
+  "/v1",
+  "/v1/stations",
+  "/v1/stations/near",
+  "/v1/stations/:id",
+  "/v1/states",
+  "/v1/cities",
+  "/v1/operators",
+  "/v1/connectors",
+  "/v1/meta",
+];
+
+// GET and HEAD are answered above and OPTIONS by cors; anything else on a real route is 405.
+app.all(KNOWN_PATHS, (req, res) => {
+  res.set("Allow", "GET, HEAD, OPTIONS");
+  return sendError(res, 405, "METHOD_NOT_ALLOWED", `${req.method} is not supported. This API is read-only.`);
+});
+
 app.use((req, res) => {
   return sendError(res, 404, "ROUTE_NOT_FOUND", `No endpoint at '${req.path}'. See /v1 for the endpoint index.`);
 });
