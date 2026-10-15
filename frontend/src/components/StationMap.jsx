@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { isFastDc, mappableStations, standardLabel, vehicleLabel } from '../lib/stations';
 
 /**
  * Interactive radius map.
@@ -46,24 +48,22 @@ function radiusPolygon(lat, lng, radiusKm, steps = 96) {
 function stationsFeatureCollection(stations) {
   return {
     type: 'FeatureCollection',
-    features: stations
-      .filter((station) => Number.isFinite(station.latitude) && Number.isFinite(station.longitude))
-      .map((station) => ({
+    features: mappableStations(stations).map((station) => ({
         type: 'Feature',
         id: station.id,
         properties: {
           id: station.id,
-          name: station.name || '',
           operator: station.operator || 'Unknown operator',
           address: station.address || '',
           city: station.city || '',
           state: station.state || '',
-          total_capacity_kw: station.total_capacity_kw || 0,
+          max_power_kw: station.max_power_kw || 0,
           distance_km: station.distance_km,
-          availability: station.availability || '',
-          is_fast_dc: (station.total_capacity_kw || 0) >= 50 ? 1 : 0,
-          connectors: (station.connectors || [])
-            .map((connector) => `${connector.type} ${connector.power_kw} kW x${connector.count}`)
+          vehicles: vehicleLabel(station.vehicle_classes),
+          chargers: station.total_chargers || 0,
+          is_fast_dc: isFastDc(station) ? 1 : 0,
+          connectors: Object.entries(station.max_kw_by_standard || {})
+            .map(([id, kw]) => `${standardLabel(id)} ${kw} kW`)
             .join(' · '),
         },
         geometry: { type: 'Point', coordinates: [station.longitude, station.latitude] },
@@ -79,28 +79,24 @@ function popupHtml(properties) {
   return `
     <div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:12px 14px;min-width:232px;max-width:284px;">
       <div style="font-size:13px;font-weight:600;color:#18181b;line-height:1.35;">${escapeHtml(
-        properties.name
-      )}</div>
+        properties.operator
+      )}${properties.city ? ` · ${escapeHtml(properties.city)}` : ''}</div>
       <div style="margin-top:2px;font-size:11px;color:#71717a;line-height:1.4;">${escapeHtml(
         properties.address
       )}</div>
       <dl style="margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px;color:#52525b;">
-        <dt style="color:#71717a;">Operator</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
-          properties.operator
+        <dt style="color:#71717a;">Power</dt><dd style="margin:0;color:#18181b;">up to ${escapeHtml(
+          properties.max_power_kw
+        )} kW per gun</dd>
+        <dt style="color:#71717a;">Vehicles</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
+          properties.vehicles
         )}</dd>
-        <dt style="color:#71717a;">Capacity</dt><dd style="margin:0;color:#18181b;">${
-          properties.total_capacity_kw
-        } kW</dd>
+        <dt style="color:#71717a;">Chargers</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
+          properties.chargers
+        )}</dd>
         ${
           distance
             ? `<dt style="color:#71717a;">Distance</dt><dd style="margin:0;color:#115e59;font-weight:600;">${distance}</dd>`
-            : ''
-        }
-        ${
-          properties.availability
-            ? `<dt style="color:#71717a;">Open</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
-                properties.availability
-              )}</dd>`
             : ''
         }
       </dl>
@@ -335,8 +331,7 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
       )}
       {status === 'unavailable' && (
         <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-md border border-line bg-surface px-3 py-2 text-xs text-ink-muted">
-          The map could not start in this browser. Every station in the result list below still
-          shows its coordinates and a direct OpenStreetMap link.
+          The map could not start in this browser. The station list still works.
         </div>
       )}
     </div>

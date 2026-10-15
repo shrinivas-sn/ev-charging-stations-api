@@ -9,7 +9,7 @@
     "start": "node backend/src/index.js",
     "test": "npm --prefix backend test",
     "verify:seo": "npm --prefix frontend run verify:seo",
-    "verify": "npm run test && npm --prefix frontend test && npm run build && npm run verify:seo",
+    "verify": "npm run test && npm --prefix frontend test && npm run build && npm --prefix frontend run test:build && npm run verify:seo",
     "build-data": "node backend/scripts/build-dataset.js ingest/out/raw-rows.json"
   },
   "dependencies": {

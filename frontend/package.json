@@ -8,7 +8,8 @@
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
     "verify:seo": "node scripts/verify-seo.mjs --dist dist",
-    "test": "node --test scripts/*.test.mjs src/lib/*.test.mjs"
+    "test": "node --test scripts/*.test.mjs src/lib/*.test.mjs",
+    "test:build": "node --test scripts/after-build/*.test.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^4.7.1",
