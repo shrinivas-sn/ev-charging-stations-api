@@ -83,6 +83,12 @@
   5. `npm run verify:seo` → `0 errors`
   When netstat shows nothing on :5173, run `npm run verify` instead and expect all of the above.
 - One task, one commit, on `rebuild/bee-real-data`. Message exactly as the task's **Commit** line, then a blank line, then the attribution lines the session's system reminder specifies (if none is given, add none).
+- **No AI slop.** Applies to every word and line this plan adds. The standard comes from the sources below, never from a word list written into this plan:
+  - Prose (README, DECISIONS, guides, docs-page strings, workflow issue text, PR body, hub records): before committing, run the `no-ai-slop-writing` skill in **Detect** mode on the new or changed text. If the executor cannot invoke skills, read `~/.claude/skills/no-ai-slop-writing/SKILL.md` (check with `ls`) and apply its patterns by hand. Fix every named pattern, then run Detect again until none remain. Paste the final Detect result (or "no patterns found") into the Progress Log.
+  - UI (only if a task touches `frontend/src` markup or styles): no pattern from `E:/dev-recipes/_knowledge/slop-signatures.md` or `~/.claude/skills/no-ai-slop/references/banned-patterns.md`. Read both before the edit.
+  - Code: match the surrounding file's comment density, naming and idiom. No new helpers, options, flags, abstractions, emojis or log lines beyond what the task's **Do** list names.
+  - Scope: add nothing the task does not ask for: no extra README sections, badges, features, endpoints or files. Anything worth adding goes into the Progress Log as a suggestion for the owner.
+  - If a source file above is missing, log a Plan issue and keep to the Code and Scope bullets. Never invent a replacement list.
 - Never commit secrets. A Vercel protection-bypass value (Task 6.3) is used only as an environment variable in the shell, never written to a file.
 - Behaviour of a library or platform you have not verified goes through `/context-brief` first, not memory.
 - Background servers you start: note their task/process ids in your session and stop them at the end of the task that needs them.
@@ -187,7 +193,7 @@ Run `npm test` and confirm exactly the first three fail.
   - therefore the check step's last line is `[ "$code" = "0" ] || [ "$code" = "1" ] || [ "$code" = "2" ]`.
 - [ ] Confirm the refresh script names used in the issue body exist: `ls ingest/fetch_bee_pdf.sh ingest/extract_bee_pdf.py` and `grep -n '"build-data"' package.json`. If a name differs, use the real name and log a Plan issue.
 **Test first:** n/a — workflow YAML has no local runner; the YAML is parsed below and the job proves itself on the first push (Task 6.3).
-**Verify:** `python -c "import sys,yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]; print('yaml ok')" .github/workflows/ci.yml .github/workflows/upstream-check.yml` → `yaml ok`. If `yaml` is not installed: `python -m pip install pyyaml` into the user site, then retry. Workflows actually running is verified in Task 6.3.
+**Verify:** `python -c "import sys,yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]; print('yaml ok')" .github/workflows/ci.yml .github/workflows/upstream-check.yml` → `yaml ok`. If `yaml` is not installed: `python -m pip install pyyaml` into the user site, then retry. Workflows actually running is verified in Task 6.3. No-AI-slop Detect (Rules) on the issue title/body strings and YAML comments you wrote → no patterns remain.
 **Don't touch:** the gst-hsn-sac repo; any other file. May-change list: none.
 **If it fails:** fix the YAML indentation; never add `continue-on-error` to the `ci.yml` steps.
 **Commit:** `ci: test workflow and weekly BEE upstream check`
@@ -219,6 +225,7 @@ Run `npm test` and confirm exactly the first three fail.
 - `node E:/OSC/api-projects/pipeline/manifest/manifest.js validate .` → `valid: api.json`, exit 0.
 - parity one-liner → `parity ok`.
 - `grep -rniE "generated sample|not official government|data\.gov\.in|GODL" README.md api.json frontend/src` → only README lines that say data.gov.in has aggregates only (if you wrote that); no other hits.
+- No-AI-slop Detect (Rules) on `README.md`, the new `DOCS/DECISIONS.md` section and the two changed `DocsPage.jsx` strings → no patterns remain.
 - split verify (Rules) → all pass.
 **Don't touch:** `DOCS/WORK/`, `.env.example` (already correct), other pages. May-change list: `frontend/scripts/docs-parity.test.mjs` only if it asserts the exact old `near:` sentence (check with `grep -n "near:" frontend/scripts/*.test.mjs`; if no hit, change nothing).
 **If it fails:** the manifest validator message names the field — fix that field only.
@@ -252,6 +259,7 @@ A new session may start here.
 - [ ] Put every finding in a table in the Progress Log: id, severity, file, verdict (fix / reject with reason).
 - [ ] Fix each accepted finding test-first, one commit each.
 - [ ] A finding that asks for a design change, data change, a new feature, or anything in **Out of scope** → do not fix; log it as a Plan issue for the owner.
+- [ ] Slop pass on the whole branch diff (Rules → No AI slop): Detect on every prose file changed in `git diff --name-only main...HEAD` (skip `backend/data/**`, `DOCS/WORK/**`); for code, list added comments with `git diff main...HEAD -- '*.js' '*.jsx' '*.mjs' | grep -E '^\+\s*(//|/\*|\*)'` and remove any that only restate the next line or exceed the file's usual comment density. Each fix is its own commit `docs: remove AI-slop wording in <file>` or `refactor: trim comments in <file>`.
 **Test first:** per accepted finding, a failing test that reproduces it.
 **Verify:** split verify → all pass; re-run `/myreview` on the new commits → no open high or critical finding.
 **Don't touch:** Out-of-scope items; `backend/data/**`. May-change list: an assertion that a finding proves wrong — log the old and new assertion in Plan issues.
@@ -318,14 +326,14 @@ A new session may start here.
 - [ ] Build (`npm --prefix frontend run build`) and confirm the 3 guides are in `frontend/dist/sitemap.xml` (`grep -c "/guides/" frontend/dist/sitemap.xml` → 3 or more).
 **Test first:** the URL check above run before changes is the test; a URL that fails is the failing case.
 **Verify:** `curl -s -o /dev/null -w "%{http_code} %{content_type}
-" "$URL"` run once per guide URL (with the origin swapped to the preview or `http://localhost:3920`) → `200 application/json…` for each (record them in the Progress Log); split verify (Rules) → all pass.
+" "$URL"` run once per guide URL (with the origin swapped to the preview or `http://localhost:3920`) → `200 application/json…` for each (record them in the Progress Log); No-AI-slop Detect (Rules) on every guide section you changed → no patterns remain; split verify (Rules) → all pass.
 **Don't touch:** guides that already pass both checks.
 **If it fails:** a guide that cannot be made accurate is not published — remove it only if at least 3 guides remain; otherwise log it and ask the owner.
 **Commit:** `docs(guides): <what changed>` per guide, or `none — guides already pass`
 
 ### Checkpoint — Phase 6
 
-- [ ] Full verification: split verify → all pass; preview smoke → `exit 0`; CI on the branch → success.
+- [ ] Full verification: split verify → all pass; preview smoke → `exit 0`; CI on the branch → success; the Progress Log has a No-AI-slop Detect result for every prose file changed in Phases 5–6.
 - [ ] Commit made for every task in this phase; the branch is pushed (`git status -sb` shows no `ahead`).
 - [ ] Status file updated: "Phase:" → `Phase 6 done — preview passes; waiting for the owner's go-ahead to merge to main`; "Next up" item 1 → `Owner: say "merge to main" to start Phase 7`.
 - [ ] Progress Log entry added.
@@ -347,7 +355,7 @@ A new session may start here.
 **Why:** Owner-authorised release.
 **Where:** GitHub PR from `rebuild/bee-real-data` to `main`
 **Do:**
-- [ ] `gh pr create --base main --head rebuild/bee-real-data --title "Rebuild on real BEE station data" --body-file <file>`; the body file (in your scratch/temp folder, not the repo) contains: a 3-line summary; data counts from `meta.json`; the attribution string; test evidence (split-verify results, preview smoke output); the line "Every push to main deploys to production."; and ends with the PR attribution lines from the session's system reminder.
+- [ ] `gh pr create --base main --head rebuild/bee-real-data --title "Rebuild on real BEE station data" --body-file <file>`; the body file (in your scratch/temp folder, not the repo) contains: a 3-line summary; data counts from `meta.json`; the attribution string; test evidence (split-verify results, preview smoke output); the line "Every push to main deploys to production."; and ends with the PR attribution lines from the session's system reminder. Run No-AI-slop Detect (Rules) on the body file before creating the PR; fix until no patterns remain.
 - [ ] Wait for the PR's checks: `gh pr checks <pr-number> --watch` → all pass.
 - [ ] `gh pr merge <pr-number> --merge` (merge commit; do not squash; do not delete the branch).
 - [ ] Find the production deployment: `MERGE=$(gh pr view <pr-number> --json mergeCommit --jq .mergeCommit.oid)`; poll `gh api "repos/shrinivas-sn/ev-charging-stations-api/deployments?sha=$MERGE" --jq '.[0].id'` then its statuses until `success` (up to 15 min).
@@ -386,7 +394,7 @@ A new session may start here.
 - [ ] `DOCS/README.md`: add one index row in the existing column format, `Touches` = `api-projects/`, `DOCS/`.
 - [ ] `DOCS/STATUS.md`: add a dated line for the EV API going live on BEE data.
 **Test first:** n/a — documentation.
-**Verify:** `grep -n "GODL dataset; 27,248" E:/OSC/api-projects/IDEA-LOG.md` → no output.
+**Verify:** `grep -n "GODL dataset; 27,248" E:/OSC/api-projects/IDEA-LOG.md` → no output; No-AI-slop Detect (Rules) on every line you added in the hub → no patterns remain.
 **Don't touch:** other projects' rows and notes.
 **If it fails:** n/a.
 **Commit:** in `E:\OSC`: `docs: correct EV charging API records after the BEE release`. Do not push the hub repo unless the owner asks.
@@ -457,6 +465,7 @@ status file and in the session's final message.)*
 - CI workflow file is named `ci.yml` (matching msp-benchmarks), not `test.yml`. *(assumed)*
 - Smoke region check uses `/health` because it is `no-store`, so `x-vercel-id` always includes the function region. *(assumed)*
 - Merge with a merge commit (not squash) so the per-task history stays readable and a single `git revert -m 1` undoes the release. *(assumed)*
+- Slop control points to the `no-ai-slop-writing` skill, `slop-signatures.md` and `banned-patterns.md` instead of a list written into this plan, so the standard stays the owner's single source and updates without editing this plan (owner request 15/10/2026).
 - Carried from the archived plan: station id `evs_` + 10 hex; per-gun filters; 404 for unknown enums; rate limit 100 / 15 min; Python only in `ingest/`; region `bom1`; keep the current design.
 
 ---
