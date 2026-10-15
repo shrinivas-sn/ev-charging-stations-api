@@ -187,13 +187,47 @@ function resolveFilters(values) {
   return filters;
 }
 
+/** True when one gun meets every gun-level condition at once. */
+function gunMatches(station, f) {
+  if (!f.connector && !f.current && !f.vehicle && f.minPowerKw === null) return true;
+  return station._guns.some(
+    (g) =>
+      (!f.connector || g.standard === f.connector) &&
+      (!f.current || g.current === f.current) &&
+      (!f.vehicle || g.classes.includes(f.vehicle)) &&
+      (f.minPowerKw === null || g.kw >= f.minPowerKw)
+  );
+}
+
+function matches(station, f) {
+  if (f.stateCode && station.state_code !== f.stateCode) return false;
+  if (f.districtKey && station._districtKey !== f.districtKey) return false;
+  if (f.cityKeys && !f.cityKeys.includes(station._cityKey)) return false;
+  if (f.operator && station.operator !== f.operator) return false;
+  if (f.ownership && station.ownership !== f.ownership) return false;
+  if (f.locationQuality !== "any" && station.location_quality !== f.locationQuality) return false;
+  return gunMatches(station, f);
+}
+
+function appliedFilters(f) {
+  return {
+    ...f.labels,
+    ...(f.ownership ? { ownership: f.ownership } : {}),
+    ...(f.connector ? { connector: f.connector } : {}),
+    ...(f.current ? { current: f.current.toLowerCase() } : {}),
+    ...(f.vehicle ? { vehicle: f.vehicle } : {}),
+    ...(f.minPowerKw !== null ? { min_power_kw: f.minPowerKw } : {}),
+    ...(f.locationQuality !== "any" ? { location_quality: f.locationQuality } : {}),
+  };
+}
+
 function getStations(values = {}) {
   const { stations } = load();
   const filters = resolveFilters(values);
   const page = values.page || 1;
   const limit = values.limit || DEFAULT_LIMIT;
-  const { slice, meta } = paginate(stations, page, limit);
-  return { data: slice.map((s) => projectStation(s)), meta: { ...meta, filters_applied: filters.labels, ...sourceMeta() } };
+  const { slice, meta } = paginate(stations.filter((s) => matches(s, filters)), page, limit);
+  return { data: slice.map((s) => projectStation(s)), meta: { ...meta, filters_applied: appliedFilters(filters), ...sourceMeta() } };
 }
 
 function getStationById(id) {
