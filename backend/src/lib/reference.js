@@ -7,13 +7,23 @@
  * a build failure or a 404.
  */
 
+const fs = require("node:fs");
 const path = require("node:path");
 
-const REFERENCE_DIR = path.join(__dirname, "..", "..", "data", "reference");
+// EV_REFERENCE_DIR exists only so tests can point at a broken table directory.
+const REFERENCE_DIR = process.env.EV_REFERENCE_DIR || path.join(__dirname, "..", "..", "data", "reference");
 
-const statesTable = require(path.join(REFERENCE_DIR, "states.json"));
-const operatorsTable = require(path.join(REFERENCE_DIR, "operators.json"));
-const standardsTable = require(path.join(REFERENCE_DIR, "connector-standards.json"));
+function loadTable(name) {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(REFERENCE_DIR, name), "utf8"));
+  } catch {
+    throw new Error(`Reference table ${name} is missing or not valid JSON (looked in ${REFERENCE_DIR}).`);
+  }
+}
+
+const statesTable = loadTable("states.json");
+const operatorsTable = loadTable("operators.json");
+const standardsTable = loadTable("connector-standards.json");
 
 /** Collapses runs of whitespace, as the raw PDF cells wrap mid-word. */
 function collapse(value) {

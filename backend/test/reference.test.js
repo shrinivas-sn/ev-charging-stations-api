@@ -86,3 +86,35 @@ describe("Reference tables resolve every raw spelling in the BEE PDF", () => {
     assert.equal(reference.resolveStandardQuery("gbt"), null);
   });
 });
+
+describe("Missing or malformed reference tables", () => {
+  const { execFileSync } = require("node:child_process");
+  const fs = require("node:fs");
+  const os = require("node:os");
+  const path = require("node:path");
+
+  function loadWith(dir) {
+    try {
+      execFileSync(process.execPath, ["-e", "require(process.argv[1])", path.join(__dirname, "..", "src", "lib", "reference.js")], {
+        env: { ...process.env, EV_REFERENCE_DIR: dir },
+        stdio: "pipe",
+      });
+      return "";
+    } catch (error) {
+      return String(error.stderr);
+    }
+  }
+
+  test("a missing table stops loading with the file name", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ev-ref-"));
+    assert.match(loadWith(dir), /Reference table states\.json is missing or not valid JSON/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("a malformed table stops loading with the file name", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ev-ref-"));
+    fs.writeFileSync(path.join(dir, "states.json"), "{ not json");
+    assert.match(loadWith(dir), /Reference table states\.json is missing or not valid JSON/);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+});
