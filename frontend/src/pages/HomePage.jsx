@@ -75,7 +75,7 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-14 px-4 py-10 sm:px-6">
-      <section className="grid items-start gap-8 lg:grid-cols-12">
+      <section className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <span className="chip">Keyless · CORS enabled · No sign-up</span>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
@@ -206,7 +206,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-2">
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-ink">States with the most stations</h2>
           <p className="mt-1 text-sm text-ink-muted">
@@ -238,7 +238,7 @@ export default function HomePage() {
             From <code className="text-xs">/v1/connectors</code>. Vehicles served follow the Ministry of Power charger
             table.
           </p>
-          <div className="mt-4 overflow-hidden rounded-lg border border-line">
+          <div className="mt-4 overflow-x-auto rounded-lg border border-line">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-line bg-subtle text-xs text-ink-muted">

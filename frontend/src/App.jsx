@@ -14,7 +14,7 @@ export function AppContent() {
   usePageMeta();
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+    <div className="flex min-h-dvh flex-col bg-canvas text-ink">
       <Navbar />
       <main className="flex-1">
         <Routes>

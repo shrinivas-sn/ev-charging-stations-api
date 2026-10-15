@@ -291,7 +291,7 @@ export default function PlaygroundPage() {
         </p>
       </header>
 
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-12">
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         {/* Controls */}
         <div className="space-y-4 lg:col-span-5">
           <section className="card">
@@ -308,6 +308,7 @@ export default function PlaygroundPage() {
                   City preset
                 </label>
                 <select
+                  autoComplete="off"
                   id="preset"
                   className="field mt-1.5"
                   value={presetIndex}
@@ -404,6 +405,7 @@ export default function PlaygroundPage() {
                 <input
                   id="radius"
                   type="range"
+                  autoComplete="off"
                   min="1"
                   max="100"
                   step="1"
@@ -423,6 +425,7 @@ export default function PlaygroundPage() {
                     Vehicle
                   </label>
                   <select
+                    autoComplete="off"
                     id="vehicle"
                     className="field mt-1.5"
                     value={vehicle}
@@ -440,6 +443,7 @@ export default function PlaygroundPage() {
                     Current
                   </label>
                   <select
+                    autoComplete="off"
                     id="current"
                     className="field mt-1.5"
                     value={current}
@@ -457,6 +461,7 @@ export default function PlaygroundPage() {
                     Standard
                   </label>
                   <select
+                    autoComplete="off"
                     id="connector"
                     className="field mt-1.5"
                     value={connector}
@@ -481,6 +486,7 @@ export default function PlaygroundPage() {
                     Minimum power per gun
                   </label>
                   <select
+                    autoComplete="off"
                     id="power"
                     className="field mt-1.5"
                     value={minPowerKw}
@@ -594,7 +600,7 @@ export default function PlaygroundPage() {
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <span className="text-sm font-medium leading-snug text-ink">
+                        <span className="min-w-0 break-words text-sm font-medium leading-snug text-ink">
                           {station.operator}
                           <span className="ml-1.5 font-normal text-ink-dim">· {station.city}</span>
                         </span>
@@ -602,7 +608,7 @@ export default function PlaygroundPage() {
                           {station.distance_km} km
                         </span>
                       </div>
-                      <p className="mt-0.5 text-xs leading-relaxed text-ink-dim">{station.address}</p>
+                      <p className="mt-0.5 break-words text-xs leading-relaxed text-ink-dim">{station.address}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
                         <span className="font-medium text-ink">up to {station.max_power_kw} kW</span>
                         {isFastDc(station) && <span className="chip-accent">DC fast</span>}

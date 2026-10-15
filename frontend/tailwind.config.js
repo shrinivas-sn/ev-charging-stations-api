@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  // hover: utilities only apply on devices that can hover, so touch screens never get stuck hover states.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {

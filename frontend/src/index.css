@@ -88,7 +88,7 @@ samp {
   }
 
   .field {
-    @apply w-full rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-sm text-ink
+    @apply w-full rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-base text-ink sm:text-sm
       placeholder:text-ink-dim focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20;
   }
 
@@ -156,4 +156,17 @@ textarea:focus-visible {
   color: var(--ink-dim);
   font-size: 16px;
   padding: 2px 6px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Keep an open popup above the map controls (attribution sits at z-index 2). */
+.maplibregl-popup {
+  z-index: 3;
+}
+
+/* Attribution links are tap targets on phones: give them a 24px-tall hit area. */
+.maplibregl-ctrl-attrib a {
+  display: inline-block;
+  padding-block: 6px;
 }

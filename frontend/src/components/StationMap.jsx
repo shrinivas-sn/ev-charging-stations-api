@@ -305,7 +305,8 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
     map.easeTo({ center: [selected.longitude, selected.latitude], duration: 320 });
 
     if (popupRef.current) popupRef.current.remove();
-    popupRef.current = new libRef.current.Popup({ closeButton: true, offset: 14 })
+    // focusAfterOpen: false — focusing the popup made the browser scroll the page to the map on load.
+    popupRef.current = new libRef.current.Popup({ closeButton: true, offset: 14, focusAfterOpen: false })
       .setLngLat([selected.longitude, selected.latitude])
       .setHTML(
         popupHtml({
