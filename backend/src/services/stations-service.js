@@ -312,6 +312,56 @@ function getStatesSummary() {
   return { data, meta: { count: data.length, total_stations: stations.length, ...sourceMeta() } };
 }
 
+function mostCommon(counts) {
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
+}
+
+/** Cities with stations, grouped by state and spelling-insensitive name. */
+function getCities(values) {
+  const { stations } = load();
+  const filters = resolveFilters({ state: values.state });
+  const groups = new Map();
+  for (const s of stations) {
+    if (filters.stateCode && s.state_code !== filters.stateCode) continue;
+    const key = `${s.state_code}|${s._cityKey}`;
+    if (!groups.has(key)) groups.set(key, { names: new Map(), districts: new Map(), state: s.state, state_code: s.state_code, stations: 0 });
+    const g = groups.get(key);
+    g.names.set(s.city, (g.names.get(s.city) || 0) + 1);
+    g.districts.set(s.district, (g.districts.get(s.district) || 0) + 1);
+    g.stations += 1;
+  }
+  const data = [...groups.values()]
+    .map((g) => ({ city: mostCommon(g.names), district: mostCommon(g.districts), state: g.state, state_code: g.state_code, stations: g.stations }))
+    .sort((a, b) => (a.state_code < b.state_code ? -1 : a.state_code > b.state_code ? 1 : a.city.localeCompare(b.city)));
+  return { data, meta: { count: data.length, filters_applied: filters.labels, ...sourceMeta() } };
+}
+
+function getOperators() {
+  const { stations } = load();
+  const rows = new Map();
+  for (const s of stations) {
+    if (!rows.has(s.operator)) rows.set(s.operator, { operator: s.operator, ownership: s.ownership, stations: 0, chargers: 0 });
+    const row = rows.get(s.operator);
+    row.stations += 1;
+    row.chargers += s.total_chargers;
+  }
+  const data = [...rows.values()].sort((a, b) => b.stations - a.stations || a.operator.localeCompare(b.operator));
+  return { data, meta: { count: data.length, ...sourceMeta() } };
+}
+
+function getConnectors() {
+  const { stations } = load();
+  const counts = new Map(reference.standards().map((s) => [s.id, { stations: 0, guns: 0 }]));
+  for (const s of stations) {
+    for (const id of s.standards) counts.get(id).stations += 1;
+    for (const charger of s.chargers) {
+      for (const gun of charger.guns) counts.get(gun.standard).guns += charger.count;
+    }
+  }
+  const data = reference.standards().map((s) => ({ ...s, ...counts.get(s.id) }));
+  return { data, meta: { count: data.length, ...sourceMeta() } };
+}
+
 function getDatasetMeta() {
   return load().meta;
 }
@@ -324,6 +374,9 @@ module.exports = {
   getStationById,
   getNearbyStations,
   getStatesSummary,
+  getCities,
+  getOperators,
+  getConnectors,
   getDatasetMeta,
   sourceMeta,
   loadCount: () => loads,
