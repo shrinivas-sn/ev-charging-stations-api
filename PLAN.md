@@ -451,6 +451,7 @@ status file and in the session's final message.)*
 - Given 15/10/2026: republish BEE data with attribution (no licence published).
 - Given 15/10/2026: **no merge or push to `main` without an explicit go-ahead.** Phase 7 waits for it. Record the go-ahead here (words + date) when given.
 - Given 15/10/2026: do not stop the servers on ports 3000/5173.
+- **Given 15/10/2026 — the Phase 7 go-ahead, verbatim:** "ok then merge to main and push i will check in th elive vercel only". Base for Task 7.1: `main` = `a4e20fb`, branch `rebuild/bee-real-data` = `97d7de3`, 41 commits ahead, fast-forward possible.
 - Only if needed: a Vercel "Protection Bypass for Automation" secret for the preview (Task 6.3), given in chat and used only as an environment variable.
 - Only if needed: setting the function region to Mumbai in Vercel Project Settings if `regions` is rejected (Task 6.3).
 - Owner's call, not in this plan: body text 16px / 44px tap targets (`MOBILE.md`); public-apis submission; any email to BEE.
