@@ -896,3 +896,10 @@ status file and in the session's final message.)*
 *(Append only. Newest at the bottom. Never rewrite an entry — if it turned out wrong,
 add a new one saying so. This log is what makes resuming cheap: a cold session reads
 the last entry and knows exactly where to start.)*
+
+### Phase 1 — 15/10/2026
+Done:       Branch `rebuild/bee-real-data` created; junk `vercel.json`/`package.json`/`frontend/package.json` edits restored, root `.env.production` deleted, `.gitignore` keeps `.vercel`. Old plans and audit moved to `DOCS/WORK/2026-10-15/` with `REVIEW.md`. `DOCS/TEST-MATRIX.md` written via the test-plan skill.
+Verified:   `npm test` → `# pass 36  # fail 0` (old suite, before any code change). `test-plan-check.js DOCS/TEST-MATRIX.md` → `Test plan valid: 95 rows`. `plan-check.js PLAN.md` → `Plan structure complete: 7 phase(s), 27 task(s)`.
+Surprises:  Owner instructed mid-session "don't make any merge to main right now" — recorded in Owner inputs and Decisions; Task 6.3 now waits for an explicit go-ahead.
+Next:       Task 2.1 — create `ingest/` (requirements, fetch script, extractor, unittest).
+Commit:     e810ccd, 56fe4ab, 866b055, aa81875
