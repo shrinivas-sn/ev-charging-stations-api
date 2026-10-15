@@ -15,7 +15,12 @@ Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 3 done
 
 ## Next up (start here)
 
-1. `PLAN.md` Phase 4, Task 4.1 — frontend build wiring and dataset summary.
+1. Finish mobile-check (Task 4.5): re-run the full probe. Remaining majors: text-legibility (text-xs is now 14px on phones — re-measure) and nav-drawer focus/Escape/scroll-lock. Preview: `PORT=3920 npm start`, then `API_PROXY_TARGET=http://localhost:3920 npx vite preview --port 4180` in frontend/ (ports 3000/5173 are held by the previous agent's servers).
+2. Look at the new graphite + amber palette in a browser (screenshots taken, not yet reviewed).
+3. Phase 5: vercel.json (bom1, includeFiles), CI + weekly BEE check, api.json and README.
+4. Phase 6: review, preview deploy, smoke test. No merge to main without the owner.
+
+Overall: about 70% done (Phases 1–3 done, Phase 4 nearly done, palette done).
 
 ## Plan issues
 
