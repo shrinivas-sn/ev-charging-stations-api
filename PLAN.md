@@ -440,6 +440,7 @@ status file and in the session's final message.)*
 | # | When | Task | Plan said | Reality (evidence) | Impact | Action taken | Owner decision |
 |---|---|---|---|---|---|---|---|
 | 1 | 15/10 | carried | Archived plan issue 4: old servers on :3000 (PID 1316) and :5173 (PID 14540) hold `frontend/node_modules` | Still running at planning time (`netstat`) | local verify only | Split verify in Rules; never stop them | owner: stop them only if they are not yours |
+| 2 | 15/10 | 5.4 | Nothing said about the old rate-limit figure in `DOCS/DECISIONS.md` | The audit entry there says limits were "raised to 300/15 min"; `backend/src/app.js` has used 100/15 min (line 16: `RATE_LIMIT_MAX \|\| 100`) | record only, no code change | Old entry left alone (DECISIONS is append-only); the new 15/10 section states 100/15 min | owner: none needed |
 
 ---
 
@@ -482,3 +483,11 @@ Verified:   `npm test` → `# pass 119 # fail 0`; frontend tests 18 + build test
 Surprises:  Docs page string `/v1/stations/near:` would fail `docs-route-parity` (fixed in Task 5.4). Manifest `source.url` must be https but BEE is http-only (Decision). The checks README's guide process pushes to `main` (overridden by Rules).
 Next:       Task 5.1 — write `backend/test/vercel-config.test.js`, see 3 tests fail, then edit `vercel.json`.
 Commit:     `docs: fresh plan for the remaining BEE release work`
+
+### Phase 5 — 15/10/2026
+Done:       Tasks 5.1–5.4. `vercel.json` runs the function in `bom1` and ships only `backend/data/**`; `backend/scripts/check-upstream.js` reports a new BEE file; `.github/workflows/ci.yml` and `upstream-check.yml`; `api.json`, `README.md`, `DOCS/DECISIONS.md` and the docs page describe the real system.
+Verified:   `npm test` → `# pass 133 # fail 0` (exit 0); `npm --prefix frontend test` → 18 pass, 0 fail; `npm --prefix frontend run build` → `[prerender] Rendered 8 pages and 404.html.`; `npm --prefix frontend run test:build` → 2 pass, 0 fail; `npm run verify:seo` → 0 errors, 0 warnings; `manifest.js validate .` → `valid: api.json` (exit 0); parity one-liner → `parity ok` (before 5.4 it printed `doc not in manifest: /v1/stations/evs_ef45e67bd1`, `/v1/cities`, `/v1/stations/near:`); YAML parse → `yaml ok`; live `check-upstream.js` → `"status": "same"`, sha256 `f519218f…b6882`, exit 0; the three README curl paths on a local API → `200` each; `plan-deploy.js --out <temp>` → `- [x] portal-routing-config`.
+Surprises:  Port 3920 was held by PID 18168 (not this session's), so the local API ran on 3921 per Rules. The docs page `near:` string failed parity exactly as planned and now passes. Plan issue 2: the old DECISIONS line for the rate limit is stale.
+Slop:       No-AI-slop Detect by hand (the skill is not loadable in this session): `README.md`, the new DECISIONS section, the two `DocsPage.jsx` strings and both workflow files → no patterns found. Banned words and empty phrases: none. Em dashes: only the `—` table placeholders and the mandated attribution string.
+Next:       Task 6.1 — review the branch, then 6.2–6.4. Phase 6 ends with a STOP for the owner.
+Commit:     `docs: Phase 5 checkpoint`
