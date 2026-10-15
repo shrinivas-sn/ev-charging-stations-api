@@ -83,8 +83,8 @@ const STATION_FIELDS = [
   ['max_power_kw, max_kw_by_standard', 'Highest single-gun power, overall and per standard.'],
   ['standards, currents, vehicle_classes', 'Everything the station offers, as sorted lists.'],
   ['total_chargers, total_connectors', 'Chargers and guns at the site.'],
-  ['distance_km', 'Only on /v1/stations/near: great-circle distance from the search point, 2 decimals.'],
-  ['source', 'Only on /v1/stations/{id}: the PDF pages and row count this station came from.'],
+  ['distance_km', 'Only in /v1/stations/near results. Great-circle distance from the search point, 2 decimals.'],
+  ['source', 'Only in /v1/stations/{id} responses. The PDF pages and row count this station came from.'],
 ];
 
 export default function DocsPage() {

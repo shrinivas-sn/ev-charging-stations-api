@@ -108,3 +108,28 @@ In-app docs and the README advertised `min_power`, `offset`, `meta.query_time_ms
 `meta.lat`, `meta.lng` and a `pincode` field — none of which exist. Code samples pointed at the dead
 host and guide snippets hardcoded it. All examples now run against a `BASE_URL` you supply, and the
 documented parameters, response shapes and error codes match the implementation.
+
+## 2026-10-15: Rebuild on the BEE station list
+
+The generated sample is gone. The dataset is now the real BEE list, which the audit had left as the
+next substantive step. Source detail, caveats and row counts are in `DOCS/DATA-NOTES.md`.
+
+- **Source:** the BEE PDF "EV Public Charging Stations Data till 26th October 2025" (1,159 pages,
+  39,641 rows). data.gov.in carries only state and city aggregates, so it cannot supply station-level
+  records.
+- **Licence:** BEE publishes none for this file. It is republished with attribution on the owner's
+  decision of 15/10/2026, and the exact attribution string appears in `meta.attribution` on every
+  response.
+- **Station ids:** `evs_` plus 10 hex digits derived from the operator name and the coordinates, so an
+  id survives a re-publish while the station keeps its operator and position.
+- **Filters:** per-gun power, connector, current and vehicle. A vehicle draws the gun's rating, not the
+  charger total, so `min_power_kw` and `max_power_kw` are gun values.
+- **Validation:** an unknown enum value is a 404 that lists the valid values; a malformed, repeated or
+  unknown parameter is a 400.
+- **Bad coordinates:** the 115 stations whose published coordinates are impossible are kept, flagged
+  `location_quality: "suspect"` and excluded from the radius search.
+- **Rate limit:** 100 requests per 15 minutes per client address.
+- **Region:** the serverless function runs in `bom1` (Mumbai), set by `vercel.json`.
+- **Python:** only `ingest/` uses it, to read the PDF. The API and the build are Node.
+- **Manifest:** `api.json` has `source.url` as `null` because the manifest schema requires https and
+  BEE serves this file over http only; the http URL sits in `stack.dataset.source_pdf_url`.
