@@ -27,12 +27,34 @@ app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS ?? 1));
 
 app.use(cors({ origin: "*", methods: ["GET", "HEAD", "OPTIONS"] }));
 
+/**
+ * Data only changes on deploy, so successful reads are CDN-cacheable. Error responses
+ * override this with no-store (see sendError); 404s keep it.
+ */
+const CACHEABLE = "public, s-maxage=3600, stale-while-revalidate=86400";
+app.use(["/v1", "/"], (req, res, next) => {
+  if (req.method === "GET" || req.method === "HEAD") res.set("Cache-Control", CACHEABLE);
+  next();
+});
+
+// No RateLimit-* headers: on CDN-cached responses they would show one caller's budget to everyone.
 const limiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   limit: RATE_LIMIT_MAX,
   standardHeaders: false,
   legacyHeaders: false,
   validate: { trustProxy: true },
+  handler: (req, res) => {
+    const resetTime = req.rateLimit && req.rateLimit.resetTime;
+    const seconds = resetTime ? Math.ceil((resetTime.getTime() - Date.now()) / 1000) : RATE_LIMIT_WINDOW_MS / 1000;
+    res.set("Retry-After", String(Math.max(1, seconds)));
+    return sendError(
+      res,
+      429,
+      "RATE_LIMIT_EXCEEDED",
+      `Rate limit exceeded: ${RATE_LIMIT_MAX} requests per ${Math.round(RATE_LIMIT_WINDOW_MS / 60000)} minutes per client. Retry after the number of seconds in the Retry-After header.`
+    );
+  },
 });
 app.use("/v1", limiter);
 
