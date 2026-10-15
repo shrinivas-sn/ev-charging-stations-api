@@ -9,3 +9,9 @@ build/
 Thumbs.db
 
 .vercel
+
+# BEE PDF ingestion
+ingest/cache/
+ingest/out/
+ingest/.venv/
+__pycache__/
