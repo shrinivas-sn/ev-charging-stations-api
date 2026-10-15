@@ -1,0 +1,58 @@
+# Weekly check that BEE's linked EV charging station file still matches backend/data/source.json.
+# It never rewrites data. On drift it opens one issue so the refresh is reviewed by hand.
+name: upstream-check
+
+on:
+  schedule:
+    - cron: '0 4 * * 1' # Mondays 04:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Exit 0 = BEE still links the pinned file, 2 = a different file, 1 = the check itself failed.
+      - name: Compare BEE's file with the pinned one
+        id: check
+        run: |
+          set +e
+          node backend/scripts/check-upstream.js | tee check.json
+          code=${PIPESTATUS[0]}
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          [ "$code" = "0" ] || [ "$code" = "1" ] || [ "$code" = "2" ]
+
+      - name: Open a drift issue
+        if: steps.check.outputs.code == '2'
+        run: |
+          if [ -n "$(gh issue list --label upstream-drift --state open --json number --jq '.[0].number')" ]; then
+            echo "A drift issue is already open."; exit 0
+          fi
+          gh label create upstream-drift --description "BEE published a different EV charging station file" --force
+          gh issue create --label upstream-drift \
+            --title "BEE published a new EV charging station list: $(jq -r '.upstream.anchor_text' check.json)" \
+            --body "Upstream $(jq -r '.upstream.url' check.json) (sha256 $(jq -r '.upstream.sha256' check.json | cut -c1-12)) differs from the pinned $(jq -r '.current.url' check.json) (sha256 $(jq -r '.current.sha256' check.json | cut -c1-12)). Refresh with bash ingest/fetch_bee_pdf.sh, then python -I ingest/extract_bee_pdf.py ingest/cache/EV_PCS_Data_29277.pdf ingest/out/raw-rows.json, npm run build-data and npm test. See README \"Refreshing the data\"."
+
+      # BEE may block runner IPs, so an unreachable page opens an issue and leaves the job green.
+      - name: Report a failed check
+        if: steps.check.outputs.code == '1'
+        run: |
+          if [ -n "$(gh issue list --label upstream-drift --state open --json number --jq '.[0].number')" ]; then
+            echo "A drift issue is already open."; exit 0
+          fi
+          gh label create upstream-drift --description "BEE published a different EV charging station file" --force
+          gh issue create --label upstream-drift \
+            --title "Weekly BEE check failed to reach BEE" \
+            --body "$(jq -r '.reason' check.json)"
+          exit 0

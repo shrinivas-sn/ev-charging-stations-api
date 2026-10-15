@@ -7,3 +7,12 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+
+.vercel
+
+# BEE PDF ingestion
+ingest/cache/
+ingest/out/
+ingest/.venv/
+__pycache__/
+.mobile-check/

@@ -7,13 +7,27 @@ import React, { createContext, useContext } from 'react';
  */
 export const EMPTY_DATASET = {
   totalStations: null,
+  totalChargers: null,
   totalStates: null,
   totalCities: null,
   totalOperators: null,
-  snapshotDate: null,
-  datasetStatus: null,
-  datasetLabel: null,
-  isOfficial: false,
+  suspectLocations: null,
+  carStations: null,
+  carFastDcStations: null,
+  twoThreeWheelerOnlyStations: null,
+  snapshotLabel: null,
+  pdfCreated: null,
+  sourceTitle: null,
+  sourcePublisher: null,
+  sourceUrl: null,
+  sourcePageUrl: null,
+  dataNotesUrl: null,
+  attribution: null,
+  apiBaseUrl: null,
+  topStates: [],
+  topOperators: [],
+  connectors: [],
+  exampleStation: null,
 };
 
 const DatasetContext = createContext(EMPTY_DATASET);
@@ -35,6 +49,16 @@ export function readInjectedDataset() {
   try {
     // eslint-disable-next-line no-undef
     return typeof __EV_DATASET__ === 'undefined' ? null : __EV_DATASET__;
+  } catch {
+    return null;
+  }
+}
+
+/** Docs examples generated at build time from the real API code (see scripts/dataset-summary.mjs). */
+export function readInjectedExamples() {
+  try {
+    // eslint-disable-next-line no-undef
+    return typeof __EV_DOC_EXAMPLES__ === 'undefined' ? null : __EV_DOC_EXAMPLES__;
   } catch {
     return null;
   }

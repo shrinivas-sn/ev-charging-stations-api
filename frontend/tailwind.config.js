@@ -1,30 +1,37 @@
+import { palette } from "./src/lib/palette.js";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  // hover: utilities only apply on devices that can hover, so touch screens never get stuck hover states.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
+      // Every colour comes from src/lib/palette.js (Radix slate + amber); no raw hex here.
       colors: {
-        canvas: "#fafafa",
-        surface: "#ffffff",
-        subtle: "#f4f4f5",
+        canvas: palette.canvas,
+        surface: palette.surface,
+        subtle: palette.subtle,
+        hover: palette.hover,
         line: {
-          DEFAULT: "#e4e4e7",
-          strong: "#d4d4d8",
+          DEFAULT: palette.line,
+          strong: palette.control,
         },
         ink: {
-          DEFAULT: "#18181b",
-          muted: "#52525b",
-          dim: "#71717a",
+          DEFAULT: palette.ink,
+          muted: palette.muted,
+          dim: palette.muted,
         },
         accent: {
-          DEFAULT: "#0f766e",
-          strong: "#115e59",
-          soft: "#f0fdfa",
-          border: "#99f6e4",
+          DEFAULT: palette.accent,
+          hover: palette.accentHover,
+          soft: palette.accentSoft,
+          border: palette.accentLine,
+          ink: palette.accentInk,
         },
-        ok: "#15803d",
-        warn: "#b45309",
-        danger: "#b91c1c",
+        ok: { DEFAULT: palette.ok, soft: palette.okSoft },
+        warn: { DEFAULT: palette.warn, soft: palette.warnSoft },
+        danger: { DEFAULT: palette.danger, soft: palette.dangerSoft },
       },
       fontFamily: {
         sans: [

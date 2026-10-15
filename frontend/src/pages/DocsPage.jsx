@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useDataset } from '../lib/dataset';
+import { formatCount, readInjectedExamples, useDataset } from '../lib/dataset';
+import { ENDPOINTS, ERROR_CODES, GUN_RULE, PARAMS } from '../content/apiReference';
+
+const EXAMPLES = readInjectedExamples();
 
 function Section({ id, title, children, subtitle }) {
   return (
@@ -29,7 +32,11 @@ function ParamTable({ rows }) {
             <tr key={row.name} className="bg-surface align-top">
               <td className="whitespace-nowrap px-4 py-3 font-mono text-xs font-medium text-ink">
                 {row.name}
-                {row.required && <span className="ml-1.5 text-danger" title="Required">*</span>}
+                {row.required && (
+                  <span className="ml-1.5 text-danger" title="Required">
+                    *
+                  </span>
+                )}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-xs text-ink-muted">{row.type}</td>
               <td className="whitespace-nowrap px-4 py-3 text-xs text-ink-muted">{row.default || '—'}</td>
@@ -42,41 +49,42 @@ function ParamTable({ rows }) {
   );
 }
 
-function CodeSample({ request, response }) {
+function CodeSample({ base, example }) {
+  if (!example) return null;
   return (
     <div className="space-y-3">
       <div className="overflow-hidden rounded-lg border border-line">
-        <div className="border-b border-line bg-subtle px-4 py-2 text-xs font-medium text-ink-muted">
-          Request
-        </div>
+        <div className="border-b border-line bg-subtle px-4 py-2 text-xs font-medium text-ink-muted">Request</div>
         <pre className="code-block rounded-none border-0">
-          <code>{request}</code>
+          <code>{`curl -s "${base}${example.request}"`}</code>
         </pre>
       </div>
       <div className="overflow-hidden rounded-lg border border-line">
         <div className="border-b border-line bg-subtle px-4 py-2 text-xs font-medium text-ink-muted">
-          Response
+          Response · {example.status} · generated from the API at build time
         </div>
-        <pre className="code-block rounded-none border-0">
-          <code>{response}</code>
+        <pre className="code-block max-h-[28rem] rounded-none border-0">
+          <code>{JSON.stringify(example.response, null, 2)}</code>
         </pre>
       </div>
     </div>
   );
 }
 
-const ERROR_CODES = [
-  { code: 'INVALID_PARAMETER', status: 400, meaning: 'A numeric parameter was malformed or out of range. details.parameter names it.' },
-  { code: 'MISSING_COORDINATES', status: 400, meaning: 'lat or lng was absent or empty on /v1/stations/near.' },
-  { code: 'INVALID_LATITUDE', status: 400, meaning: 'lat is not a number between -90 and 90.' },
-  { code: 'INVALID_LONGITUDE', status: 400, meaning: 'lng is not a number between -180 and 180.' },
-  { code: 'UNKNOWN_STATE', status: 400, meaning: 'state matched no state or union territory in the dataset.' },
-  { code: 'UNKNOWN_CITY', status: 400, meaning: 'city matched no city in the dataset.' },
-  { code: 'UNKNOWN_CONNECTOR', status: 400, meaning: 'connector is not a recognised standard; details.expected lists the accepted values.' },
-  { code: 'INVALID_STATION_ID', status: 400, meaning: 'The id path segment is not a positive integer.' },
-  { code: 'STATION_NOT_FOUND', status: 404, meaning: 'The id is well formed but no station has it.' },
-  { code: 'RATE_LIMIT_EXCEEDED', status: 429, meaning: 'Per-client request budget exhausted. Retry-After gives the wait in seconds.' },
-  { code: 'ROUTE_NOT_FOUND', status: 404, meaning: 'The path is not an endpoint. See /v1 for the index.' },
+const STATION_FIELDS = [
+  ['id', 'Stable id: evs_ + 10 hex digits, derived from operator and coordinates.'],
+  ['operator, ownership', 'Charge point operator and govt or private, as published.'],
+  ['state, state_code, district, city, address', 'Location as published by BEE; state names and codes follow ISO 3166-2:IN.'],
+  ['latitude, longitude', 'As published. Check location_quality before routing a driver there.'],
+  ['location_quality', 'ok, or suspect when the coordinates are impossible (latitude equal to longitude, or outside India).'],
+  ['mixed_admin', 'true when BEE lists the same station with different district or city spellings.'],
+  ['chargers[]', 'One entry per distinct charger: type_raw (as published), standards, lev_variant, charger_kw (charger total), connectors_per_charger, guns[] and count (identical chargers at the site).'],
+  ['chargers[].guns[]', '{ standard, kw }: the power one gun delivers to one vehicle.'],
+  ['max_power_kw, max_kw_by_standard', 'Highest single-gun power, overall and per standard.'],
+  ['standards, currents, vehicle_classes', 'Everything the station offers, as sorted lists.'],
+  ['total_chargers, total_connectors', 'Chargers and guns at the site.'],
+  ['distance_km', 'Only in /v1/stations/near results. Great-circle distance from the search point, 2 decimals.'],
+  ['source', 'Only in /v1/stations/{id} responses. The PDF pages and row count this station came from.'],
 ];
 
 export default function DocsPage() {
@@ -93,25 +101,34 @@ export default function DocsPage() {
       <header className="max-w-3xl">
         <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">API reference</h1>
         <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-          Every endpoint is a <code className="text-xs">GET</code> returning JSON. This page documents
-          the behaviour the API actually implements, including validation rules and error codes.
+          Every endpoint is a <code className="text-xs">GET</code> returning JSON. This page documents what
+          the API actually does; every example response below was produced by the API&apos;s own code
+          when this site was built.
         </p>
-        <p className="mt-3 rounded-lg border border-line bg-subtle px-4 py-3 text-sm text-ink-muted">
-          Responses come from a <span className="font-semibold text-ink">generated sample dataset</span>{' '}
-          ({dataset.totalStations ? dataset.totalStations.toLocaleString('en-IN') : '—'} stations).
-          Use it for development; it is not official Government of India data.
-        </p>
+        <div className="mt-3 rounded-lg border border-line bg-subtle px-4 py-3 text-sm text-ink-muted">
+          <p>
+            {formatCount(dataset.totalStations)} stations and {formatCount(dataset.totalChargers)} chargers
+            from{' '}
+            <a className="link" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
+              {dataset.sourceTitle}
+            </a>
+            .
+          </p>
+          <p className="mt-1 text-xs">{dataset.attribution}</p>
+        </div>
       </header>
 
       <nav className="mt-8 flex flex-wrap gap-2 border-b border-line pb-6 text-sm">
         {[
           ['conventions', 'Conventions'],
+          ['power', 'Power and vehicles'],
           ['near', 'Radius search'],
           ['stations', 'Directory'],
           ['station-id', 'Station by id'],
-          ['reference', 'States, operators, connectors'],
-          ['normalisation', 'Input normalisation'],
-          ['errors', 'Error codes'],
+          ['cities', 'Cities'],
+          ['reference', 'Reference endpoints'],
+          ['fields', 'Station fields'],
+          ['errors', 'Errors'],
         ].map(([anchor, label]) => (
           <a key={anchor} href={`#${anchor}`} className="chip hover:border-line-strong hover:text-ink">
             {label}
@@ -120,17 +137,15 @@ export default function DocsPage() {
       </nav>
 
       <div className="mt-10 space-y-14">
-        <Section
-          id="conventions"
-          title="Conventions"
-          subtitle="Shared behaviour across every endpoint."
-        >
+        <Section id="conventions" title="Conventions" subtitle="Behaviour shared by every endpoint.">
           <div className="grid gap-4 sm:grid-cols-2">
             {[
               ['Base URL', base || 'resolved at runtime'],
-              ['Authentication', 'None. No keys, headers or registration.'],
+              ['Authentication', 'None. No keys, headers or sign-up.'],
               ['CORS', 'Access-Control-Allow-Origin: *'],
-              ['Rate limit', '300 requests per 15 minutes, per client address.'],
+              ['Rate limit', '100 requests per 15 minutes per client address. A 429 carries Retry-After in seconds.'],
+              ['Caching', 'Successful responses and 404s are cacheable for an hour (s-maxage=3600); errors are no-store.'],
+              ['Attribution', 'Every success response carries meta.attribution and meta.source. Keep the attribution when you show this data.'],
             ].map(([label, value]) => (
               <div key={label} className="card p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-ink-dim">{label}</p>
@@ -138,212 +153,93 @@ export default function DocsPage() {
               </div>
             ))}
           </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-ink">Success envelope</h3>
-            <pre className="code-block mt-2">
-              <code>{`{
-  "success": true,
-  "data": [ /* array, or a single object for /v1/stations/{id} */ ],
-  "meta": { "took_ms": 4.2, /* endpoint-specific fields */ }
-}`}</code>
-            </pre>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-ink">Error envelope</h3>
-            <p className="mt-1 text-sm text-ink-muted">
-              Validation failures are <code className="text-xs">400</code> responses with a stable{' '}
-              <code className="text-xs">code</code>, and <code className="text-xs">details</code> naming
-              the offending parameter.
-            </p>
-            <pre className="code-block mt-2">
-              <code>{`{
-  "success": false,
-  "error": {
-    "code": "INVALID_PARAMETER",
-    "message": "'radius' must be at most 100, received 250.",
-    "details": { "parameter": "radius", "received": "250", "expected": "number <= 100" }
-  }
-}`}</code>
-            </pre>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-ink">Rate limiting</h3>
-            <p className="mt-1 text-sm text-ink-muted">
-              Limits are applied per client address, so one heavy caller cannot exhaust another's
-              budget. Every response carries <code className="text-xs">RateLimit-Limit</code>,{' '}
-              <code className="text-xs">RateLimit-Remaining</code> and{' '}
-              <code className="text-xs">RateLimit-Reset</code>. A <code className="text-xs">429</code>{' '}
-              additionally carries <code className="text-xs">Retry-After</code> in seconds.
-            </p>
-          </div>
-        </Section>
-
-        <Section
-          id="near"
-          title="GET /v1/stations/near"
-          subtitle="Stations within a kilometre radius of a coordinate, sorted nearest first."
-        >
-          <ParamTable
-            rows={[
-              { name: 'lat', type: 'number', required: true, notes: 'Latitude, -90 to 90.' },
-              { name: 'lng', type: 'number', required: true, notes: 'Longitude, -180 to 180.' },
-              { name: 'radius', type: 'number', default: '10', notes: 'Kilometres. Must be greater than 0 and at most 100.' },
-              { name: 'limit', type: 'integer', default: '25', notes: 'Results per page, 1 to 100.' },
-              { name: 'connector', type: 'string', notes: 'Filter to stations exposing this connector.' },
-              { name: 'min_power_kw', type: 'number', notes: 'Minimum total station capacity.' },
-              { name: 'operator', type: 'string', notes: 'Exact or partial charge point operator match.' },
-            ]}
-          />
           <p className="text-sm text-ink-muted">
-            Filters are applied before the nearest-first sort, so <code className="text-xs">total_found</code>{' '}
-            counts matches inside the radius, not matches within the page.
-          </p>
-          <CodeSample
-            request={`curl -s "${base}/v1/stations/near?lat=12.9716&lng=77.5946&radius=15&connector=CCS-2&limit=1"`}
-            response={`{
-  "success": true,
-  "data": [
-    {
-      "id": 1739,
-      "name": "Tata Power EZ Charge - Bengaluru Shortened name",
-      "operator": "Tata Power EZ Charge",
-      "state": "Karnataka",
-      "state_code": "KA",
-      "district": "Bengaluru Urban",
-      "city": "Bengaluru",
-      "address": "Metro Station Parking, Sector 22, Bengaluru, Bengaluru Urban, Karnataka - India",
-      "latitude": 12.940123,
-      "longitude": 77.561234,
-      "connectors": [
-        { "type": "CCS-2", "power_kw": 120, "count": 2 },
-        { "type": "Type-2 AC", "power_kw": 22, "count": 2 }
-      ],
-      "total_capacity_kw": 284,
-      "availability": "24x7",
-      "access_type": "Public",
-      "status": "Operational",
-      "distance_km": 1.42
-    }
-  ],
-  "meta": {
-    "center": { "lat": 12.9716, "lng": 77.5946 },
-    "radius_km": 15,
-    "count": 1,
-    "total_found": 5312,
-    "limit": 1,
-    "filters_applied": { "operator": null, "connector": "CCS-2", "min_power_kw": null },
-    "took_ms": 6.8
-  }
-}`}
-          />
-        </Section>
-
-        <Section
-          id="stations"
-          title="GET /v1/stations"
-          subtitle="Paginated directory of every station in the dataset."
-        >
-          <ParamTable
-            rows={[
-              { name: 'state', type: 'string', notes: 'State name or code. Trimmed and case-insensitive.' },
-              { name: 'city', type: 'string', notes: 'City name. Common alternate spellings are resolved.' },
-              { name: 'operator', type: 'string', notes: 'Exact match, or a partial match as a fallback.' },
-              { name: 'connector', type: 'string', notes: 'Stations exposing this connector.' },
-              { name: 'min_power_kw', type: 'number', notes: 'Minimum total station capacity.' },
-              { name: 'page', type: 'integer', default: '1', notes: '1-based page number.' },
-              { name: 'limit', type: 'integer', default: '25', notes: 'Page size, 1 to 100.' },
-            ]}
-          />
-          <CodeSample
-            request={`curl -s "${base}/v1/stations?state=KA&min_power_kw=142&limit=2"`}
-            response={`{
-  "success": true,
-  "data": [ /* station objects */ ],
-  "meta": {
-    "total": 1104,
-    "page": 1,
-    "limit": 2,
-    "count": 2,
-    "total_pages": 552,
-    "filters_applied": {
-      "state": "Karnataka",
-      "city": null,
-      "operator": null,
-      "connector": null,
-      "min_power_kw": 142
-    },
-    "took_ms": 4.1
-  }
-}`}
-          />
-        </Section>
-
-        <Section id="station-id" title="GET /v1/stations/{id}" subtitle="One station by integer id.">
-          <p className="text-sm text-ink-muted">
-            Ids are positive integers. Anything else — <code className="text-xs">1.5</code>,{' '}
-            <code className="text-xs">1e3</code>, <code className="text-xs">abc</code> — is rejected with{' '}
-            <code className="text-xs">400 INVALID_STATION_ID</code> rather than being truncated to a
-            valid id.
+            Nothing is silently ignored: an unknown parameter, a repeated parameter or a malformed number is a{' '}
+            <code className="text-xs">400</code>, and an unknown value for an enum-like filter is a{' '}
+            <code className="text-xs">404</code> that lists the valid values.
           </p>
         </Section>
 
-        <Section
-          id="reference"
-          title="Reference endpoints"
-          subtitle="Dataset-wide facts that need no parameters."
-        >
+        <Section id="power" title="Power and vehicles" subtitle="How the filters answer “can my vehicle charge here, and how fast?”">
+          <ul className="space-y-2 text-sm leading-relaxed text-ink-muted">
+            <li>
+              BEE lists one row per charger. A charger has one or more <span className="font-medium text-ink">guns</span>, and
+              a vehicle draws the gun&apos;s rating, not the charger total: a Bharat AC-001 charger is 10 kW but each gun gives
+              3.3 kW. <code className="text-xs">min_power_kw</code> and <code className="text-xs">max_power_kw</code> use gun power.
+            </li>
+            <li>
+              Which vehicles a standard serves comes from the Ministry of Power charger table: CCS2 and CHAdeMO serve cars;
+              Type 2 AC, Bharat AC-001 and Bharat DC-001 serve cars and two/three-wheelers; light-EV (LEV) points serve
+              two/three-wheelers. {formatCount(dataset.twoThreeWheelerOnlyStations)} stations serve only two/three-wheelers.
+            </li>
+            <li>{GUN_RULE}</li>
+          </ul>
+        </Section>
+
+        <Section id="near" title="GET /v1/stations/near" subtitle="Stations within a radius of a point, nearest first.">
+          <ParamTable rows={PARAMS.near} />
+          <p className="text-sm text-ink-muted">
+            Stations with suspect coordinates are never returned here. Filters apply before sorting and paging, so{' '}
+            <code className="text-xs">total_found</code> counts every match inside the radius. Example: the nearest
+            station where a car can draw at least 50 kW DC, from central Bengaluru.
+          </p>
+          <CodeSample base={base} example={EXAMPLES && EXAMPLES.near} />
+        </Section>
+
+        <Section id="stations" title="GET /v1/stations" subtitle="The whole directory, filtered and paged.">
+          <ParamTable rows={PARAMS.stations} />
+          <CodeSample base={base} example={EXAMPLES && EXAMPLES.stations} />
+        </Section>
+
+        <Section id="station-id" title="GET /v1/stations/{id}" subtitle="One station, with the PDF pages it was read from.">
+          <p className="text-sm text-ink-muted">
+            Ids look like <code className="text-xs">evs_1a2b3c4d5e</code> and stay the same when BEE publishes a new
+            list, as long as the operator and coordinates do not change. Anything else is a{' '}
+            <code className="text-xs">400 INVALID_STATION_ID</code>.
+          </p>
+          <CodeSample base={base} example={EXAMPLES && EXAMPLES.station} />
+        </Section>
+
+        <Section id="cities" title="GET /v1/cities" subtitle="Valid city values, with district and station count.">
+          <ParamTable rows={PARAMS.cities} />
+          <CodeSample base={base} example={EXAMPLES && EXAMPLES.cities} />
+          <p className="text-xs text-ink-dim">Response shortened to three cities.</p>
+        </Section>
+
+        <Section id="reference" title="Reference endpoints" subtitle="Every endpoint at a glance.">
           <div className="grid gap-4 sm:grid-cols-2">
-            {[
-              ['/v1/states', 'Station and capacity totals per state and union territory, with leading operators.'],
-              ['/v1/operators', 'Charge point operators with station counts, sorted by size.'],
-              ['/v1/connectors', 'Connector reference: current type, power range, standard and vehicles, plus stations_with_this_connector.'],
-              ['/v1/meta', 'Provenance, coverage counts, snapshot date and disclaimer.'],
-              ['/v1', 'Self-describing index of endpoints and the active rate limit.'],
-              ['/health', 'Liveness probe with uptime.'],
-            ].map(([path, description]) => (
-              <div key={path} className="card p-4">
-                <p className="font-mono text-xs font-medium text-ink">{path}</p>
-                <p className="mt-1 text-sm text-ink-muted">{description}</p>
+            {ENDPOINTS.map((endpoint) => (
+              <div key={endpoint.path} className="card p-4">
+                <p className="font-mono text-xs font-medium text-ink">{endpoint.path}</p>
+                <p className="mt-1 text-sm text-ink-muted">{endpoint.description}</p>
               </div>
             ))}
           </div>
         </Section>
 
-        <Section
-          id="normalisation"
-          title="Input normalisation"
-          subtitle="How loosely-typed input is resolved, so you can pass user-entered values safely."
-        >
-          <ul className="space-y-2 text-sm leading-relaxed text-ink-muted">
-            <li>
-              <span className="font-medium text-ink">Whitespace and case</span> —{' '}
-              <code className="text-xs">state</code>, <code className="text-xs">city</code>,{' '}
-              <code className="text-xs">operator</code> and <code className="text-xs">connector</code>{' '}
-              are trimmed and compared case-insensitively.
-            </li>
-            <li>
-              <span className="font-medium text-ink">Connector spellings</span> —{' '}
-              <code className="text-xs">CCS-2</code>, <code className="text-xs">CCS 2</code>,{' '}
-              <code className="text-xs">ccs2</code> and <code className="text-xs">Combo Type 2</code>{' '}
-              all resolve to the same standard.
-            </li>
-            <li>
-              <span className="font-medium text-ink">City aliases</span> —{' '}
-              <code className="text-xs">Bangalore</code> → Bengaluru, <code className="text-xs">Bombay</code>{' '}
-              → Mumbai, <code className="text-xs">Gurgaon</code> → Gurugram,{' '}
-              <code className="text-xs">Trivandrum</code> → Thiruvananthapuram, and similar.
-            </li>
-            <li>
-              <span className="font-medium text-ink">State codes</span> — the two-letter code from{' '}
-              <code className="text-xs">/v1/states</code> is accepted in place of the full name.
-            </li>
-          </ul>
+        <Section id="fields" title="Station fields">
+          <div className="overflow-x-auto rounded-lg border border-line">
+            <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+              <tbody className="divide-y divide-line">
+                {STATION_FIELDS.map(([field, meaning]) => (
+                  <tr key={field} className="bg-surface align-top">
+                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-ink">{field}</td>
+                    <td className="px-4 py-3 text-ink-muted">{meaning}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-sm text-ink-muted">
+            Known problems in the source and how they are handled are listed in the{' '}
+            <a className="link" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
+              data notes
+            </a>
+            .
+          </p>
         </Section>
 
-        <Section id="errors" title="Error codes">
+        <Section id="errors" title="Errors">
           <div className="overflow-x-auto rounded-lg border border-line">
             <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
               <thead>
@@ -364,13 +260,13 @@ export default function DocsPage() {
               </tbody>
             </table>
           </div>
+          <CodeSample base={base} example={EXAMPLES && EXAMPLES.error} />
         </Section>
 
         <div className="rounded-lg border border-line bg-subtle p-5">
           <h2 className="text-sm font-semibold text-ink">Next steps</h2>
           <p className="mt-1 text-sm text-ink-muted">
-            Try the parameters interactively in the playground, then read the integration guides for
-            retry handling and server-side filtering.
+            Try the filters in the playground, or read the guides on route planning and charging standards.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link to="/playground" className="btn-primary">

@@ -1,0 +1,287 @@
+{
+  "source": "ISO 3166-2:IN current subdivision list (28 states, 8 union territories; IN-TS since 2023-11-23, IN-DH since 2020-11-11)",
+  "source_url": "https://en.wikipedia.org/wiki/ISO_3166-2:IN",
+  "checked": "2026-10-15",
+  "note": "aliases are raw spellings seen in the BEE PDF; matching is exact after whitespace collapse",
+  "states": [
+    {
+      "code": "AN",
+      "iso": "IN-AN",
+      "name": "Andaman and Nicobar Islands",
+      "type": "ut",
+      "aliases": [
+        "Andaman & Nicobar"
+      ]
+    },
+    {
+      "code": "AP",
+      "iso": "IN-AP",
+      "name": "Andhra Pradesh",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "AR",
+      "iso": "IN-AR",
+      "name": "Arunachal Pradesh",
+      "type": "state",
+      "aliases": [
+        "ARUNACHAL PRADESH"
+      ]
+    },
+    {
+      "code": "AS",
+      "iso": "IN-AS",
+      "name": "Assam",
+      "type": "state",
+      "aliases": [
+        "ASSAM"
+      ]
+    },
+    {
+      "code": "BR",
+      "iso": "IN-BR",
+      "name": "Bihar",
+      "type": "state",
+      "aliases": [
+        "BIHAR"
+      ]
+    },
+    {
+      "code": "CH",
+      "iso": "IN-CH",
+      "name": "Chandigarh",
+      "type": "ut",
+      "aliases": []
+    },
+    {
+      "code": "CG",
+      "iso": "IN-CG",
+      "name": "Chhattisgarh",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "DH",
+      "iso": "IN-DH",
+      "name": "Dadra and Nagar Haveli and Daman and Diu",
+      "type": "ut",
+      "aliases": [
+        "UT OF D&NH AND D&D",
+        "UT of D&NH and D&D"
+      ]
+    },
+    {
+      "code": "DL",
+      "iso": "IN-DL",
+      "name": "Delhi",
+      "type": "ut",
+      "aliases": []
+    },
+    {
+      "code": "GA",
+      "iso": "IN-GA",
+      "name": "Goa",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "GJ",
+      "iso": "IN-GJ",
+      "name": "Gujarat",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "HR",
+      "iso": "IN-HR",
+      "name": "Haryana",
+      "type": "state",
+      "aliases": [
+        "HARYANA"
+      ]
+    },
+    {
+      "code": "HP",
+      "iso": "IN-HP",
+      "name": "Himachal Pradesh",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "JK",
+      "iso": "IN-JK",
+      "name": "Jammu and Kashmir",
+      "type": "ut",
+      "aliases": [
+        "Jammu & Kashmir"
+      ]
+    },
+    {
+      "code": "JH",
+      "iso": "IN-JH",
+      "name": "Jharkhand",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "KA",
+      "iso": "IN-KA",
+      "name": "Karnataka",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "KL",
+      "iso": "IN-KL",
+      "name": "Kerala",
+      "type": "state",
+      "aliases": [
+        "KERALA"
+      ]
+    },
+    {
+      "code": "LA",
+      "iso": "IN-LA",
+      "name": "Ladakh",
+      "type": "ut",
+      "aliases": []
+    },
+    {
+      "code": "LD",
+      "iso": "IN-LD",
+      "name": "Lakshadweep",
+      "type": "ut",
+      "aliases": []
+    },
+    {
+      "code": "MP",
+      "iso": "IN-MP",
+      "name": "Madhya Pradesh",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "MH",
+      "iso": "IN-MH",
+      "name": "Maharashtra",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "MN",
+      "iso": "IN-MN",
+      "name": "Manipur",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "ML",
+      "iso": "IN-ML",
+      "name": "Meghalaya",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "MZ",
+      "iso": "IN-MZ",
+      "name": "Mizoram",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "NL",
+      "iso": "IN-NL",
+      "name": "Nagaland",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "OD",
+      "iso": "IN-OD",
+      "name": "Odisha",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "PY",
+      "iso": "IN-PY",
+      "name": "Puducherry",
+      "type": "ut",
+      "aliases": []
+    },
+    {
+      "code": "PB",
+      "iso": "IN-PB",
+      "name": "Punjab",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "RJ",
+      "iso": "IN-RJ",
+      "name": "Rajasthan",
+      "type": "state",
+      "aliases": [
+        "RAJASTHAN"
+      ]
+    },
+    {
+      "code": "SK",
+      "iso": "IN-SK",
+      "name": "Sikkim",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "TN",
+      "iso": "IN-TN",
+      "name": "Tamil Nadu",
+      "type": "state",
+      "aliases": [
+        "Tamil nadu"
+      ]
+    },
+    {
+      "code": "TS",
+      "iso": "IN-TS",
+      "name": "Telangana",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "TR",
+      "iso": "IN-TR",
+      "name": "Tripura",
+      "type": "state",
+      "aliases": []
+    },
+    {
+      "code": "UP",
+      "iso": "IN-UP",
+      "name": "Uttar Pradesh",
+      "type": "state",
+      "aliases": [
+        "Uttar pradesh"
+      ]
+    },
+    {
+      "code": "UK",
+      "iso": "IN-UK",
+      "name": "Uttarakhand",
+      "type": "state",
+      "aliases": [
+        "Uttrakhand"
+      ]
+    },
+    {
+      "code": "WB",
+      "iso": "IN-WB",
+      "name": "West Bengal",
+      "type": "state",
+      "aliases": [
+        "West bengal"
+      ]
+    }
+  ]
+}

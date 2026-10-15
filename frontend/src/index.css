@@ -2,21 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS custom properties mirror src/lib/palette.js through Tailwind's theme(). */
 :root {
-  --canvas: #fafafa;
-  --surface: #ffffff;
-  --subtle: #f4f4f5;
-  --line: #e4e4e7;
-  --line-strong: #d4d4d8;
-  --ink: #18181b;
-  --ink-muted: #52525b;
-  --ink-dim: #71717a;
-  --accent: #0f766e;
-  --accent-strong: #115e59;
-  --accent-soft: #f0fdfa;
-  --ok: #15803d;
-  --warn: #b45309;
-  --danger: #b91c1c;
+  --canvas: theme("colors.canvas");
+  --surface: theme("colors.surface");
+  --subtle: theme("colors.subtle");
+  --line: theme("colors.line.DEFAULT");
+  --line-strong: theme("colors.line.strong");
+  --ink: theme("colors.ink.DEFAULT");
+  --ink-muted: theme("colors.ink.muted");
+  --ink-dim: theme("colors.ink.dim");
+  --accent: theme("colors.accent.DEFAULT");
+  --ok: theme("colors.ok.DEFAULT");
+  --warn: theme("colors.warn.DEFAULT");
+  --danger: theme("colors.danger.DEFAULT");
 }
 
 html {
@@ -88,22 +87,24 @@ samp {
   }
 
   .field {
-    @apply w-full rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-sm text-ink
-      placeholder:text-ink-dim focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20;
+    @apply w-full rounded-md border border-line-strong bg-surface px-2.5 py-1.5 text-base text-ink sm:text-sm
+      placeholder:text-ink-dim focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/20;
   }
 
   .btn {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm
-      font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
+      font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink
+      focus-visible:ring-offset-2
       disabled:cursor-not-allowed disabled:opacity-55;
   }
 
   .btn-primary {
-    @apply btn bg-accent text-white hover:bg-accent-strong;
+    /* Amber fill under graphite text (10.4:1); amber is never used as a text colour. */
+    @apply btn bg-accent text-ink hover:bg-accent-hover;
   }
 
   .btn-secondary {
-    @apply btn border border-line-strong bg-surface text-ink hover:bg-subtle;
+    @apply btn border border-line-strong bg-surface text-ink hover:bg-hover;
   }
 
   /* Chips are used as links and buttons in places, so they keep a 24px minimum
@@ -115,12 +116,17 @@ samp {
 
   .chip-accent {
     @apply inline-flex min-h-6 items-center gap-1 rounded-full border border-accent-border
-      bg-accent-soft px-2.5 text-xs font-medium text-accent-strong;
+      bg-accent-soft px-2.5 text-xs font-medium text-accent-ink;
   }
 
   .code-block {
-    @apply overflow-x-auto rounded-md border border-line bg-[#0b0b0d] p-3 text-xs leading-relaxed
-      text-[#e4e4e7];
+    @apply overflow-x-auto rounded-md border border-ink bg-ink p-3 text-xs leading-relaxed text-subtle;
+  }
+
+  /* Links: graphite text with an amber underline, so the accent never carries text contrast. */
+  .link {
+    @apply font-medium text-ink underline decoration-accent decoration-2 underline-offset-2
+      hover:decoration-ink;
   }
 
   .prose-body {
@@ -134,14 +140,14 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 /* MapLibre attribution: keep it legible on light basemaps. */
 .maplibregl-ctrl-attrib,
 .maplibregl-ctrl-attrib a {
-  color: #52525b;
+  color: var(--ink-muted);
   font-size: 11px;
 }
 
@@ -149,11 +155,41 @@ textarea:focus-visible {
   padding: 0;
   border-radius: 8px;
   border: 1px solid var(--line);
-  box-shadow: 0 8px 24px rgba(24, 24, 27, 0.12);
+  box-shadow: 0 8px 24px theme("colors.ink.DEFAULT / 12%");
 }
 
 .maplibregl-popup-close-button {
   color: var(--ink-dim);
   font-size: 16px;
   padding: 2px 6px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Keep an open popup above the map controls (attribution sits at z-index 2). */
+.maplibregl-popup {
+  z-index: 3;
+}
+
+/* Attribution links are tap targets on phones: give them a 24px-tall hit area. */
+.maplibregl-ctrl-attrib a {
+  display: inline-block;
+  padding-block: 6px;
+}
+
+/*
+ * Phones: nothing below 14px. text-xs (12px) stays on larger screens, where it is used for
+ * secondary detail; below the sm breakpoint it becomes 14px/20px (mobile-check text-legibility).
+ * Plain CSS after the utilities layer, so it wins by order rather than !important.
+ */
+@media (max-width: 639.98px) {
+  .text-xs {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .maplibregl-ctrl-attrib,
+  .maplibregl-ctrl-attrib a {
+    font-size: 0.875rem;
+  }
 }

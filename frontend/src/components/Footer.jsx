@@ -12,15 +12,11 @@ export default function Footer() {
           <div className="md:col-span-2">
             <p className="text-sm font-semibold text-ink">India EV Charging Station Directory API</p>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
-              A keyless REST API for Indian public EV charging stations: radius search, state,
-              city, operator and connector filters, and a connector reference dictionary.
+              A keyless REST API for India&apos;s public EV charging stations: radius search and
+              filters for vehicle type, AC/DC, charging standard and per-gun power.
             </p>
             <p className="mt-3 max-w-md rounded-md border border-line bg-subtle px-3 py-2 text-xs leading-relaxed text-ink-muted">
-              <span className="font-semibold text-ink">Data status: generated sample.</span> The
-              bundled dataset is synthetic, produced by{' '}
-              <code className="text-[11px]">backend/scripts/generate-data.js</code>, so it is
-              suitable for development and evaluation — not for navigation or dispatch. It is not
-              official Government of India data.
+              {dataset.attribution}
             </p>
           </div>
 
@@ -36,7 +32,7 @@ export default function Footer() {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="-mx-1 inline-flex min-h-6 items-center rounded px-1 text-ink-muted hover:text-accent"
+                    className="-mx-1 inline-flex min-h-6 items-center rounded px-1 text-ink-muted hover:text-ink"
                   >
                     {label}
                   </Link>
@@ -72,19 +68,19 @@ export default function Footer() {
 
         <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-dim sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Code licensed under MIT. Intended data source:{' '}
+            Code licensed under MIT. Data:{' '}
             <a
-              href="https://data.gov.in"
+              href={dataset.sourcePageUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-ink"
             >
-              Open Government Data (data.gov.in)
-            </a>{' '}
-            under GODL-India — not yet ingested.
+              Bureau of Energy Efficiency
+            </a>
+            , republished with attribution.
           </p>
           <p>
-            Snapshot {dataset.snapshotDate || '—'} · keyless · CORS enabled
+            Data {dataset.snapshotLabel || '—'} · keyless · CORS enabled
           </p>
         </div>
       </div>

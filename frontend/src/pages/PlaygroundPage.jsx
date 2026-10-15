@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StationMap from '../components/StationMap';
 import { ApiError, apiGet, buildNearQuery } from '../lib/api';
-import { formatCount, formatMs, useDataset } from '../lib/dataset';
+import { formatCount, useDataset } from '../lib/dataset';
+import { isFastDc, standardLabel, vehicleLabel } from '../lib/stations';
 
 const PRESETS = [
   { label: 'Bengaluru, Karnataka', lat: 12.9716, lng: 77.5946 },
@@ -14,20 +15,25 @@ const PRESETS = [
   { label: 'Kolkata, West Bengal', lat: 22.5726, lng: 88.3639 },
 ];
 
-const CONNECTORS = [
-  { value: '', label: 'Any connector' },
-  { value: 'CCS-2', label: 'CCS-2 (DC)' },
-  { value: 'Type-2 AC', label: 'Type-2 AC' },
-  { value: 'Bharat DC-001', label: 'Bharat DC-001' },
-  { value: 'Bharat AC-001', label: 'Bharat AC-001' },
+const VEHICLE_OPTIONS = [
+  { value: '', label: 'Any vehicle' },
+  { value: 'car', label: 'Car (4W)' },
+  { value: 'two_three_wheeler', label: 'Two/three-wheeler' },
 ];
 
+const CURRENT_OPTIONS = [
+  { value: '', label: 'AC or DC' },
+  { value: 'ac', label: 'AC only' },
+  { value: 'dc', label: 'DC only' },
+];
+
+// Power one gun delivers to one vehicle, not the charger's total.
 const POWER_OPTIONS = [
-  { value: '', label: 'Any capacity' },
-  { value: '40', label: '40 kW and above' },
-  { value: '74.8', label: '74.8 kW and above' },
-  { value: '142', label: '142 kW and above (DC fast)' },
-  { value: '284', label: '284 kW and above (ultra fast)' },
+  { value: '', label: 'Any power' },
+  { value: '7', label: '7 kW and above' },
+  { value: '22', label: '22 kW and above' },
+  { value: '50', label: '50 kW and above (fast)' },
+  { value: '100', label: '100 kW and above' },
 ];
 
 const DEBOUNCE_MS = 450;
@@ -61,7 +67,11 @@ export default function PlaygroundPage() {
   const [lngText, setLngText] = useState(String(PRESETS[0].lng));
   const [radiusKm, setRadiusKm] = useState(15);
   const [connector, setConnector] = useState('');
+  const [current, setCurrent] = useState('');
+  const [vehicle, setVehicle] = useState('');
   const [minPowerKw, setMinPowerKw] = useState('');
+  const [connectorOptions, setConnectorOptions] = useState({ status: 'loading', items: [] });
+  const [extraPages, setExtraPages] = useState({ page: 1, items: [], loading: false });
 
   const [coords, setCoords] = useState({ lat: PRESETS[0].lat, lng: PRESETS[0].lng });
   const [result, setResult] = useState(null);
@@ -100,6 +110,7 @@ export default function PlaygroundPage() {
     abortRef.current = controller;
 
     setLoading(true);
+    setExtraPages({ page: 1, items: [], loading: false });
     apiGet(
       buildNearQuery({
         lat: coords.lat,
@@ -107,6 +118,8 @@ export default function PlaygroundPage() {
         radiusKm,
         limit: RESULT_LIMIT,
         connector,
+        current,
+        vehicle,
         minPowerKw,
       }),
       { signal: controller.signal }
@@ -131,7 +144,60 @@ export default function PlaygroundPage() {
       });
 
     return () => controller.abort();
-  }, [coords.lat, coords.lng, radiusKm, connector, minPowerKw, refreshKey, retryAfter]);
+  }, [coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw, refreshKey, retryAfter]);
+
+  // Connector choices come from the API, so the list always matches the data.
+  useEffect(() => {
+    const controller = new AbortController();
+    apiGet('/v1/connectors', { signal: controller.signal })
+      .then((body) => setConnectorOptions({ status: 'ready', items: body.data }))
+      .catch((caught) => {
+        if (caught.name !== 'AbortError') setConnectorOptions({ status: 'error', items: [] });
+      });
+    return () => controller.abort();
+  }, []);
+
+  const loadMoreRef = useRef(null);
+  const loadMore = useCallback(() => {
+    if (!result || extraPages.loading) return;
+    const nextPage = extraPages.page + 1;
+    const controller = new AbortController();
+    loadMoreRef.current = controller;
+    setExtraPages((state) => ({ ...state, loading: true }));
+    apiGet(
+      buildNearQuery({
+        lat: coords.lat,
+        lng: coords.lng,
+        radiusKm,
+        limit: RESULT_LIMIT,
+        connector,
+        current,
+        vehicle,
+        minPowerKw,
+        page: nextPage,
+      }),
+      { signal: controller.signal }
+    )
+      .then((body) =>
+        setExtraPages((state) => ({ page: nextPage, items: [...state.items, ...body.data], loading: false }))
+      )
+      .catch((caught) => {
+        if (caught.name === 'AbortError') return;
+        setExtraPages((state) => ({ ...state, loading: false }));
+        setError(caught);
+        if (caught instanceof ApiError && caught.isRateLimited && caught.retryAfterSeconds) {
+          setRetryAfter(caught.retryAfterSeconds);
+        }
+      });
+  }, [result, extraPages, coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw]);
+
+  // A new search makes any pending "load more" obsolete.
+  useEffect(
+    () => () => {
+      if (loadMoreRef.current) loadMoreRef.current.abort();
+    },
+    [coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw, refreshKey]
+  );
 
   // Count the rate-limit window down so the user knows when to retry.
   useEffect(() => {
@@ -197,7 +263,8 @@ export default function PlaygroundPage() {
     );
   }, []);
 
-  const stations = result ? result.data : [];
+  const stations = result ? [...result.data, ...extraPages.items] : [];
+  const totalPages = result ? result.meta.total_pages : 0;
   const mapCenter = coords;
 
   const errorKind = useMemo(() => {
@@ -217,13 +284,14 @@ export default function PlaygroundPage() {
           Radius search playground
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-          Query <code className="text-xs">/v1/stations/near</code> against the bundled sample
-          dataset of {formatCount(dataset.totalStations)} stations. Coordinates, radius, connector
-          and capacity filters are all applied by the API, not in the browser.
+          Query <code className="text-xs">/v1/stations/near</code> against{' '}
+          {formatCount(dataset.totalStations)} public charging stations from BEE&apos;s list (
+          {dataset.snapshotLabel}). Vehicle, current, standard and power filters are applied by
+          the API, to one charging gun at a time.
         </p>
       </header>
 
-      <div className="mt-6 grid items-start gap-6 lg:grid-cols-12">
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         {/* Controls */}
         <div className="space-y-4 lg:col-span-5">
           <section className="card">
@@ -240,6 +308,7 @@ export default function PlaygroundPage() {
                   City preset
                 </label>
                 <select
+                  autoComplete="off"
                   id="preset"
                   className="field mt-1.5"
                   value={presetIndex}
@@ -316,7 +385,7 @@ export default function PlaygroundPage() {
                   <p
                     className={`mt-2 rounded-md border px-2.5 py-1.5 text-xs ${
                       geoState.status === 'error'
-                        ? 'border-danger/30 bg-danger/5 text-danger'
+                        ? 'border-danger bg-danger-soft text-danger'
                         : 'border-line bg-subtle text-ink-muted'
                     }`}
                     role={geoState.status === 'error' ? 'alert' : undefined}
@@ -336,12 +405,13 @@ export default function PlaygroundPage() {
                 <input
                   id="radius"
                   type="range"
+                  autoComplete="off"
                   min="1"
                   max="100"
                   step="1"
                   value={radiusKm}
                   onChange={(event) => setRadiusKm(Number(event.target.value))}
-                  className="mt-2 w-full accent-accent"
+                  className="mt-2 w-full accent-ink"
                 />
                 <div className="mt-1 flex justify-between text-xs text-ink-dim">
                   <span>1 km</span>
@@ -351,16 +421,17 @@ export default function PlaygroundPage() {
 
               <div className="grid gap-3 border-t border-line pt-4 sm:grid-cols-2">
                 <div>
-                  <label className="label" htmlFor="connector">
-                    Connector
+                  <label className="label" htmlFor="vehicle">
+                    Vehicle
                   </label>
                   <select
-                    id="connector"
+                    autoComplete="off"
+                    id="vehicle"
                     className="field mt-1.5"
-                    value={connector}
-                    onChange={(event) => setConnector(event.target.value)}
+                    value={vehicle}
+                    onChange={(event) => setVehicle(event.target.value)}
                   >
-                    {CONNECTORS.map((option) => (
+                    {VEHICLE_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -368,10 +439,54 @@ export default function PlaygroundPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="label" htmlFor="power">
-                    Minimum capacity
+                  <label className="label" htmlFor="current">
+                    Current
                   </label>
                   <select
+                    autoComplete="off"
+                    id="current"
+                    className="field mt-1.5"
+                    value={current}
+                    onChange={(event) => setCurrent(event.target.value)}
+                  >
+                    {CURRENT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label" htmlFor="connector">
+                    Standard
+                  </label>
+                  <select
+                    autoComplete="off"
+                    id="connector"
+                    className="field mt-1.5"
+                    value={connector}
+                    onChange={(event) => setConnector(event.target.value)}
+                    disabled={connectorOptions.status !== 'ready'}
+                  >
+                    <option value="">Any standard</option>
+                    {connectorOptions.items.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                  {connectorOptions.status === 'error' && (
+                    <p className="mt-1 text-xs text-danger" role="status">
+                      Could not load the standards list; other filters still work.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="label" htmlFor="power">
+                    Minimum power per gun
+                  </label>
+                  <select
+                    autoComplete="off"
                     id="power"
                     className="field mt-1.5"
                     value={minPowerKw}
@@ -400,6 +515,8 @@ export default function PlaygroundPage() {
                   className="btn-secondary"
                   onClick={() => {
                     setConnector('');
+                    setCurrent('');
+                    setVehicle('');
                     setMinPowerKw('');
                     setRadiusKm(15);
                   }}
@@ -422,17 +539,14 @@ export default function PlaygroundPage() {
                   {formatCount(result ? result.meta.total_found : null)} within {radiusKm} km
                 </span>
               </h2>
-              {result && !error && (
-                <span className="hint">responded in {formatMs(result.meta.took_ms)}</span>
-              )}
             </div>
 
             {error && (
               <div
                 className={`border-b border-line px-4 py-3 text-sm ${
                   errorKind === 'rate-limit'
-                    ? 'bg-warn/5 text-warn'
-                    : 'bg-danger/5 text-danger'
+                    ? 'bg-warn-soft text-ink'
+                    : 'bg-danger-soft text-danger'
                 }`}
                 role="alert"
               >
@@ -465,8 +579,8 @@ export default function PlaygroundPage() {
             <ul className={`divide-y divide-line ${isStale ? 'opacity-60' : ''}`}>
               {stations.length === 0 && !loading && !error && (
                 <li className="px-4 py-10 text-center text-sm text-ink-muted">
-                  No stations matched. Try a larger radius, or clear the connector and capacity
-                  filters.
+                  No stations matched. Try a larger radius, or clear the vehicle, current, standard
+                  and power filters.
                 </li>
               )}
               {stations.length === 0 && loading && (
@@ -476,7 +590,6 @@ export default function PlaygroundPage() {
               )}
               {stations.map((station) => {
                 const isSelected = station.id === selectedStationId;
-                const isFastDc = station.total_capacity_kw >= 50;
                 return (
                   <li key={station.id}>
                     <button
@@ -487,32 +600,49 @@ export default function PlaygroundPage() {
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <span className="text-sm font-medium leading-snug text-ink">
-                          {station.name}
+                        <span className="min-w-0 break-words text-sm font-medium leading-snug text-ink">
+                          {station.operator}
+                          <span className="ml-1.5 font-normal text-ink-dim">· {station.city}</span>
                         </span>
-                        <span className="shrink-0 font-mono text-xs text-accent-strong">
+                        <span className="shrink-0 font-mono text-xs text-ink">
                           {station.distance_km} km
                         </span>
                       </div>
-                      <p className="mt-0.5 text-xs leading-relaxed text-ink-dim">
-                        {station.address}
-                      </p>
+                      <p className="mt-0.5 break-words text-xs leading-relaxed text-ink-dim">{station.address}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
-                        <span>{station.operator}</span>
-                        <span className="font-medium text-ink">
-                          {station.total_capacity_kw} kW
+                        <span className="font-medium text-ink">up to {station.max_power_kw} kW</span>
+                        {isFastDc(station) && <span className="chip-accent">DC fast</span>}
+                        <span>{vehicleLabel(station.vehicle_classes)}</span>
+                        <span>
+                          {station.total_chargers} {station.total_chargers === 1 ? 'charger' : 'chargers'}
                         </span>
-                        {isFastDc && <span className="chip-accent">DC fast</span>}
-                        {station.availability && <span>Open {station.availability}</span>}
-                        <span className="font-mono text-[11px] text-ink-dim">
-                          {station.latitude}, {station.longitude}
-                        </span>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {Object.entries(station.max_kw_by_standard).map(([id, kw]) => (
+                          <span key={id} className="chip">
+                            {standardLabel(id)} {kw} kW
+                          </span>
+                        ))}
                       </div>
                     </button>
                   </li>
                 );
               })}
             </ul>
+            {result && extraPages.page < totalPages && (
+              <div className="border-t border-line px-4 py-3">
+                <button
+                  type="button"
+                  className="btn-secondary w-full"
+                  onClick={loadMore}
+                  disabled={extraPages.loading || retryAfter > 0}
+                >
+                  {extraPages.loading
+                    ? 'Loading…'
+                    : `Load more (${formatCount(stations.length)} of ${formatCount(result.meta.total_found)})`}
+                </button>
+              </div>
+            )}
           </section>
         </div>
 
@@ -522,7 +652,7 @@ export default function PlaygroundPage() {
             <div className="card-header">
               <h2 className="text-sm font-semibold text-ink">Map</h2>
               <a
-                className="hint underline hover:text-accent"
+                className="hint underline hover:text-ink"
                 href={`https://www.openstreetmap.org/#map=13/${mapCenter.lat}/${mapCenter.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -541,12 +671,12 @@ export default function PlaygroundPage() {
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-4 py-2.5 text-xs text-ink-muted">
               <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
-                DC fast (≥ 50 kW)
+                <span className="h-2.5 w-2.5 rounded-full bg-accent ring-1 ring-ink" aria-hidden="true" />
+                Car DC fast (CCS2/CHAdeMO ≥ 50 kW)
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-ink-dim" aria-hidden="true" />
-                AC or lower capacity
+                Other chargers
               </span>
               <span>Basemap: OpenFreeMap · data © OpenStreetMap contributors</span>
             </div>

@@ -1,594 +1,383 @@
 "use strict";
 
+/**
+ * Read-only queries over the committed BEE dataset (backend/data/stations.json).
+ * The data is loaded and indexed once per process; it only changes on deploy.
+ */
+
 const path = require("node:path");
-const { performance } = require("node:perf_hooks");
+const reference = require("../lib/reference");
+const { ApiError } = require("../lib/errors");
+
+const STATION_ID = /^evs_[0-9a-f]{10}$/;
+const VEHICLES = ["car", "two_three_wheeler"];
+const OWNERSHIPS = ["govt", "private"];
+const CURRENTS = ["ac", "dc"];
+const LOCATION_QUALITIES = ["ok", "suspect", "any"];
+
+/** Colloquial or former names; a query matches whichever spellings the data uses. */
+const CITY_ALIAS_PAIRS = [
+  ["bangalore", "bengaluru"],
+  ["bombay", "mumbai"],
+  ["calcutta", "kolkata"],
+  ["madras", "chennai"],
+  ["gurgaon", "gurugram"],
+  ["mysore", "mysuru"],
+  ["mangalore", "mangaluru"],
+  ["belgaum", "belagavi"],
+  ["hubli", "hubballi"],
+  ["trivandrum", "thiruvananthapuram"],
+  ["cochin", "kochi"],
+  ["baroda", "vadodara"],
+  ["poona", "pune"],
+  ["allahabad", "prayagraj"],
+  ["pondicherry", "puducherry"],
+  ["simla", "shimla"],
+  ["trichy", "tiruchirappalli"],
+  ["vizag", "visakhapatnam"],
+  ["panjim", "panaji"],
+  ["benares", "varanasi"],
+];
+const CITY_ALIASES = new Map();
+for (const [a, b] of CITY_ALIAS_PAIRS) {
+  CITY_ALIASES.set(a, b);
+  CITY_ALIASES.set(b, a);
+}
 
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 25;
 const MAX_RADIUS_KM = 100;
+const FAST_DC_KW = 50;
 
-let cachedStations = null;
-let cachedStates = null;
-let cachedConnectors = null;
-let cachedMeta = null;
-let derivedIndex = null;
+let data = null;
+let loads = 0;
 
-/**
- * A query parameter that failed validation. Routes turn this into a 400 with a
- * stable machine-readable code.
- */
-class ValidationError extends Error {
-  constructor(code, message, details) {
-    super(message);
-    this.name = "ValidationError";
-    this.code = code;
-    this.details = details;
-  }
-}
+function load() {
+  if (data) return data;
+  loads += 1;
 
-// ---------------------------------------------------------------------------
-// Normalisation
-// ---------------------------------------------------------------------------
+  const stations = require(path.join(DATA_DIR, "stations.json"));
+  const meta = require(path.join(DATA_DIR, "meta.json"));
+  const byId = new Map();
 
-/**
- * Collapses punctuation and case so `CCS-2`, `ccs 2` and `CCS2` are the same
- * token. Used for connector types and city/state lookup keys.
- */
-function compactToken(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function trim(value) {
-  return typeof value === "string" ? value.trim() : value;
-}
-
-/** Accepted spellings for each connector type present in the dataset. */
-const CONNECTOR_ALIASES = {
-  ccs2: "CCS-2",
-  ccs: "CCS-2",
-  ccs2dc: "CCS-2",
-  combotype2: "CCS-2",
-  type2: "Type-2 AC",
-  type2ac: "Type-2 AC",
-  mennekes: "Type-2 AC",
-  ac: "Type-2 AC",
-  bharatdc001: "Bharat DC-001",
-  bharatdc: "Bharat DC-001",
-  dc001: "Bharat DC-001",
-  bharatac001: "Bharat AC-001",
-  bharatac: "Bharat AC-001",
-  ac001: "Bharat AC-001",
-};
-
-/** Colloquial and historical city names mapped onto dataset spellings. */
-const CITY_ALIASES = {
-  bangalore: "bengaluru",
-  bombay: "mumbai",
-  calcutta: "kolkata",
-  cochin: "kochi",
-  ernakulam: "kochi",
-  gurgaon: "gurugram",
-  mysore: "mysuru",
-  trivandrum: "thiruvananthapuram",
-  trichur: "thrissur",
-  trichy: "tiruchirappalli",
-  mangalore: "mangaluru",
-  belgaum: "belagavi",
-  hubli: "hubballi",
-  baroda: "vadodara",
-  panjim: "panaji",
-  pondicherry: "puducherry",
-  simla: "shimla",
-  prayagraj: "allahabad",
-  delhi: "newdelhi",
-  newdelhi: "newdelhi",
-};
-
-// ---------------------------------------------------------------------------
-// Dataset loading
-// ---------------------------------------------------------------------------
-
-function loadData() {
-  if (cachedStations) return;
-
-  cachedStations = require(path.join(DATA_DIR, "stations.json"));
-  cachedStates = require(path.join(DATA_DIR, "states.json"));
-  cachedConnectors = require(path.join(DATA_DIR, "connectors.json"));
-  cachedMeta = require(path.join(DATA_DIR, "meta.json"));
-
-  // Lookup tables so filters resolve a human token to a canonical value once,
-  // then compare against a pre-computed key per station.
-  const stateByKey = new Map();
-  const cityByKey = new Map();
-  const connectorByKey = new Map();
-
-  for (const station of cachedStations) {
-    station._stateKey = compactToken(station.state);
-    station._stateCodeKey = compactToken(station.state_code);
-    station._cityKey = compactToken(station.city);
-    station._operatorKey = String(station.operator).toLowerCase();
-    station._connectorKeys = station.connectors.map((c) => compactToken(c.type));
-
-    stateByKey.set(station._stateKey, station.state);
-    stateByKey.set(station._stateCodeKey, station.state);
-    cityByKey.set(station._cityKey, station.city);
-    for (const key of station._connectorKeys) connectorByKey.set(key, key);
+  for (const station of stations) {
+    byId.set(station.id, station);
+    // Internal lookup keys; projectStation never exposes them.
+    station._cityKey = reference.compactKey(station.city);
+    station._districtKey = reference.compactKey(station.district);
+    station._guns = station.chargers.flatMap((charger) =>
+      charger.guns.map((gun) => {
+        const standard = reference.standard(gun.standard);
+        return { standard: gun.standard, kw: gun.kw, current: standard.current, classes: standard.vehicle_classes };
+      })
+    );
+    station._carFastDc = station._guns.some(
+      (g) => g.current === "DC" && g.classes.includes("car") && g.kw >= FAST_DC_KW
+    );
   }
 
-  const operatorCounts = new Map();
-  const connectorCounts = new Map();
-  const cityCounts = new Map();
-  let totalCapacityKw = 0;
+  data = { stations, meta, byId };
+  return data;
+}
 
-  for (const station of cachedStations) {
-    operatorCounts.set(station.operator, (operatorCounts.get(station.operator) || 0) + 1);
-    cityCounts.set(station.city, (cityCounts.get(station.city) || 0) + 1);
-    totalCapacityKw += station.total_capacity_kw || 0;
-    for (const connector of station.connectors) {
-      connectorCounts.set(connector.type, (connectorCounts.get(connector.type) || 0) + 1);
-    }
+/** Public shape of a station; `withSource` adds the PDF page range (detail endpoint only). */
+function projectStation(station, { withSource = false } = {}) {
+  const out = {};
+  for (const [key, value] of Object.entries(station)) {
+    if (key.startsWith("_")) continue;
+    if (key === "source" && !withSource) continue;
+    out[key] = value;
   }
+  return out;
+}
 
-  const operators = [...operatorCounts.keys()].sort();
-
-  derivedIndex = {
-    stateByKey,
-    cityByKey,
-    operatorCounts,
-    connectorCounts,
-    operators,
-    operatorLabels: new Map(operators.map((o) => [o.toLowerCase(), o])),
-    cities: [...cityCounts.keys()].sort(),
-    districts: [...new Set(cachedStations.map((s) => s.district))].sort(),
-    totalStations: cachedStations.length,
-    totalCapacityKw: Number(totalCapacityKw.toFixed(2)),
+function sourceMeta() {
+  const { meta } = load();
+  return {
+    source: { name: meta.source.title, publisher: meta.source.publisher, url: meta.source.url, snapshot_label: meta.source.snapshot_label },
+    attribution: meta.attribution,
   };
 }
 
-// ---------------------------------------------------------------------------
-// Parameter validation
-// ---------------------------------------------------------------------------
-
-function parseIntParam(name, raw, { min, max, fallback }) {
-  if (raw === undefined || raw === "") return fallback;
-  const value = Number(String(raw).trim());
-  if (!Number.isInteger(value)) {
-    throw new ValidationError(
-      "INVALID_PARAMETER",
-      `'${name}' must be an integer, received '${raw}'.`,
-      { parameter: name, received: raw, expected: `integer between ${min} and ${max}` }
-    );
-  }
-  if (value < min || value > max) {
-    throw new ValidationError(
-      "INVALID_PARAMETER",
-      `'${name}' must be between ${min} and ${max}, received ${value}.`,
-      { parameter: name, received: raw, expected: `integer between ${min} and ${max}` }
-    );
-  }
-  return value;
+function paginate(items, page, limit) {
+  const start = (page - 1) * limit;
+  const slice = items.slice(start, start + limit);
+  return {
+    slice,
+    meta: { total: items.length, page, limit, count: slice.length, total_pages: Math.ceil(items.length / limit) },
+  };
 }
 
-function parseNumberParam(name, raw, { min, max, fallback }) {
-  if (raw === undefined || raw === "") return fallback;
-  const value = Number(String(raw).trim());
-  if (!Number.isFinite(value)) {
-    throw new ValidationError(
-      "INVALID_PARAMETER",
-      `'${name}' must be a number, received '${raw}'.`,
-      { parameter: name, received: raw, expected: "number" }
-    );
-  }
-  if (min !== undefined && value < min) {
-    throw new ValidationError(
-      "INVALID_PARAMETER",
-      `'${name}' must be at least ${min}, received ${value}.`,
-      { parameter: name, received: raw, expected: `number >= ${min}` }
-    );
-  }
-  if (max !== undefined && value > max) {
-    throw new ValidationError(
-      "INVALID_PARAMETER",
-      `'${name}' must be at most ${max}, received ${value}.`,
-      { parameter: name, received: raw, expected: `number <= ${max}` }
-    );
-  }
-  return value;
+function unknownValue(param, received, validValues, extra = {}) {
+  const code = `UNKNOWN_${param.toUpperCase()}`;
+  return new ApiError(404, code, `No ${param.replace(/_/g, " ")} matches '${received}'.`, {
+    parameter: param,
+    received,
+    ...(validValues ? { valid_values: validValues } : {}),
+    ...extra,
+  });
 }
 
-function parseLatitude(raw) {
-  const value = Number(String(raw).trim());
-  if (!Number.isFinite(value) || value < -90 || value > 90) {
-    throw new ValidationError(
-      "INVALID_LATITUDE",
-      `'lat' must be a number between -90 and 90, received '${raw}'.`,
-      { parameter: "lat", received: raw, expected: "number between -90 and 90" }
-    );
-  }
-  return value;
-}
-
-function parseLongitude(raw) {
-  const value = Number(String(raw).trim());
-  if (!Number.isFinite(value) || value < -180 || value > 180) {
-    throw new ValidationError(
-      "INVALID_LONGITUDE",
-      `'lng' must be a number between -180 and 180, received '${raw}'.`,
-      { parameter: "lng", received: raw, expected: "number between -180 and 180" }
-    );
-  }
+function pickEnum(param, raw, values) {
+  if (raw === null) return null;
+  const value = raw.toLowerCase();
+  if (!values.includes(value)) throw unknownValue(param, raw, values);
   return value;
 }
 
 /**
- * Every resolver returns a matched index `key` plus the dataset's `label` for
- * that value. Filtering compares keys; metadata reports labels.
+ * Turns parsed text values into filter terms. An unknown value is a 404 that lists the
+ * valid values (or, for cities and districts, points at /v1/cities).
  */
-function resolveState(raw) {
-  if (raw === undefined || trim(raw) === "") return null;
-  const input = trim(raw);
-  const label = derivedIndex.stateByKey.get(compactToken(input));
-  if (!label) {
-    throw new ValidationError(
-      "UNKNOWN_STATE",
-      `'state' does not match any state or union territory in this dataset: '${input}'.`,
-      {
-        parameter: "state",
-        received: input,
-        expected: "a state name or state code, e.g. 'Karnataka' or 'KA'",
-      }
-    );
+function resolveFilters(values) {
+  const { stations } = load();
+  const filters = { labels: {} };
+
+  if (values.state !== null && values.state !== undefined) {
+    const state = reference.resolveStateQuery(values.state);
+    if (!state) throw unknownValue("state", values.state, reference.states().map((s) => s.name));
+    filters.stateCode = state.code;
+    filters.labels.state = state.name;
   }
-  return { key: compactToken(label), label };
-}
 
-function resolveCity(raw) {
-  if (raw === undefined || trim(raw) === "") return null;
-  const input = trim(raw);
-  const key = compactToken(input);
-  const label = derivedIndex.cityByKey.get(CITY_ALIASES[key] || key);
-  if (!label) {
-    throw new ValidationError(
-      "UNKNOWN_CITY",
-      `'city' does not match any city in this dataset: '${input}'.`,
-      {
-        parameter: "city",
-        received: input,
-        expected: "a city name present in this dataset, e.g. 'Bengaluru'",
-      }
-    );
+  const inState = (s) => !filters.stateCode || s.state_code === filters.stateCode;
+  const hint = `/v1/cities${filters.stateCode ? `?state=${filters.stateCode}` : ""}`;
+
+  if (values.district !== null && values.district !== undefined) {
+    const key = reference.compactKey(values.district);
+    const match = stations.find((s) => s._districtKey === key && inState(s));
+    if (!match) throw unknownValue("district", values.district, null, { hint });
+    filters.districtKey = key;
+    filters.labels.district = match.district;
   }
-  return { key: compactToken(label), label };
-}
 
-function resolveConnector(raw) {
-  if (raw === undefined || trim(raw) === "") return null;
-  const input = trim(raw);
-  const label = CONNECTOR_ALIASES[compactToken(input)];
-  if (!label) {
-    throw new ValidationError(
-      "UNKNOWN_CONNECTOR",
-      `'connector' does not match a known charging standard: '${input}'.`,
-      {
-        parameter: "connector",
-        received: input,
-        expected: [...new Set(Object.values(CONNECTOR_ALIASES))],
-      }
-    );
+  if (values.city !== null && values.city !== undefined) {
+    const key = reference.compactKey(values.city);
+    const keys = [key, CITY_ALIASES.get(key)].filter(Boolean);
+    const matches = stations.filter((s) => keys.includes(s._cityKey) && inState(s));
+    if (matches.length === 0) throw unknownValue("city", values.city, null, { hint });
+    filters.cityKeys = keys;
+    filters.labels.city = [...new Set(matches.map((s) => s.city))].sort();
+    const states = [...new Set(matches.map((s) => s.state_code))].sort();
+    if (states.length > 1) filters.labels.city_ambiguous_states = states;
   }
-  return { key: compactToken(label), label };
+
+  if (values.operator !== null && values.operator !== undefined) {
+    const operator = reference.resolveOperatorQuery(values.operator);
+    if (!operator) throw unknownValue("operator", values.operator, reference.operators().map((o) => o.canonical).sort());
+    filters.operator = operator.canonical;
+    filters.labels.operator = operator.canonical;
+  }
+
+  filters.ownership = pickEnum("ownership", values.ownership ?? null, OWNERSHIPS);
+  filters.vehicle = pickEnum("vehicle", values.vehicle ?? null, VEHICLES);
+  const current = pickEnum("current", values.current ?? null, CURRENTS);
+  filters.current = current ? current.toUpperCase() : null;
+
+  if (values.connector !== null && values.connector !== undefined) {
+    const id = reference.resolveStandardQuery(values.connector);
+    if (!id) throw unknownValue("connector", values.connector, reference.standards().map((s) => s.id));
+    filters.connector = id;
+  }
+
+  filters.minPowerKw = values.min_power_kw ?? null;
+  filters.locationQuality = pickEnum("location_quality", values.location_quality ?? null, LOCATION_QUALITIES) || "any";
+  return filters;
 }
 
-function resolveOperator(raw) {
-  if (raw === undefined || trim(raw) === "") return null;
-  const input = trim(raw).toLowerCase();
-  const exactLabel = derivedIndex.operatorLabels.get(input);
-  return exactLabel ? { key: input, label: exactLabel } : { partial: input };
+/** True when one gun meets every gun-level condition at once. */
+function gunMatches(station, f) {
+  if (!f.connector && !f.current && !f.vehicle && f.minPowerKw === null) return true;
+  return station._guns.some(
+    (g) =>
+      (!f.connector || g.standard === f.connector) &&
+      (!f.current || g.current === f.current) &&
+      (!f.vehicle || g.classes.includes(f.vehicle)) &&
+      (f.minPowerKw === null || g.kw >= f.minPowerKw)
+  );
 }
 
-// ---------------------------------------------------------------------------
-// Spatial maths
-// ---------------------------------------------------------------------------
+function matches(station, f) {
+  if (f.stateCode && station.state_code !== f.stateCode) return false;
+  if (f.districtKey && station._districtKey !== f.districtKey) return false;
+  if (f.cityKeys && !f.cityKeys.includes(station._cityKey)) return false;
+  if (f.operator && station.operator !== f.operator) return false;
+  if (f.ownership && station.ownership !== f.ownership) return false;
+  if (f.locationQuality !== "any" && station.location_quality !== f.locationQuality) return false;
+  return gunMatches(station, f);
+}
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
+function appliedFilters(f) {
+  return {
+    ...f.labels,
+    ...(f.ownership ? { ownership: f.ownership } : {}),
+    ...(f.connector ? { connector: f.connector } : {}),
+    ...(f.current ? { current: f.current.toLowerCase() } : {}),
+    ...(f.vehicle ? { vehicle: f.vehicle } : {}),
+    ...(f.minPowerKw !== null ? { min_power_kw: f.minPowerKw } : {}),
+    ...(f.locationQuality !== "any" ? { location_quality: f.locationQuality } : {}),
+  };
+}
+
+function getStations(values = {}) {
+  const { stations } = load();
+  const filters = resolveFilters(values);
+  const page = values.page || 1;
+  const limit = values.limit || DEFAULT_LIMIT;
+  const { slice, meta } = paginate(stations.filter((s) => matches(s, filters)), page, limit);
+  return { data: slice.map((s) => projectStation(s)), meta: { ...meta, filters_applied: appliedFilters(filters), ...sourceMeta() } };
+}
+
+const EARTH_RADIUS_KM = 6371.0088;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
   const toRad = Math.PI / 180;
   const dLat = (lat2 - lat1) * toRad;
-  const dLon = (lon2 - lon1) * toRad;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Number((R * c).toFixed(2));
-}
-
-/** Public shape of a station. Internal index keys are never exposed. */
-function projectStation(station) {
-  return {
-    id: station.id,
-    name: station.name,
-    operator: station.operator,
-    state: station.state,
-    state_code: station.state_code,
-    district: station.district,
-    city: station.city,
-    address: station.address,
-    latitude: station.latitude,
-    longitude: station.longitude,
-    connectors: station.connectors,
-    total_capacity_kw: station.total_capacity_kw,
-    availability: station.availability,
-    access_type: station.access_type,
-    status: station.status,
-  };
-}
-
-function matchesFilters(station, filters) {
-  if (filters.stateKey && station._stateKey !== filters.stateKey) return false;
-  if (filters.cityKey && station._cityKey !== filters.cityKey) return false;
-  if (filters.operatorKey && station._operatorKey !== filters.operatorKey) return false;
-  if (filters.operatorPartial && !station._operatorKey.includes(filters.operatorPartial)) return false;
-  if (filters.minPowerKw !== null && station.total_capacity_kw < filters.minPowerKw) return false;
-  if (filters.connectorKey && !station._connectorKeys.includes(filters.connectorKey)) return false;
-  return true;
-}
-
-function buildFilterSet(query) {
-  const state = resolveState(query.state);
-  const city = resolveCity(query.city);
-  const connector = resolveConnector(query.connector);
-  const operator = resolveOperator(query.operator);
-
-  return {
-    stateKey: state ? state.key : null,
-    cityKey: city ? city.key : null,
-    connectorKey: connector ? connector.key : null,
-    operatorKey: operator && operator.key ? operator.key : null,
-    operatorPartial: operator && operator.partial ? operator.partial : null,
-    minPowerKw: parseNumberParam("min_power_kw", query.min_power_kw, {
-      min: 0,
-      max: 100000,
-      fallback: null,
-    }),
-    labels: {
-      state: state ? state.label : null,
-      city: city ? city.label : null,
-      connector: connector ? connector.label : null,
-      operator: operator ? operator.label || operator.partial : null,
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/**
- * Paginated directory listing with optional state/city/operator/connector and
- * minimum-power filtering. Every supplied filter is validated, so an invalid
- * value is a 400 rather than a silently unfiltered result.
- */
-function getStations(query = {}) {
-  const startedAt = performance.now();
-  loadData();
-
-  const filters = buildFilterSet(query);
-  const page = parseIntParam("page", query.page, { min: 1, max: 100000, fallback: 1 });
-  const limit = parseIntParam("limit", query.limit, { min: 1, max: MAX_LIMIT, fallback: DEFAULT_LIMIT });
-
-  const matched = cachedStations.filter((station) => matchesFilters(station, filters));
-  const total = matched.length;
-  const startIndex = (page - 1) * limit;
-
-  return {
-    data: matched.slice(startIndex, startIndex + limit).map(projectStation),
-    meta: {
-      total,
-      page,
-      limit,
-      count: Math.min(limit, Math.max(0, total - startIndex)),
-      total_pages: Math.ceil(total / limit),
-      filters_applied: {
-        state: filters.labels.state,
-        city: filters.labels.city,
-        operator: filters.labels.operator,
-        connector: filters.labels.connector,
-        min_power_kw: filters.minPowerKw,
-      },
-      took_ms: Number((performance.now() - startedAt).toFixed(2)),
-    },
-  };
+  const dLng = (lng2 - lng1) * toRad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
 /**
- * Great-circle proximity search around a coordinate, nearest first. Accepts the
- * same operator/connector/min_power_kw filters as the directory listing so
- * callers never need to filter a truncated page client side.
+ * Stations within `radius` km of (lat, lng), nearest first. Suspect coordinates are
+ * never returned: a wrong location is worse than no result for someone driving there.
  */
-function getNearbyStations(query = {}) {
-  const startedAt = performance.now();
-  loadData();
+function getNearbyStations(values) {
+  const { stations } = load();
+  const filters = resolveFilters({ ...values, location_quality: "ok" });
+  const { lat, lng, radius } = values;
+  const page = values.page || 1;
+  const limit = values.limit || DEFAULT_LIMIT;
 
-  if (query.lat === undefined || trim(query.lat) === "") {
-    throw new ValidationError("MISSING_COORDINATES", "'lat' query parameter is required.", {
-      parameter: "lat",
-    });
+  // Cheap bounding box first; the longitude span uses the circle's pole-ward edge so it never clips.
+  const latDelta = radius / 110.574;
+  const edgeLat = Math.min(89.9, Math.abs(lat) + latDelta);
+  const lngDelta = radius / (111.32 * Math.max(Math.cos(edgeLat * (Math.PI / 180)), 0.001));
+
+  const found = [];
+  for (const station of stations) {
+    if (Math.abs(station.latitude - lat) > latDelta) continue;
+    if (Math.abs(station.longitude - lng) > lngDelta) continue;
+    if (!matches(station, filters)) continue;
+    const distance = Math.round(haversineKm(lat, lng, station.latitude, station.longitude) * 100) / 100;
+    if (distance <= radius) found.push({ station, distance });
   }
-  if (query.lng === undefined || trim(query.lng) === "") {
-    throw new ValidationError("MISSING_COORDINATES", "'lng' query parameter is required.", {
-      parameter: "lng",
-    });
-  }
+  found.sort((a, b) => a.distance - b.distance || (a.station.id < b.station.id ? -1 : 1));
 
-  const userLat = parseLatitude(query.lat);
-  const userLng = parseLongitude(query.lng);
-  const radius = parseNumberParam("radius", query.radius, {
-    min: 0.1,
-    max: MAX_RADIUS_KM,
-    fallback: 10,
-  });
-  const limit = parseIntParam("limit", query.limit, {
-    min: 1,
-    max: MAX_LIMIT,
-    fallback: DEFAULT_LIMIT,
-  });
-  const filters = buildFilterSet(query);
-
-  const latDelta = radius / 111.0;
-  const cosLat = Math.cos(userLat * (Math.PI / 180));
-  const lngDelta = radius / (111.0 * Math.max(cosLat, 0.01));
-
-  const nearby = [];
-  for (const station of cachedStations) {
-    if (
-      station.latitude < userLat - latDelta ||
-      station.latitude > userLat + latDelta ||
-      station.longitude < userLng - lngDelta ||
-      station.longitude > userLng + lngDelta
-    ) {
-      continue;
-    }
-    if (!matchesFilters(station, filters)) continue;
-
-    const distance = calculateDistance(userLat, userLng, station.latitude, station.longitude);
-    if (distance <= radius) {
-      nearby.push({ ...projectStation(station), distance_km: distance });
-    }
-  }
-
-  nearby.sort((a, b) => a.distance_km - b.distance_km);
-  const page = nearby.slice(0, limit);
-
+  const { slice, meta } = paginate(found, page, limit);
+  const { total, ...pageMeta } = meta;
   return {
-    data: page,
+    data: slice.map(({ station, distance }) => ({ ...projectStation(station), distance_km: distance })),
     meta: {
-      center: { lat: userLat, lng: userLng },
+      center: { lat, lng },
       radius_km: radius,
-      count: page.length,
-      total_found: nearby.length,
-      limit,
-      filters_applied: {
-        operator: filters.labels.operator,
-        connector: filters.labels.connector,
-        min_power_kw: filters.minPowerKw,
-      },
-      took_ms: Number((performance.now() - startedAt).toFixed(2)),
+      total_found: total,
+      ...pageMeta,
+      filters_applied: appliedFilters({ ...filters, locationQuality: "any" }),
+      ...sourceMeta(),
     },
   };
 }
 
-function getStationById(rawId) {
-  const startedAt = performance.now();
-  loadData();
-
-  const id = String(rawId).trim();
-  if (!/^\d+$/.test(id)) {
-    throw new ValidationError(
-      "INVALID_STATION_ID",
-      `'${rawId}' is not a valid station id. Ids are positive integers.`,
-      { parameter: "id", received: rawId, expected: "positive integer" }
-    );
+function getStationById(id) {
+  if (!STATION_ID.test(id)) {
+    throw new ApiError(400, "INVALID_STATION_ID", `'${id}' is not a station id. Ids look like evs_1a2b3c4d5e.`, {
+      parameter: "id",
+      received: id,
+      expected: "evs_ followed by 10 lowercase hex digits",
+    });
   }
-
-  const station = cachedStations.find((s) => s.id === Number(id));
-  if (!station) return { station: null, took_ms: Number((performance.now() - startedAt).toFixed(2)) };
-
-  return {
-    station: projectStation(station),
-    took_ms: Number((performance.now() - startedAt).toFixed(2)),
-  };
+  const station = load().byId.get(id);
+  return station ? projectStation(station, { withSource: true }) : null;
 }
 
 function getStatesSummary() {
-  const startedAt = performance.now();
-  loadData();
+  const { stations } = load();
+  const rows = new Map(
+    reference.states().map((s) => [
+      s.code,
+      { name: s.name, code: s.code, iso: s.iso, type: s.type, stations: 0, chargers: 0, dc_stations: 0, car_fast_dc_stations: 0 },
+    ])
+  );
+  for (const station of stations) {
+    const row = rows.get(station.state_code);
+    row.stations += 1;
+    row.chargers += station.total_chargers;
+    if (station.currents.includes("DC")) row.dc_stations += 1;
+    if (station._carFastDc) row.car_fast_dc_stations += 1;
+  }
+  const data = [...rows.values()].sort((a, b) => b.stations - a.stations || a.name.localeCompare(b.name));
+  return { data, meta: { count: data.length, total_stations: stations.length, ...sourceMeta() } };
+}
 
-  return {
-    data: cachedStates,
-    meta: {
-      count: cachedStates.length,
-      total_stations: cachedStations.length,
-      total_capacity_kw: derivedIndex.totalCapacityKw,
-      took_ms: Number((performance.now() - startedAt).toFixed(2)),
-    },
-  };
+function mostCommon(counts) {
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
+}
+
+/** Cities with stations, grouped by state and spelling-insensitive name. */
+function getCities(values) {
+  const { stations } = load();
+  const filters = resolveFilters({ state: values.state });
+  const groups = new Map();
+  for (const s of stations) {
+    if (filters.stateCode && s.state_code !== filters.stateCode) continue;
+    const key = `${s.state_code}|${s._cityKey}`;
+    if (!groups.has(key)) groups.set(key, { names: new Map(), districts: new Map(), state: s.state, state_code: s.state_code, stations: 0 });
+    const g = groups.get(key);
+    g.names.set(s.city, (g.names.get(s.city) || 0) + 1);
+    g.districts.set(s.district, (g.districts.get(s.district) || 0) + 1);
+    g.stations += 1;
+  }
+  const data = [...groups.values()]
+    .map((g) => ({ city: mostCommon(g.names), district: mostCommon(g.districts), state: g.state, state_code: g.state_code, stations: g.stations }))
+    .sort((a, b) => (a.state_code < b.state_code ? -1 : a.state_code > b.state_code ? 1 : a.city.localeCompare(b.city)));
+  return { data, meta: { count: data.length, filters_applied: filters.labels, ...sourceMeta() } };
 }
 
 function getOperators() {
-  const startedAt = performance.now();
-  loadData();
-
-  const data = [...derivedIndex.operatorCounts.entries()]
-    .map(([name, totalStations]) => ({ operator: name, total_stations: totalStations }))
-    .sort((a, b) => b.total_stations - a.total_stations || a.operator.localeCompare(b.operator));
-
-  return {
-    data,
-    meta: {
-      count: data.length,
-      total_stations: cachedStations.length,
-      took_ms: Number((performance.now() - startedAt).toFixed(2)),
-    },
-  };
+  const { stations } = load();
+  const rows = new Map();
+  for (const s of stations) {
+    if (!rows.has(s.operator)) rows.set(s.operator, { operator: s.operator, ownership: s.ownership, stations: 0, chargers: 0 });
+    const row = rows.get(s.operator);
+    row.stations += 1;
+    row.chargers += s.total_chargers;
+  }
+  const data = [...rows.values()].sort((a, b) => b.stations - a.stations || a.operator.localeCompare(b.operator));
+  return { data, meta: { count: data.length, ...sourceMeta() } };
 }
 
 function getConnectors() {
-  const startedAt = performance.now();
-  loadData();
-
-  const counts = derivedIndex.connectorCounts;
-
-  const data = cachedConnectors.map((connector) => ({
-    ...connector,
-    // How many stations in the current dataset expose this connector. Zero for
-    // standards that are documented but absent from the data (see `dataset_type`).
-    stations_with_this_connector: connector.dataset_type
-      ? counts.get(connector.dataset_type) || 0
-      : 0,
-  }));
-
-  return {
-    data,
-    meta: {
-      count: data.length,
-      took_ms: Number((performance.now() - startedAt).toFixed(2)),
-    },
-  };
+  const { stations } = load();
+  const counts = new Map(reference.standards().map((s) => [s.id, { stations: 0, guns: 0 }]));
+  for (const s of stations) {
+    for (const id of s.standards) counts.get(id).stations += 1;
+    for (const charger of s.chargers) {
+      for (const gun of charger.guns) counts.get(gun.standard).guns += charger.count;
+    }
+  }
+  const data = reference.standards().map((s) => ({ ...s, ...counts.get(s.id) }));
+  return { data, meta: { count: data.length, ...sourceMeta() } };
 }
 
-/**
- * Dataset provenance and coverage. Counts are derived from the loaded data so
- * they cannot drift from what the endpoints actually serve.
- */
 function getDatasetMeta() {
-  const startedAt = performance.now();
-  loadData();
-
-  return {
-    ...cachedMeta,
-    total_stations: derivedIndex.totalStations,
-    total_states: cachedStates.length,
-    total_cities: derivedIndex.cities.length,
-    total_districts: derivedIndex.districts.length,
-    total_operators: derivedIndex.operators.length,
-    total_capacity_kw: derivedIndex.totalCapacityKw,
-    took_ms: Number((performance.now() - startedAt).toFixed(2)),
-  };
+  return load().meta;
 }
 
 module.exports = {
-  ValidationError,
+  MAX_LIMIT,
+  DEFAULT_LIMIT,
+  MAX_RADIUS_KM,
   getStations,
-  getNearbyStations,
   getStationById,
+  getNearbyStations,
   getStatesSummary,
+  getCities,
   getOperators,
   getConnectors,
   getDatasetMeta,
-  MAX_LIMIT,
-  MAX_RADIUS_KM,
+  sourceMeta,
+  loadCount: () => loads,
 };

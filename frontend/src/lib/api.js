@@ -60,8 +60,11 @@ export async function apiGet(path, { signal } = {}) {
   return body;
 }
 
-/** Builds a /v1/stations/near query string from a parameter object. */
-export function buildNearQuery({ lat, lng, radiusKm, limit = 25, connector, minPowerKw }) {
+/**
+ * Builds a /v1/stations/near query string. Empty filters and page 1 are omitted so the
+ * same search always produces the same URL (and the same CDN cache entry).
+ */
+export function buildNearQuery({ lat, lng, radiusKm, limit = 25, connector, current, vehicle, minPowerKw, page }) {
   const params = new URLSearchParams({
     lat: String(lat),
     lng: String(lng),
@@ -69,6 +72,9 @@ export function buildNearQuery({ lat, lng, radiusKm, limit = 25, connector, minP
     limit: String(limit),
   });
   if (connector) params.set('connector', connector);
+  if (current) params.set('current', current);
+  if (vehicle) params.set('vehicle', vehicle);
   if (minPowerKw) params.set('min_power_kw', String(minPowerKw));
+  if (page && page > 1) params.set('page', String(page));
   return `/v1/stations/near?${params.toString()}`;
 }

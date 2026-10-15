@@ -94,7 +94,7 @@ export default function GuidesPage() {
     return (
       <article className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <nav className="text-sm text-ink-dim">
-          <Link to="/guides" className="hover:text-accent">
+          <Link to="/guides" className="hover:text-ink">
             Guides
           </Link>
           <span className="px-1.5">/</span>
@@ -138,7 +138,7 @@ export default function GuidesPage() {
             to={`/guides/${guide.id}`}
             className="card flex flex-col p-5 transition-colors hover:border-line-strong"
           >
-            <span className="text-xs font-medium text-accent-strong">{guide.category}</span>
+            <span className="text-xs font-medium text-ink">{guide.category}</span>
             <h2 className="mt-2 text-base font-semibold leading-snug text-ink">{guide.title}</h2>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">{guide.summary}</p>
             <span className="mt-4 text-xs text-ink-dim">{guide.readTime}</span>
