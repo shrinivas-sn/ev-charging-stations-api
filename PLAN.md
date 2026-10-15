@@ -431,7 +431,7 @@ Numbers accept only `^-?\d+(\.\d+)?$` after trimming: hex, exponent, `Infinity` 
 - "50 kW" must mean a real 50 kW charger, not the sum of slow ones (A2).
 **Where:** `backend/src/services/stations-service.js` (search text: `function matchesFilters`)
 **Do:**
-- [ ] A station matches when **at least one charger entry** satisfies `connector` AND `current` AND `vehicle` AND `charger_kw >= min_power_kw` together, not each on different chargers.
+- [ ] A station matches when **at least one gun** (amended, see issue 2) satisfies `connector` AND `current` AND `vehicle` AND `kw >= min_power_kw` together, not each on different guns.
 - [ ] `operator`: exact canonical or alias match, case-insensitive; unknown → 404 with valid values. Remove partial substring matching.
 - [ ] `city`: compact-key match plus alias. When the city name exists in several states and no `state` is given, return all, and `meta.filters_applied.city_ambiguous_states` lists the states.
 **Test first:**
@@ -860,6 +860,8 @@ status file and in the session's final message.)*
 
 | # | When | Task | Plan said | Reality (evidence) | Impact | Action taken | Owner decision |
 |---|---|---|---|---|---|---|---|
+| 1 | 15/10 | 2.1 | Verify with `python -I -m unittest ingest/test_extract.py`; page 1159 has 36 data rows | `-m unittest` with a file path fails (`No module named 'ingest'`); page 1159 has 37 data rows (only page 1 has a header; planning probe printed 37 table rows, first row data) | local, same intent | Run as `python -I ingest/test_extract.py`; test expects 37 | n/a |
+| 2 | 15/10 | 2.3, 2.4, 3.3 | Charger entry has `connector_kw`; station `max_charger_kw`; `min_power_kw` compares `charger_kw` | First real build rejected 263 valid combo fast chargers: Connector Rating is a per-gun list (`60+60+22`, 245 rows). A vehicle receives the gun rating, not the charger total (Bharat AC-001: 10 kW charger, 3.3 kW per gun) | touches the API contract (field names, filter meaning) — same intent as "50 kW means a real 50 kW charger", more accurate | Charger entries carry `guns: [{standard, kw}]`; stations carry `max_power_kw` and `max_kw_by_standard`; `min_power_kw` and connector/current/vehicle filters match on one gun. Rejects drop from 264 to 1. Phase 3 contract amended to match | not needed — owner asked for real-world correctness; flagged in STATUS |
 
 ---
 

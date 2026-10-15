@@ -127,7 +127,7 @@ describe("buildDataset grouping and derived fields", () => {
     assert.equal(stations.length, 1);
     assert.equal(stations[0].chargers.length, 2);
     assert.deepEqual(stations[0].currents, ["AC", "DC"]);
-    assert.equal(stations[0].max_charger_kw, 60);
+    assert.equal(stations[0].max_power_kw, 60);
   });
 
   test("two operators at identical coordinates are two stations", () => {
@@ -136,7 +136,9 @@ describe("buildDataset grouping and derived fields", () => {
   });
 
   test("combo charger exposes all its standards; vehicle classes are the union", () => {
-    const { stations } = buildDataset(doc([row({ type: "Combo (CCS-II + CHAdeMo + Type II)" })]));
+    const { stations } = buildDataset(
+      doc([row({ type: "Combo (CCS-II + CHAdeMo + Type II)", chargerKw: "142", connectorKw: "60+60+22", connectors: "3" })])
+    );
     assert.deepEqual(stations[0].chargers[0].standards, ["CCS2", "CHADEMO", "TYPE2_AC"]);
     assert.deepEqual(stations[0].vehicle_classes, ["car", "two_three_wheeler"]);
   });
@@ -147,10 +149,10 @@ describe("buildDataset grouping and derived fields", () => {
     assert.deepEqual(stations[0].currents, ["AC"]);
   });
 
-  test("max_charger_kw comes from the strongest single charger, not the sum", () => {
+  test("max_power_kw comes from the strongest single gun, not the sum", () => {
     const rows = Array.from({ length: 10 }, () => row({ type: "Type-II AC", chargerKw: "7.4", connectorKw: "7.4", connectors: "1" }));
     const { stations } = buildDataset(doc(rows));
-    assert.equal(stations[0].max_charger_kw, 7.4);
+    assert.equal(stations[0].max_power_kw, 7.4);
     assert.equal(stations[0].total_chargers, 10);
   });
 
@@ -182,6 +184,68 @@ describe("buildDataset grouping and derived fields", () => {
   test("differing district or city within one station is flagged mixed_admin", () => {
     const { stations } = buildDataset(doc([row(), row({ type: "Type-II AC", city: "Bangalore" })]));
     assert.equal(stations[0].mixed_admin, true);
+  });
+});
+
+describe("charger guns (what a vehicle actually receives)", () => {
+  test("a rating list on a combo charger maps one gun per standard, in order", () => {
+    const { stations } = buildDataset(
+      doc([row({ type: "Combo (CCS-II + CHAdeMo + Type II)", chargerKw: "142", connectorKw: "60+60+22", connectors: "3" })])
+    );
+    assert.deepEqual(stations[0].chargers[0].guns, [
+      { standard: "CCS2", kw: 60 },
+      { standard: "CHADEMO", kw: 60 },
+      { standard: "TYPE2_AC", kw: 22 },
+    ]);
+    assert.equal(stations[0].max_power_kw, 60);
+    assert.deepEqual(stations[0].max_kw_by_standard, { CCS2: 60, CHADEMO: 60, TYPE2_AC: 22 });
+  });
+
+  test("a list longer than the standards gives the last gun to the last standard", () => {
+    const { stations } = buildDataset(
+      doc([row({ type: "Combo(CCS-II+Type-II)", chargerKw: "82", connectorKw: "30+30+22", connectors: "3" })])
+    );
+    assert.deepEqual(stations[0].chargers[0].guns, [
+      { standard: "CCS2", kw: 30 },
+      { standard: "CCS2", kw: 30 },
+      { standard: "TYPE2_AC", kw: 22 },
+    ]);
+  });
+
+  test("a single rating applies to every gun of a single-standard charger", () => {
+    const { stations } = buildDataset(
+      doc([row({ type: "Bharat AC-001", chargerKw: "10", connectorKw: "3.3", connectors: "3" })])
+    );
+    assert.deepEqual(stations[0].chargers[0].guns, [
+      { standard: "BHARAT_AC001", kw: 3.3 },
+      { standard: "BHARAT_AC001", kw: 3.3 },
+      { standard: "BHARAT_AC001", kw: 3.3 },
+    ]);
+    assert.equal(stations[0].max_power_kw, 3.3);
+    assert.equal(stations[0].chargers[0].charger_kw, 10);
+  });
+
+  test("a single rating on a two-standard combo gives one gun per standard", () => {
+    const { stations } = buildDataset(
+      doc([row({ type: "Combo (CCS-II+CHAdeMO)", chargerKw: "50", connectorKw: "25", connectors: "2" })])
+    );
+    assert.deepEqual(stations[0].chargers[0].guns, [
+      { standard: "CCS2", kw: 25 },
+      { standard: "CHADEMO", kw: 25 },
+    ]);
+  });
+
+  test("a rating list that does not match the connector count is rejected", () => {
+    const { stations, rejects } = buildDataset(
+      doc([row({ type: "Combo (CCS-II+CHAdeMO)", chargerKw: "100", connectorKw: "50+50", connectors: "3" }), row()])
+    );
+    assert.equal(stations.length, 1);
+    assert.deepEqual(rejects.map((r) => r.reason), ["RATING_MISMATCH"]);
+  });
+
+  test("an Excel overflow coordinate (###) is rejected as a bad coordinate", () => {
+    const { rejects } = buildDataset(doc([row({ lng: "###########" })]));
+    assert.deepEqual(rejects.map((r) => r.reason), ["BAD_COORDINATE"]);
   });
 });
 
