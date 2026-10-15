@@ -17,6 +17,7 @@ Phase: Rebuilding on real BEE data — Phases 1–4 done (about 75%); remaining 
 
 - No merge or push to `main` without the owner's explicit go-ahead (any push to `main` deploys production). Pushing the branch for a preview is allowed (PLAN Task 6.3).
 - Never stop the servers on ports 3000/5173 (another agent's). They lock `frontend/node_modules`, so `npm run verify` fails locally on `npm ci` EPERM — use the split verify in `PLAN.md` Rules.
+- No AI slop: every prose step passes `no-ai-slop-writing` Detect; UI follows `slop-signatures.md` + `banned-patterns.md`; code matches its file's style (`PLAN.md` Rules).
 - Git Bash: `export MSYS_NO_PATHCONV=1` before commands that pass `/route` arguments.
 - Owner inputs that may be needed: a Vercel preview protection-bypass secret (Task 6.3).
 
