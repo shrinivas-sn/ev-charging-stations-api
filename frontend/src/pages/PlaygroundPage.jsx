@@ -16,7 +16,6 @@ export default function PlaygroundPage() {
   const [lat, setLat] = useState(CITIES[0].lat.toString());
   const [lng, setLng] = useState(CITIES[0].lng.toString());
   const [radius, setRadius] = useState('15');
-  const [connector, setConnector] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
@@ -51,7 +50,7 @@ export default function PlaygroundPage() {
     setLoading(true);
     setError(null);
     try {
-      let url = `/v1/stations/near?lat=${lat}&lng=${lng}&radius=${radius}&limit=15`;
+      const url = `/v1/stations/near?lat=${lat}&lng=${lng}&radius=${radius}&limit=15`;
       const res = await fetch(url);
       const json = await res.json();
       if (!res.ok) {
@@ -70,141 +69,163 @@ export default function PlaygroundPage() {
   }, [lat, lng, radius]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white">Interactive Station Playground</h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Test the live Indian EV Charging API in your browser using coordinates or preset metro hubs.
-        </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-mono font-bold text-white uppercase tracking-tight">
+            Spatial Proximity Workbench
+          </h1>
+          <p className="text-slate-400 text-xs font-mono mt-0.5">
+            Real-time Haversine distance search across 27,248 indexed Indian EV charging hubs.
+          </p>
+        </div>
+        <div className="text-xs font-mono text-slate-400">
+          <span>ENDPOINT: </span>
+          <span className="text-blue-400 font-bold">GET /v1/stations/near</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Query Controls Column */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5 h-fit">
-          <h2 className="text-base font-bold text-white uppercase tracking-wider text-xs text-emerald-400">
-            Search Parameters
-          </h2>
+        <div className="lg:col-span-4 panel-technical rounded text-xs font-mono space-y-4">
+          <div className="panel-header font-bold text-white uppercase">
+            PARAMETER_CONTROLS
+          </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-300">Quick Metro Preset</label>
-            <select
-              value={selectedCity ? selectedCity.name : ''}
-              onChange={handleCitySelect}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+          <div className="p-4 space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-slate-300 font-semibold block">METRO_PRESET</label>
+              <select
+                value={selectedCity ? selectedCity.name : ''}
+                onChange={handleCitySelect}
+                className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="" disabled>Select metro area</option>
+                {CITIES.map((c) => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-slate-300 font-semibold block">LATITUDE</label>
+                <input
+                  type="text"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-slate-300 font-semibold block">LONGITUDE</label>
+                <input
+                  type="text"
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleUseMyLocation}
+              className="w-full py-1.5 px-3 text-xs font-mono text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded transition-colors"
             >
-              <option value="" disabled>Select a city</option>
-              {CITIES.map((c) => (
-                <option key={c.name} value={c.name}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+              LOCATE: USE CURRENT GPS COORDS
+            </button>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Latitude</label>
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-300 font-semibold">SEARCH_RADIUS</span>
+                <span className="text-blue-400 font-bold">{radius} km</span>
+              </div>
               <input
-                type="text"
-                value={lat}
-                onChange={(e) => setLat(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-emerald-500"
+                type="range"
+                min="2"
+                max="50"
+                step="1"
+                value={radius}
+                onChange={(e) => setRadius(e.target.value)}
+                className="w-full accent-blue-600"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Longitude</label>
-              <input
-                type="text"
-                value={lng}
-                onChange={(e) => setLng(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-emerald-500"
-              />
+
+            <button
+              onClick={runQuery}
+              disabled={loading}
+              className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs rounded disabled:opacity-50 transition-colors"
+            >
+              {loading ? 'CALCULATING_PROXIMITY...' : 'DISPATCH QUERY'}
+            </button>
+
+            <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 leading-normal">
+              Haversine formula computes great-circle distance between coordinate pairs (r = 6,371 km).
             </div>
           </div>
-
-          <button
-            onClick={handleUseMyLocation}
-            className="w-full py-2 px-3 text-xs font-medium text-slate-300 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-lg flex items-center justify-center gap-2 transition-colors"
-          >
-            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Use My Current Location
-          </button>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs font-semibold text-slate-300">
-              <span>Radius (km)</span>
-              <span className="text-emerald-400 font-mono">{radius} km</span>
-            </div>
-            <input
-              type="range"
-              min="2"
-              max="50"
-              step="1"
-              value={radius}
-              onChange={(e) => setRadius(e.target.value)}
-              className="w-full accent-emerald-500"
-            />
-          </div>
-
-          <button
-            onClick={runQuery}
-            disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-slate-950 font-bold text-sm hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
-            {loading ? 'Searching Stations...' : 'Execute /v1/stations/near'}
-          </button>
         </div>
 
         {/* Results Column */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white">
-              Nearby Charging Stations {response && `(${response.data.length})`}
-            </h3>
-            {response && (
-              <span className="text-xs text-slate-400 font-mono">
-                Total in area: {response.meta.total_found}
+        <div className="lg:col-span-8 space-y-4">
+          <div className="panel-technical rounded">
+            <div className="panel-header flex items-center justify-between font-mono text-xs">
+              <span className="text-white font-bold">
+                PROXIMITY_RESULTS {response && `(${response.data.length})`}
               </span>
+              {response && (
+                <span className="text-slate-400">
+                  TOTAL_IN_RADIUS: <strong className="text-emerald-400">{response.meta.total_found}</strong>
+                </span>
+              )}
+            </div>
+
+            {error && (
+              <div className="p-4 bg-red-950/40 border-b border-red-800 text-red-200 text-xs font-mono">
+                QUERY_ERROR: {error}
+              </div>
+            )}
+
+            {response && (
+              <div className="divide-y divide-slate-800">
+                {response.data.map((st) => (
+                  <div key={st.id} className="p-4 space-y-2 hover:bg-slate-900/30 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 font-mono">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-bold text-sm">{st.name}</span>
+                          <span className="text-[10px] text-slate-400 border border-slate-700 px-1.5 py-0.2 rounded bg-slate-900">
+                            ID: {st.id}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-400 font-sans mt-0.5">{st.address}</div>
+                        <div className="text-[11px] text-slate-500 font-mono mt-0.5">
+                          {st.city}, {st.state} • CPO: {st.operator}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-xs font-bold font-mono bg-blue-950 text-blue-300 border border-blue-800 rounded">
+                          {st.distance_km} km away
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1.5 text-xs font-mono">
+                      <span className="text-slate-400">PLUGS:</span>
+                      {st.connectors.map((c, i) => (
+                        <span key={i} className="px-1.5 py-0.5 bg-slate-800/80 text-slate-300 border border-slate-700 rounded text-[11px]">
+                          {c.type} • {c.power_kw}kW ({c.count}x)
+                        </span>
+                      ))}
+                      <span className="text-emerald-400 text-[11px] ml-auto">
+                        TOTAL: {st.total_capacity_kw} kW
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-
-          {error && (
-            <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/40 text-red-200 text-sm">
-              Error: {error}
-            </div>
-          )}
-
-          {response && (
-            <div className="space-y-3">
-              {response.data.map((st) => (
-                <div key={st.id} className="p-5 rounded-xl bg-slate-900/40 border border-slate-800 hover:border-slate-700 transition-colors space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-white text-base">{st.name}</h4>
-                      <p className="text-xs text-slate-400">{st.address}</p>
-                    </div>
-                    <div className="shrink-0 flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
-                        {st.distance_km} km away
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-800/60">
-                    <span className="text-xs font-medium text-slate-400">Connectors:</span>
-                    {st.connectors.map((c, i) => (
-                      <span key={i} className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono border border-slate-700">
-                        {c.type} • {c.power_kw}kW ({c.count}x)
-                      </span>
-                    ))}
-                    <span className="text-xs text-cyan-400 font-mono ml-auto">
-                      {st.total_capacity_kw} kW Total Capacity
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

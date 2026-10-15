@@ -2,97 +2,96 @@ import React from 'react';
 
 export default function DocsPage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-      <div className="space-y-4">
-        <h1 className="text-3xl font-extrabold text-white">API Reference & Documentation</h1>
-        <p className="text-slate-400 text-base">
-          Complete specifications, query parameters, error envelopes, and JSON response models for the India EV Charging Station Directory API.
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      <div className="border-b border-slate-800 pb-4">
+        <h1 className="text-xl sm:text-2xl font-mono font-bold text-white uppercase tracking-tight">
+          API Technical Reference &amp; Specifications
+        </h1>
+        <p className="text-slate-400 text-xs font-mono mt-0.5">
+          Standard REST contracts, query parameters, error envelopes, and data models.
         </p>
       </div>
 
       {/* Conventions & Auth Banner */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-        <h2 className="text-xl font-bold text-white">Global Protocol Invariants</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-300">
-          <div className="flex items-start gap-3">
-            <span className="text-emerald-400 font-bold">✓</span>
-            <div>
-              <strong className="text-white">Authentication:</strong> None. Zero API keys, tokens, or signups required.
-            </div>
+      <div className="panel-technical rounded">
+        <div className="panel-header font-mono text-xs font-bold text-white uppercase">
+          GLOBAL_PROTOCOL_INVARIANTS
+        </div>
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono text-slate-300">
+          <div className="p-2.5 bg-slate-900/60 border border-slate-800 rounded">
+            <span className="text-blue-400 font-bold block mb-1">AUTHENTICATION:</span>
+            <span className="text-slate-300">None. Zero API keys, headers, or registration needed.</span>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-emerald-400 font-bold">✓</span>
-            <div>
-              <strong className="text-white">CORS:</strong> Enabled (<code className="text-xs bg-slate-800 px-1 py-0.5 rounded">Access-Control-Allow-Origin: *</code>) on all routes.
-            </div>
+          <div className="p-2.5 bg-slate-900/60 border border-slate-800 rounded">
+            <span className="text-blue-400 font-bold block mb-1">CORS_POLICY:</span>
+            <span className="text-slate-300">Access-Control-Allow-Origin: * on all routes.</span>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-emerald-400 font-bold">✓</span>
-            <div>
-              <strong className="text-white">Rate Limit:</strong> 100 requests per 15 minutes per IP address.
-            </div>
+          <div className="p-2.5 bg-slate-900/60 border border-slate-800 rounded">
+            <span className="text-blue-400 font-bold block mb-1">RATE_LIMIT:</span>
+            <span className="text-slate-300">100 requests per 15 minutes per origin IP.</span>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-emerald-400 font-bold">✓</span>
-            <div>
-              <strong className="text-white">Base URL:</strong> <code className="text-xs text-emerald-400 font-mono">https://ev-charging-stations-api.vercel.app</code>
-            </div>
+          <div className="p-2.5 bg-slate-900/60 border border-slate-800 rounded">
+            <span className="text-blue-400 font-bold block mb-1">BASE_URL:</span>
+            <span className="text-emerald-400">https://ev-charging-stations-api.vercel.app</span>
           </div>
         </div>
       </div>
 
       {/* Endpoint 1: GET /v1/stations/near */}
-      <section className="space-y-4 pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">GET</span>
-          <h3 className="text-xl font-mono text-white font-bold">/v1/stations/near</h3>
+      <section className="panel-technical rounded">
+        <div className="panel-header flex items-center justify-between font-mono text-xs">
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-400 border border-blue-800 rounded font-bold">GET</span>
+            <span className="text-white font-bold">/v1/stations/near</span>
+          </div>
+          <span className="text-slate-400">SPATIAL_RADIUS_LOOKUP</span>
         </div>
-        <p className="text-slate-400 text-sm">
-          Performs great-circle spatial proximity search to find public EV stations within a specified kilometer radius around a given latitude and longitude.
-        </p>
+        
+        <div className="p-4 space-y-4">
+          <p className="text-slate-300 text-xs font-sans leading-relaxed">
+            Performs great-circle spatial proximity search to find public EV stations within a specified kilometer radius around a given latitude and longitude. Results are sorted nearest-first.
+          </p>
 
-        <h4 className="text-sm font-semibold text-slate-200">Query Parameters</h4>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300 border border-slate-800 rounded-lg">
-            <thead className="bg-slate-900 text-slate-400 font-mono">
-              <tr>
-                <th className="p-3">Parameter</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Required</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 font-mono">
-              <tr>
-                <td className="p-3 text-emerald-400 font-bold">lat</td>
-                <td className="p-3">float</td>
-                <td className="p-3 text-amber-400">Yes</td>
-                <td className="p-3 font-sans">Target latitude coordinate (-90 to 90).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400 font-bold">lng</td>
-                <td className="p-3">float</td>
-                <td className="p-3 text-amber-400">Yes</td>
-                <td className="p-3 font-sans">Target longitude coordinate (-180 to 180).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">radius</td>
-                <td className="p-3">float</td>
-                <td className="p-3 text-slate-400">No</td>
-                <td className="p-3 font-sans">Search radius in kilometers. Default is 10 km (max 100 km).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">limit</td>
-                <td className="p-3">integer</td>
-                <td className="p-3 text-slate-400">No</td>
-                <td className="p-3 font-sans">Maximum results returned. Default is 25 (max 100).</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono">
+              <thead className="bg-slate-900 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th className="p-2.5">Parameter</th>
+                  <th className="p-2.5">Type</th>
+                  <th className="p-2.5">Required</th>
+                  <th className="p-2.5">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 text-slate-300">
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">lat</td>
+                  <td className="p-2.5">float</td>
+                  <td className="p-2.5 text-amber-400">Yes</td>
+                  <td className="p-2.5 font-sans">Target latitude coordinate (-90 to 90).</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">lng</td>
+                  <td className="p-2.5">float</td>
+                  <td className="p-2.5 text-amber-400">Yes</td>
+                  <td className="p-2.5 font-sans">Target longitude coordinate (-180 to 180).</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-slate-300 font-bold">radius</td>
+                  <td className="p-2.5">float</td>
+                  <td className="p-2.5 text-slate-500">No</td>
+                  <td className="p-2.5 font-sans">Search radius in km. Default: 10, Maximum: 100.</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-slate-300 font-bold">limit</td>
+                  <td className="p-2.5">integer</td>
+                  <td className="p-2.5 text-slate-500">No</td>
+                  <td className="p-2.5 font-sans">Maximum stations returned. Default: 25, Maximum: 100.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <h4 className="text-sm font-semibold text-slate-200 pt-2">Sample Response</h4>
-        <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300 overflow-x-auto">
+          <div className="bg-[#060a12] border border-slate-800 rounded p-3 font-mono text-xs text-slate-300 overflow-x-auto">
 {`{
   "success": true,
   "data": [
@@ -104,7 +103,6 @@ export default function DocsPage() {
       "state_code": "KA",
       "district": "Bengaluru Urban",
       "city": "Bengaluru",
-      "address": "Commercial Tech Park, Sector 14, Bengaluru, Karnataka - India",
       "latitude": 12.9782,
       "longitude": 77.5991,
       "connectors": [
@@ -112,8 +110,6 @@ export default function DocsPage() {
         { "type": "Type-2 AC", "power_kw": 22, "count": 1 }
       ],
       "total_capacity_kw": 142,
-      "access_type": "Public",
-      "status": "Operational",
       "distance_km": 0.88
     }
   ],
@@ -124,85 +120,92 @@ export default function DocsPage() {
     "total_found": 18
   }
 }`}
-        </pre>
+          </div>
+        </div>
       </section>
 
       {/* Endpoint 2: GET /v1/stations */}
-      <section className="space-y-4 pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">GET</span>
-          <h3 className="text-xl font-mono text-white font-bold">/v1/stations</h3>
+      <section className="panel-technical rounded">
+        <div className="panel-header flex items-center justify-between font-mono text-xs">
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-400 border border-blue-800 rounded font-bold">GET</span>
+            <span className="text-white font-bold">/v1/stations</span>
+          </div>
+          <span className="text-slate-400">PAGINATED_INDEX</span>
         </div>
-        <p className="text-slate-400 text-sm">
-          Paginated list of all public charging stations with state, city, operator, connector type, and minimum power filtering.
-        </p>
+        
+        <div className="p-4 space-y-4">
+          <p className="text-slate-300 text-xs font-sans leading-relaxed">
+            Paginated list of all public charging stations with state, city, operator, connector type, and minimum power filtering.
+          </p>
 
-        <h4 className="text-sm font-semibold text-slate-200">Query Parameters</h4>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300 border border-slate-800 rounded-lg">
-            <thead className="bg-slate-900 text-slate-400 font-mono">
-              <tr>
-                <th className="p-3">Parameter</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Description</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 font-mono">
-              <tr>
-                <td className="p-3 text-emerald-400">state</td>
-                <td className="p-3">string</td>
-                <td className="p-3 font-sans">Full state name (e.g. `Karnataka`) or 2-letter state code (`KA`).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">city</td>
-                <td className="p-3">string</td>
-                <td className="p-3 font-sans">City name (e.g. `Mumbai`, `Bengaluru`, `Delhi`).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">operator</td>
-                <td className="p-3">string</td>
-                <td className="p-3 font-sans">Filter by CPO name (e.g. `Tata Power`, `Jio-bp`, `Statiq`).</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">connector</td>
-                <td className="p-3">string</td>
-                <td className="p-3 font-sans">Filter by plug type: `CCS-2`, `Type-2 AC`, `Bharat DC-001`.</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">min_power_kw</td>
-                <td className="p-3">number</td>
-                <td className="p-3 font-sans">Filter for stations with at least this total power capacity in kW.</td>
-              </tr>
-              <tr>
-                <td className="p-3 text-emerald-400">page / limit</td>
-                <td className="p-3">integer</td>
-                <td className="p-3 font-sans">Pagination controls (page defaults to 1; limit defaults to 25, max 100).</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono">
+              <thead className="bg-slate-900 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th className="p-2.5">Parameter</th>
+                  <th className="p-2.5">Type</th>
+                  <th className="p-2.5">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 text-slate-300">
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">state</td>
+                  <td className="p-2.5">string</td>
+                  <td className="p-2.5 font-sans">Full state name (e.g. `Karnataka`) or 2-letter state code (`KA`).</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">city</td>
+                  <td className="p-2.5">string</td>
+                  <td className="p-2.5 font-sans">City name (e.g. `Mumbai`, `Bengaluru`, `Delhi`).</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">operator</td>
+                  <td className="p-2.5">string</td>
+                  <td className="p-2.5 font-sans">Filter by CPO name (e.g. `Tata Power`, `Jio-bp`, `Statiq`).</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">connector</td>
+                  <td className="p-2.5">string</td>
+                  <td className="p-2.5 font-sans">Filter by plug type: `CCS-2`, `Type-2 AC`, `Bharat DC-001`.</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-blue-400 font-bold">min_power_kw</td>
+                  <td className="p-2.5">number</td>
+                  <td className="p-2.5 font-sans">Filter for stations with at least this total power capacity in kW.</td>
+                </tr>
+                <tr>
+                  <td className="p-2.5 text-slate-300 font-bold">page / limit</td>
+                  <td className="p-2.5">integer</td>
+                  <td className="p-2.5 font-sans">Pagination controls (page defaults to 1; limit defaults to 25, max 100).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      {/* Endpoint 3: GET /v1/states */}
-      <section className="space-y-4 pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">GET</span>
-          <h3 className="text-xl font-mono text-white font-bold">/v1/states</h3>
+      {/* Endpoint 3 & 4 */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="panel-technical rounded p-4 font-mono text-xs space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-400 border border-blue-800 rounded font-bold">GET</span>
+            <span className="text-white font-bold">/v1/states</span>
+          </div>
+          <p className="text-slate-400 font-sans text-xs">
+            Aggregated station counts across 36 Indian states and union territories with leading operator market share.
+          </p>
         </div>
-        <p className="text-slate-400 text-sm">
-          Returns aggregated public charging station totals across Indian states and union territories along with dominant operators.
-        </p>
-      </section>
 
-      {/* Endpoint 4: GET /v1/connectors */}
-      <section className="space-y-4 pt-4 border-t border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">GET</span>
-          <h3 className="text-xl font-mono text-white font-bold">/v1/connectors</h3>
+        <div className="panel-technical rounded p-4 font-mono text-xs space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-400 border border-blue-800 rounded font-bold">GET</span>
+            <span className="text-white font-bold">/v1/connectors</span>
+          </div>
+          <p className="text-slate-400 font-sans text-xs">
+            Standard specifications for CCS-2, Type-2 AC, Bharat DC-001, and Bharat AC-001 plugs.
+          </p>
         </div>
-        <p className="text-slate-400 text-sm">
-          Reference catalog detailing IS/IEC/AIS standards, typical power levels, and compatible Indian vehicle types for every connector.
-        </p>
       </section>
     </div>
   );

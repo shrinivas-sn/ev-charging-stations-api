@@ -11,7 +11,7 @@ import NotFoundPage from './pages/NotFoundPage';
 
 export function AppContent() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-[#080c14] text-slate-100">
       <Navbar />
       <main className="flex-1">
         <Routes>

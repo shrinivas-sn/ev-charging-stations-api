@@ -10,44 +10,44 @@ export default function GuidesPage() {
 
     if (!guide) {
       return (
-        <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-          <h1 className="text-3xl font-bold text-white">Guide Not Found</h1>
-          <p className="text-slate-400">The requested guide does not exist.</p>
-          <Link to="/guides" className="text-emerald-400 underline">Back to all guides</Link>
+        <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4 font-mono">
+          <h1 className="text-xl font-bold text-white uppercase">GUIDE_NOT_FOUND</h1>
+          <p className="text-slate-400 text-xs">The requested guide identifier does not exist in the index.</p>
+          <Link to="/guides" className="text-xs text-blue-400 underline">Return to Guides Index</Link>
         </div>
       );
     }
 
     return (
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-        <div className="space-y-4 border-b border-slate-800 pb-8">
-          <div className="flex items-center gap-3">
-            <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <div className="space-y-3 border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-3 font-mono text-xs">
+            <span className="px-1.5 py-0.5 bg-blue-950 text-blue-400 border border-blue-800 rounded font-bold">
               {guide.category}
             </span>
-            <span className="text-xs text-slate-400">{guide.readTime}</span>
+            <span className="text-slate-400">{guide.readTime}</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-mono font-bold text-white uppercase tracking-tight">
             {guide.title}
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed">
+          <p className="text-slate-300 text-xs font-sans leading-relaxed">
             {guide.summary}
           </p>
         </div>
 
-        <div className="prose prose-invert max-w-none text-slate-300 space-y-6 text-sm sm:text-base leading-relaxed">
+        <div className="space-y-4 text-slate-300 text-xs leading-relaxed font-sans">
           {guide.content.split('\n\n').map((paragraph, idx) => {
             if (paragraph.startsWith('## ')) {
-              return <h2 key={idx} className="text-2xl font-bold text-white pt-4">{paragraph.replace('## ', '')}</h2>;
+              return <h2 key={idx} className="text-lg font-mono font-bold text-white pt-4 border-b border-slate-800 pb-1">{paragraph.replace('## ', '')}</h2>;
             }
             if (paragraph.startsWith('### ')) {
-              return <h3 key={idx} className="text-lg font-bold text-emerald-400 pt-2">{paragraph.replace('### ', '')}</h3>;
+              return <h3 key={idx} className="text-sm font-mono font-bold text-blue-400 pt-2">{paragraph.replace('### ', '')}</h3>;
             }
             if (paragraph.startsWith('```')) {
               const lines = paragraph.split('\n');
               const code = lines.slice(1, -1).join('\n');
               return (
-                <pre key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono overflow-x-auto text-emerald-300">
+                <pre key={idx} className="p-3 bg-[#060a12] border border-slate-800 rounded font-mono text-xs overflow-x-auto text-emerald-300 leading-normal">
                   {code}
                 </pre>
               );
@@ -56,9 +56,9 @@ export default function GuidesPage() {
           })}
         </div>
 
-        <div className="pt-8 border-t border-slate-800">
-          <Link to="/guides" className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-2">
-            ← Back to all technical guides
+        <div className="pt-6 border-t border-slate-800 font-mono text-xs">
+          <Link to="/guides" className="text-blue-400 hover:underline">
+            ← RETURN_TO_GUIDES_INDEX
           </Link>
         </div>
       </article>
@@ -66,37 +66,39 @@ export default function GuidesPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      <div className="space-y-3">
-        <h1 className="text-3xl font-extrabold text-white">Technical Guides & Implementation Notes</h1>
-        <p className="text-slate-400 text-base">
-          Practical developer articles on calculating highway charging stops, connector standards, and building Indian EV software.
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="border-b border-slate-800 pb-4">
+        <h1 className="text-xl sm:text-2xl font-mono font-bold text-white uppercase tracking-tight">
+          Engineering Guides &amp; Protocols
+        </h1>
+        <p className="text-slate-400 text-xs font-mono mt-0.5">
+          Reference architectures, spatial queries, and connector implementations.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {EV_GUIDES.map((g) => (
           <Link
             key={g.id}
             to={`/guides/${g.id}`}
-            className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between group"
+            className="panel-technical rounded p-4 flex flex-col justify-between hover:border-slate-600 transition-colors"
           >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="px-1.5 py-0.5 bg-slate-900 text-slate-300 border border-slate-800 rounded">
                   {g.category}
                 </span>
-                <span className="text-slate-400">{g.readTime}</span>
+                <span className="text-slate-500">{g.readTime}</span>
               </div>
-              <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug">
+              <h2 className="text-sm font-mono font-bold text-white leading-snug">
                 {g.title}
-              </h3>
-              <p className="text-slate-400 text-xs leading-relaxed line-clamp-3">
+              </h2>
+              <p className="text-slate-400 text-xs font-sans leading-relaxed line-clamp-3">
                 {g.summary}
               </p>
             </div>
-            <div className="pt-4 text-xs font-semibold text-emerald-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              Read guide →
+            <div className="pt-3 font-mono text-xs text-blue-400">
+              OPEN_SPEC →
             </div>
           </Link>
         ))}

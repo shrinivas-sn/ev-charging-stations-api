@@ -3,20 +3,22 @@ import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-6">
-      <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-emerald-400 font-mono text-2xl font-bold">
+    <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4 font-mono">
+      <div className="w-12 h-12 bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-blue-400 font-bold text-lg rounded">
         404
       </div>
-      <h1 className="text-3xl font-extrabold text-white">Route Not Found</h1>
-      <p className="text-slate-400 text-sm max-w-md mx-auto">
-        The requested page or documentation path does not exist on this domain.
+      <h1 className="text-xl font-bold text-white uppercase tracking-tight">
+        404_ROUTE_NOT_FOUND
+      </h1>
+      <p className="text-slate-400 text-xs font-sans max-w-sm mx-auto">
+        The requested path does not map to any active frontend view or API endpoint documentation.
       </p>
-      <div>
+      <div className="pt-2">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-sm font-semibold border border-slate-700 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-blue-400 text-xs font-mono border border-slate-800 rounded transition-colors"
         >
-          ← Return to Overview
+          ← RETURN_TO_HOME
         </Link>
       </div>
     </div>
