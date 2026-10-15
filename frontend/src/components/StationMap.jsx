@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -18,6 +18,7 @@ export default function StationMap({
   selectedStationId,
   onSelectStation
 }) {
+  const [isDark, setIsDark] = useState(true);
   const containerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const layerGroupRef = useRef(null);
@@ -42,10 +43,9 @@ export default function StationMap({
         zoomControl: true,
       });
 
-      // CartoDB Dark Matter tile layer (100% free, keyless, open-source)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
+      // 100% Free, Keyless, OpenStreetMap Standard Tiles (Zero API Key, Zero Watermarks)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(map);
 
@@ -110,7 +110,7 @@ export default function StationMap({
       weight: 1.5,
       dashArray: '4, 4',
       fillColor: '#3b82f6',
-      fillOpacity: 0.05,
+      fillOpacity: 0.08,
     }).addTo(map);
     circleRef.current = circle;
 
@@ -120,7 +120,7 @@ export default function StationMap({
     const centerIcon = L.divIcon({
       className: 'custom-center-marker',
       html: `<div style="position:relative; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">
-        <span style="position:absolute; width:20px; height:20px; border-radius:50%; background:rgba(59,130,246,0.25); border:1px solid #3b82f6;"></span>
+        <span style="position:absolute; width:20px; height:20px; border-radius:50%; background:rgba(59,130,246,0.3); border:1px solid #3b82f6;"></span>
         <span style="width:8px; height:8px; border-radius:50%; background:#60a5fa; box-shadow:0 0 6px #3b82f6;"></span>
       </div>`,
       iconSize: [22, 22],
@@ -194,7 +194,27 @@ export default function StationMap({
   }
 
   return (
-    <div className="relative w-full h-full min-h-[400px] sm:min-h-[480px] bg-[#060a12] border border-slate-800 rounded overflow-hidden">
+    <div className={`relative w-full h-full min-h-[400px] sm:min-h-[480px] bg-[#060a12] border border-slate-800 rounded overflow-hidden ${isDark ? 'dark-tiles' : ''}`}>
+      {/* Light / Dark Mode Map Toggle */}
+      <div className="absolute top-3 right-3 z-[1000] flex items-center bg-[#0e1526]/90 border border-slate-700/80 rounded p-1 text-[10px] font-mono shadow-md backdrop-blur">
+        <button
+          onClick={() => setIsDark(true)}
+          className={`px-2 py-0.5 rounded transition-colors ${
+            isDark ? 'bg-blue-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          DARK
+        </button>
+        <button
+          onClick={() => setIsDark(false)}
+          className={`px-2 py-0.5 rounded transition-colors ${
+            !isDark ? 'bg-blue-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          LIGHT
+        </button>
+      </div>
+
       <div ref={containerRef} className="w-full h-full" style={{ minHeight: '480px' }} />
     </div>
   );

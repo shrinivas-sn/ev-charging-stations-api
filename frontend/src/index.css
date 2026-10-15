@@ -98,3 +98,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #94a3b8 !important;
   padding: 4px !important;
 }
+
+/* Keyless OpenStreetMap dark mode filter (zero external keys, zero watermarks) */
+.dark-tiles .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(95%);
+}
