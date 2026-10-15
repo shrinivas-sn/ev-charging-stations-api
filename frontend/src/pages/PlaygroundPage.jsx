@@ -316,6 +316,29 @@ export default function PlaygroundPage() {
     if (mapPins.length > 0) return mapPins;
     return listStations;
   }, [hasQueried, mapPins, listStations]);
+
+  const orderedStations = useMemo(() => {
+    if (!selectedStationId) return listStations;
+
+    let selected = listStations.find((s) => String(s.id) === String(selectedStationId));
+    if (!selected && mapPins && mapPins.length > 0) {
+      selected = mapPins.find((s) => String(s.id) === String(selectedStationId));
+    }
+
+    if (!selected) return listStations;
+
+    const rest = listStations.filter((s) => String(s.id) !== String(selectedStationId));
+    return [selected, ...rest];
+  }, [selectedStationId, listStations, mapPins]);
+
+  const resultsContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedStationId && resultsContainerRef.current) {
+      resultsContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedStationId]);
+
   const totalPages = result ? result.meta.total_pages : 0;
   const mapCenter = coords;
 
@@ -595,7 +618,7 @@ export default function PlaygroundPage() {
           </section>
 
           {/* Results */}
-          <section className="card">
+          <section ref={resultsContainerRef} className="card">
             <div className="card-header">
               <h2 className="text-sm font-semibold text-ink">
                 Nearby stations
@@ -665,21 +688,26 @@ export default function PlaygroundPage() {
                   Searching within {radiusKm} km…
                 </li>
               )}
-              {listStations.map((station) => {
-                const isSelected = station.id === selectedStationId;
+              {orderedStations.map((station) => {
+                const isSelected = String(station.id) === String(selectedStationId);
                 return (
                   <li key={station.id}>
                     <button
                       type="button"
                       onClick={() => setSelectedStationId(station.id)}
                       className={`w-full px-4 py-3 text-left transition-colors ${
-                        isSelected ? 'bg-accent-soft' : 'hover:bg-subtle'
+                        isSelected ? 'bg-accent-soft ring-1 ring-inset ring-accent-border' : 'hover:bg-subtle'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <span className="min-w-0 break-words text-sm font-medium leading-snug text-ink">
                           {station.operator}
                           <span className="ml-1.5 font-normal text-ink-dim">· {station.city}</span>
+                          {isSelected && (
+                            <span className="chip-accent ml-2 px-1.5 py-0 text-xs">
+                              Selected
+                            </span>
+                          )}
                         </span>
                         <span className="shrink-0 font-mono text-xs text-ink">
                           {station.distance_km} km

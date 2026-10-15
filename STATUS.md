@@ -5,7 +5,7 @@ Phase: Live on BEE data (29184 stations, till 26 Oct 2025); production checks pa
 
 ## Current State
 
-- **Repo / main:** `E:\OSC\api-projects\projects\ev-charging-stations-api`, on `main` at `41cd597`. PR #1 merged the BEE rebuild (`a6bfb72`); PR #2 fixed manifest (`d307644`); `41cd597` added on-demand playground query, `/v1/stations/near/pins` map endpoint, and Google Maps popup links.
+- **Repo / main:** `E:\OSC\api-projects\projects\ev-charging-stations-api`, on `main`. Playground moves selected map pins to top of results list with highlight, and centers map with offset [0, 80] preventing popup overflow/clipping.
 - **Live site:** `https://ev-charging-stations-api.vercel.app` serves BEE's "EV Public Charging Stations Data till 26th October 2025". Production deployment `7098515522` → `success`; `/health` answers 200.
 - **Source:** BEE PDF (http only), sha256 `f519218fa96a04f57b3c56e919a8045133e7df1307a77710cca0076ab25b6882`, 7942286 bytes, republished with attribution string on every response (`DOCS/DATA-NOTES.md`).
 - **Dataset:** 29,184 stations / 39,640 chargers / 44,065 connectors, 36 states and UTs, 70 operators, 115 suspect coordinates flagged, 1 row rejected.
@@ -23,6 +23,6 @@ Phase: Live on BEE data (29184 stations, till 26 Oct 2025); production checks pa
 
 ## Next up (start here)
 
-1. Review and address pending UX adjustments / bugs requested by the owner for the playground and map.
+1. Verify live deployment on Vercel at `https://ev-charging-stations-api.vercel.app/playground`.
 2. Owner's call: public-apis submission row-shape in `api.json` (shorten description to <= 100 chars without trailing period).
 3. Re-run `run-checks.js --stage production` after any change to manifest, pages or guides.

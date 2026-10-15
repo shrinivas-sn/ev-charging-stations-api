@@ -80,17 +80,17 @@ function popupHtml(properties) {
   const connectors = properties.connectors ? properties.connectors.split(' · ') : [];
 
   return `
-    <div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:12px 14px;min-width:232px;max-width:284px;">
-      <div style="font-size:15px;font-weight:600;color:${palette.ink};line-height:1.35;">${escapeHtml(
+    <div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:10px 12px;min-width:220px;max-width:270px;box-sizing:border-box;">
+      <div style="font-size:14px;font-weight:600;color:${palette.ink};line-height:1.3;padding-right:18px;">${escapeHtml(
         properties.operator
       )}${properties.city ? ` · ${escapeHtml(properties.city)}` : ''}</div>
-      <div style="margin-top:2px;font-size:14px;color:${palette.muted};line-height:1.4;">${escapeHtml(
+      <div style="margin-top:2px;font-size:12px;color:${palette.muted};line-height:1.35;max-height:34px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(
         properties.address
       )}</div>
-      <dl style="margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14px;color:${palette.muted};">
+      <dl style="margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:12px;line-height:1.35;color:${palette.muted};">
         <dt style="color:${palette.muted};">Power</dt><dd style="margin:0;color:${palette.ink};">up to ${escapeHtml(
           properties.max_power_kw
-        )} kW per gun</dd>
+        )} kW</dd>
         <dt style="color:${palette.muted};">Vehicles</dt><dd style="margin:0;color:${palette.ink};">${escapeHtml(
           properties.vehicles
         )}</dd>
@@ -105,19 +105,24 @@ function popupHtml(properties) {
       </dl>
       ${
         connectors.length
-          ? `<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:4px;">${connectors
+          ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">${connectors
+              .slice(0, 4)
               .map(
                 (connector) =>
-                  `<span style="border:1px solid ${palette.line};background:${palette.subtle};border-radius:4px;padding:1px 5px;font-size:13px;color:${palette.ink};">${escapeHtml(
+                  `<span style="border:1px solid ${palette.line};background:${palette.subtle};border-radius:4px;padding:1px 4px;font-size:11px;color:${palette.ink};">${escapeHtml(
                     connector
                   )}</span>`
               )
-              .join('')}</div>`
+              .join('')}${
+              connectors.length > 4
+                ? `<span style="font-size:11px;color:${palette.muted};padding:1px 2px;">+${connectors.length - 4} more</span>`
+                : ''
+            }</div>`
         : ''
       }
       <a href="https://www.google.com/maps?q=${properties.latitude},${properties.longitude}"
          target="_blank" rel="noopener noreferrer"
-         style="display:block;margin-top:10px;text-align:center;background:${palette.accent};color:${palette.ink};padding:8px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;">
+         style="display:block;margin-top:8px;text-align:center;background:${palette.accent};color:${palette.ink};padding:6px 8px;border-radius:4px;text-decoration:none;font-size:12px;font-weight:600;">
         Open in Google Maps
       </a>
     </div>`;
@@ -130,6 +135,7 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
   const popupRef = useRef(null);
   const selectionRef = useRef(onSelectStation);
   const stationsRef = useRef(stations);
+  const openPopupRef = useRef(null);
   const [status, setStatus] = useState('loading');
 
   selectionRef.current = onSelectStation;
@@ -180,7 +186,11 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
 
       map.on('click', LAYER_STATION_DOT, (event) => {
         const feature = event.features && event.features[0];
-        if (feature && selectionRef.current) selectionRef.current(String(feature.properties.id));
+        if (feature) {
+          const id = String(feature.properties.id);
+          if (selectionRef.current) selectionRef.current(id);
+          if (openPopupRef.current) openPopupRef.current(id);
+        }
       });
 
       map.on('mouseenter', LAYER_STATION_DOT, () => {
@@ -287,13 +297,12 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
     );
   }, [center.lat, center.lng, radiusKm, stations, status]);
 
-  // Focus the selected station and show its popup without reopening the popup on
-  // every unrelated re-render of the parent list.
-  useEffect(() => {
+  const openStationPopup = (stationId) => {
     const map = mapRef.current;
-    if (!map || status !== 'ready') return;
+    const lib = libRef.current;
+    if (!map || !lib || status !== 'ready') return;
 
-    const selected = stationsRef.current.find((station) => station.id === selectedStationId);
+    const selected = stationsRef.current.find((station) => String(station.id) === String(stationId));
     const selectedSource = map.getSource(SOURCE_SELECTED);
 
     if (!selected || !selectedSource) {
@@ -303,11 +312,21 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
     }
 
     selectedSource.setData(stationsFeatureCollection([selected]));
-    map.easeTo({ center: [selected.longitude, selected.latitude], duration: 320 });
+    map.easeTo({
+      center: [selected.longitude, selected.latitude],
+      offset: [0, 80],
+      duration: 300,
+    });
 
     if (popupRef.current) popupRef.current.remove();
     // focusAfterOpen: false — focusing the popup made the browser scroll the page to the map on load.
-    popupRef.current = new libRef.current.Popup({ closeButton: true, offset: 14, focusAfterOpen: false })
+    popupRef.current = new lib.Popup({
+      closeButton: true,
+      closeOnClick: false,
+      offset: 12,
+      focusAfterOpen: false,
+      maxWidth: '280px',
+    })
       .setLngLat([selected.longitude, selected.latitude])
       .setHTML(
         popupHtml({
@@ -317,6 +336,23 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
         })
       )
       .addTo(map);
+  };
+  openPopupRef.current = openStationPopup;
+
+  // Focus the selected station and show its popup without reopening the popup on
+  // every unrelated re-render of the parent list.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || status !== 'ready') return;
+
+    if (!selectedStationId) {
+      const selectedSource = map.getSource(SOURCE_SELECTED);
+      if (selectedSource) selectedSource.setData(stationsFeatureCollection([]));
+      if (popupRef.current) popupRef.current.remove();
+      return;
+    }
+
+    openStationPopup(selectedStationId);
   }, [selectedStationId, status]);
 
   return (
