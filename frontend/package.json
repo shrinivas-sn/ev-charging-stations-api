@@ -7,10 +7,10 @@
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
-    "verify:seo": "node scripts/verify-seo.mjs --dist dist"
+    "verify:seo": "node scripts/verify-seo.mjs --dist dist",
+    "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
-    "ev-charging-stations-api": "file:..",
     "maplibre-gl": "^4.7.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

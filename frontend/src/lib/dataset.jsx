@@ -7,13 +7,27 @@ import React, { createContext, useContext } from 'react';
  */
 export const EMPTY_DATASET = {
   totalStations: null,
+  totalChargers: null,
   totalStates: null,
   totalCities: null,
   totalOperators: null,
-  snapshotDate: null,
-  datasetStatus: null,
-  datasetLabel: null,
-  isOfficial: false,
+  suspectLocations: null,
+  carStations: null,
+  carFastDcStations: null,
+  twoThreeWheelerOnlyStations: null,
+  snapshotLabel: null,
+  pdfCreated: null,
+  sourceTitle: null,
+  sourcePublisher: null,
+  sourceUrl: null,
+  sourcePageUrl: null,
+  dataNotesUrl: null,
+  attribution: null,
+  apiBaseUrl: null,
+  topStates: [],
+  topOperators: [],
+  connectors: [],
+  exampleStation: null,
 };
 
 const DatasetContext = createContext(EMPTY_DATASET);
