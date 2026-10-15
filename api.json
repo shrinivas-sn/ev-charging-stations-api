@@ -1,0 +1,51 @@
+{
+  "manifest_version": 1,
+  "slug": "ev-charging-stations",
+  "name": "India EV Charging Station Directory API",
+  "one_liner": "Free, keyless REST API for India's public electric vehicle charging stations, connectors, and power ratings.",
+  "category": "Transportation",
+  "repo": "https://github.com/shrinivas-sn/ev-charging-stations-api",
+  "source": {
+    "name": "Ministry of Power / Bureau of Energy Efficiency via Open Government Data (data.gov.in)",
+    "url": "https://data.gov.in",
+    "license": "Government Open Data License - India (GODL-India)"
+  },
+  "not_provided": [
+    "real-time live plug occupancy telemetry",
+    "charging payment or booking transactions"
+  ],
+  "stack": null,
+  "deploy": {
+    "portal_url": "https://ev-charging-stations-api.vercel.app",
+    "api_base_url": "https://ev-charging-stations-api.vercel.app",
+    "health_path": "/health",
+    "warmup_path": "/health"
+  },
+  "routes": [
+    { "path": "/", "base": "portal", "kind": "page" },
+    { "path": "/docs", "base": "portal", "kind": "page" },
+    { "path": "/playground", "base": "portal", "kind": "page" },
+    { "path": "/status", "base": "portal", "kind": "page" },
+    { "path": "/v1/stations", "base": "api", "kind": "api" },
+    { "path": "/v1/stations/near", "base": "api", "kind": "api" },
+    { "path": "/v1/stations/1", "base": "api", "kind": "api" },
+    { "path": "/v1/states", "base": "api", "kind": "api" },
+    { "path": "/v1/connectors", "base": "api", "kind": "api" },
+    { "path": "/health", "base": "api", "kind": "api" }
+  ],
+  "submission": {
+    "terms": [
+      "EV",
+      "Electric Vehicle",
+      "charging stations",
+      "chargers India",
+      "BEE"
+    ],
+    "targets": [
+      {
+        "repo": "public-apis/public-apis",
+        "pr": null
+      }
+    ]
+  }
+}
