@@ -441,6 +441,8 @@ status file and in the session's final message.)*
 |---|---|---|---|---|---|---|---|
 | 1 | 15/10 | carried | Archived plan issue 4: old servers on :3000 (PID 1316) and :5173 (PID 14540) hold `frontend/node_modules` | Still running at planning time (`netstat`) | local verify only | Split verify in Rules; never stop them | owner: stop them only if they are not yours |
 | 2 | 15/10 | 5.4 | Nothing said about the old rate-limit figure in `DOCS/DECISIONS.md` | The audit entry there says limits were "raised to 300/15 min"; `backend/src/app.js` has used 100/15 min (line 16: `RATE_LIMIT_MAX \|\| 100`) | record only, no code change | Old entry left alone (DECISIONS is append-only); the new 15/10 section states 100/15 min | owner: none needed |
+| 3 | 15/10 | 6.3 | Preview smoke runs against the deployment URL | Every path answers `302` with `Protected by Vercel Authentication` (curl on `/health`, `/v1/stations?limit=1`, `/docs`) | blocks one verification, not the build or CI | CI recorded green; preview smoke and the cold-start measurement left for the owner-supplied bypass secret (Failure handling) | owner: a "Protection Bypass for Automation" secret, or turn preview protection off for this project |
+| 4 | 15/10 | 6.1 | Review would cover the branch's own code | The prerender step prints `useLayoutEffect does nothing on the server` per page; the only `useLayoutEffect` in the tree is inside `react-router` / `react-router-dom` (3 and 7 occurrences) | none on the shipped HTML (SEO gate and mobile-check pass) | Logged, not fixed: a fix means changing a dependency, which is outside this plan | owner: none needed |
 
 ---
 
@@ -491,3 +493,25 @@ Surprises:  Port 3920 was held by PID 18168 (not this session's), so the local A
 Slop:       No-AI-slop Detect by hand (the skill is not loadable in this session): `README.md`, the new DECISIONS section, the two `DocsPage.jsx` strings and both workflow files → no patterns found. Banned words and empty phrases: none. Em dashes: only the `—` table placeholders and the mandated attribution string.
 Next:       Task 6.1 — review the branch, then 6.2–6.4. Phase 6 ends with a STOP for the owner.
 Commit:     `docs: Phase 5 checkpoint`
+
+### Phase 6 — 15/10/2026
+Done:       Task 6.1 review (below), Task 6.2 `scripts/smoke.mjs`, Task 6.3 branch pushed and preview built, Task 6.4 guide checks. No Task 6.1 finding needed a fix; 6.4 changed nothing.
+Reviews:    `/myreview` over `git diff main...HEAD` minus `backend/data/**` and `frontend/dist/**`, plus a read of the whole HTTP layer (`backend/src/app.js`, both routers, `backend/src/services/stations-service.js`), the build rules (`normalise.js`, `reference.js`), `api/index.js`, the frontend client (`lib/api.js`), both workflows and the ingest shell script.
+
+| id | severity | file | finding | verdict |
+|---|---|---|---|---|
+| 1 | low | `frontend/src/lib/api.js` (`buildNearQuery`) | `minPowerKw` is dropped when it is 0, because 0 is falsy | reject: 0 kW is the same as no power filter, and the documented range starts at 0 |
+| 2 | low | `backend/src/app.js` (`trust proxy`) | With `npm start` (no proxy), a caller can spoof `X-Forwarded-For` and get a fresh rate-limit bucket | reject: Vercel overwrites the header in production, and the comment plus README state the limitation |
+| 3 | low | `backend/src/lib/normalise.js` (`toStation`) | Ownership comes from the curated operators table, not the row's Govt./Private cell | reject: one canonical ownership per operator is the documented design |
+| 4 | low | `backend/src/lib/reference.js` (`stateByKey`) | Raw PDF state spellings resolve in the build but not as `state=` query values | reject: the API documents name, 2-letter code and ISO code |
+| 5 | info | `ingest/fetch_bee_pdf.sh` | The refresh prints the new sha256 instead of comparing it with `backend/data/source.json` | reject: `check-upstream.js` does the comparison, and the build records the new sha |
+| 6 | info | prerender step | `useLayoutEffect does nothing on the server`, once per page (Plan issue 4) | logged for the owner: the call is inside react-router, so a fix means changing a dependency |
+| 7 | info | `vercel.json` | `regions` and `includeFiles` cannot be proven locally | planned: the deployment built and succeeded; the region check needs the preview bypass (Plan issue 3) |
+
+No high or critical finding, so Task 6.1 commits nothing.
+Verified:   `scripts/smoke.mjs --base http://localhost:3921 --local` → `smoke ok (7 checks)`, exit 0; the same script against a dead port → `FAIL /health answers 200 with JSON`, exit 1; split verify → 133 backend, 18 frontend, 2 build tests, `Rendered 8 pages`, SEO `0 errors, 0 warnings`; CI run `38763956143` on the pushed branch → `ci` `completed success` (job `node` 28 s: `# pass 133 # fail 0`, `# pass 18 # fail 0`, `Rendered 8 pages and 404.html.`, `# pass 2 # fail 0`, `0 errors, 0 warnings`; job `ingest` 8 s); preview deployment `7097443039` → `success`; branch pushed, `git status -sb` not ahead.
+Guides:     The one concrete URL in `guidesData.js` is `/v1/connectors`; against the local API it answers `200 application/json` with the 7 standards the guide names. Guide 1's four Bengaluru–Mysuru waypoints each return car fast-DC stations (top result `max_kw_by_standard.CCS2` 60 in all four). Guide 3's `city=Kochi&vehicle=car` pages once (`total 13`, `attribution` a string). Guide 4's Delhi query answers 200. The only live-availability sentence says the data has no live availability. `frontend/dist/sitemap.xml` holds 3 `/guides/` entries. Nothing needed changing.
+Surprises:  Preview deployments are behind Vercel Authentication, so Task 6.3's smoke and cold-start numbers cannot run yet (Plan issue 3). The region check (`::bom1::`) is therefore also unproven. CI was green on the first push.
+Slop:       Script comments and check names read clean (no banned words, no empty phrases, no em dashes).
+Next:       Owner: a Vercel protection-bypass secret (or protection off) so the preview smoke and the region check can run, then "merge to main" to start Phase 7.
+Commit:     `test: live smoke script` (6.2); none for 6.1 and 6.4; push only for 6.3
