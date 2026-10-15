@@ -1,35 +1,6 @@
-# PLAN — Ship the BEE real-data rebuild (remaining work)
+# RELEASE — India EV Charging Station Directory API, BEE real-data rebuild
 
-**Written 15/10/2026.** Temporary file — deleted when this closes.
-
-**Goal:** Take branch `rebuild/bee-real-data`, which already passes all 4 build phases, through deploy config, CI, docs, review and a working preview. Then, **only after the owner says so**, merge it to production and correct the hub records.
-**Why:** Owner request 15/10/2026: "make a fresh final plan for all this remaining work … that can be executed by AI agents without guessing … step by step so that we don't break anything". It continues the archived plan `DOCS/WORK/2026-10-15/PLAN-bee-rebuild-phases-1-4.md` (Phases 1–4 done; its Phases 5–7 are carried here, rewritten with verified facts).
-**What this changes:** this repo (`vercel.json`, `backend/test/`, `backend/scripts/check-upstream.js`, `.github/workflows/`, `scripts/smoke.mjs`, `api.json`, `README.md`, `DOCS/DECISIONS.md`, `frontend/src/pages/DocsPage.jsx`, `STATUS.md`, `DOCS/`). After the owner's go-ahead only: GitHub `main`, and the OSC hub repo `E:\OSC` (`api-projects/IDEA-LOG.md`, `api-projects/research/ev-charging-stations.md`, `api-projects/checklists/ev-charging-stations/`, `DOCS/`).
-**Done means:** Phase 6's checkpoint passes: the branch preview at Vercel passes `node scripts/smoke.mjs` with exit 0. Phase 7, if the owner authorises it, then ends with `https://ev-charging-stations-api.vercel.app` passing the smoke script and `run-checks.js --stage production` with no FAIL.
-**Out of scope:** public-apis submission; emailing BEE; route/corridor search; bulk download; real-time availability, pricing or booking; any visual redesign; raising body text to 16px or tap targets to 44px (owner's call, see `MOBILE.md`); changes to the shared pipeline (`E:\OSC\api-projects\pipeline`), skills or `E:\adapter-ingestion`; stopping the servers on ports 3000 and 5173.
-
----
-
-## Read this first
-
-1. Bring the workspace up: `cd E:/OSC/api-projects/projects/ev-charging-stations-api && git fetch origin && git switch rebuild/bee-real-data && git status -sb`. Expect `## rebuild/bee-real-data` (with `...origin/rebuild/bee-real-data` once Task 6.3 has pushed it) and no modified files. If files are modified and you did not change them, stop and ask the owner — do not discard them.
-2. Read only: `STATUS.md`, this file's **Rules for every task**, **Failure handling**, your current task, and the last **Progress Log** entry. Do **not** read whole: `backend/data/stations.json` (21.8 MB), anything under `DOCS/WORK/` (archived history), `ingest/cache/*.pdf`, `frontend/dist/`.
-3. Detect the environment — run each command; never assume the value:
-
-| Check | Command | Pass looks like |
-|---|---|---|
-| Node | `node -v` | `v20` or later |
-| Python | `python --version` | `Python 3.10` or later |
-| Branch | `git branch --show-current` | `rebuild/bee-real-data` |
-| GitHub CLI | `gh auth status` | `Logged in to github.com account shrinivas-sn` |
-| Backend tests | `npm test 2>&1 \| grep -E "^# (pass\|fail)"` | `# pass 119` (or more) and `# fail 0` |
-| Frontend tests | `npm --prefix frontend test 2>&1 \| grep -E "^# (pass\|fail)"` | `# fail 0` |
-| Old servers holding files | `netstat -ano \| grep -E ":(3000\|5173) " \| grep LISTEN` | Any output means the previous agent's servers still run. **Never stop them.** Use the split verify in Rules. |
-| Free port for your API | `netstat -ano \| grep ":3920 " \| grep LISTEN` | No output. If busy, use 3921, 3922 … and write the port you used in the Progress Log. |
-| BEE page reachable | `curl -s -o /dev/null -w "%{http_code}" -m 30 -A "Mozilla/5.0" "http://beeindia.gov.in/show_content.php?lang=1&level=2&ls_id=345&lid=67"` | `200` |
-
-4. A task's **Where:** uses search text, not line numbers. If the text is missing, the code moved: find the equivalent, apply the same intent, and log it under **Plan issues**.
-5. Shell: this is Windows with Git Bash. Before running any command that passes a path starting with `/` as an argument (routes such as `/docs`), run `export MSYS_NO_PATHCONV=1`, and write script paths as `E:/...`, not `/e/...`. Without it Git Bash rewrites `/docs` into `C:/Program Files/Git/docs`.
+Archived 15/10/2026 from `PLAN.md` when the plan closed. Phases 5 to 7 are done; the live service is https://ev-charging-stations-api.vercel.app. The sections below are copied verbatim.
 
 ## Facts verified while planning
 
@@ -529,3 +500,28 @@ Done:       `node scripts/smoke.mjs --base https://ev-charging-stations-api.verc
 Verified:   With the api.json fix in the working tree, `run-checks.js --stage production` → `production: pass`, 14 rows PASS, including `routes-live: 15 routes answered as declared` and `docs-route-parity: 9 documented paths match 8 manifest routes`.
 Surprises:  The same run continues into the `pre-pr` stage for public-apis and exits 3 there on `row-shape` (the row's description is 178 characters, the limit is 100, and it ends with a period). That is submission work, out of this plan's scope — flagged to the owner, not fixed.
 Next:       Owner merges the fix-forward PR; then re-run the production gates and finish 7.2, 7.3 and 7.4.
+
+### Task 7.2 — 15/10/2026 (finished)
+Done:       Owner approved the fix-forward PR; it merged as `d307644` and production deployment `7098515522` reported `success`. Checklist files written by `record-live.js` and `run-checks.js --stage production`; committed in the hub as `f30bf4c` together with `pipeline/decide/decisions.jsonl`.
+Verified:   `smoke.mjs --base https://ev-charging-stations-api.vercel.app` → `smoke ok (9 checks)`, exit 0. `run-checks.js --stage production` → `production: pass`, 14 rows, no FAIL. `builder.js --api-url …` → `route: ask-user`, `exit 3`, `stoppedAt: prescreen`, criteria `1:unsure 2:unsure 5:pass`; the same verdict before and after the IDEA-LOG correction.
+Surprises:  The runner exits 3 because it continues into the public-apis `pre-pr` stage, where `row-shape` FAILs: the derived row's description is 178 characters against a limit of 100 and ends with a period. Submission work, out of this plan's scope — the owner's call, not fixed.
+Slop:       Detect over the hub lines this task added: no patterns found.
+Next:       Task 7.3.
+
+### Task 7.3 — 15/10/2026
+Done:       The IDEA-LOG row reads `live` with the BEE source, counts, map and test totals; the research note gained `## Correction 15/10/2026`; `DOCS/WORK/2026-10-15/WORK.md` gained the release section with the PR links; `DOCS/README.md` gained one index row; `DOCS/STATUS.md` gained a dated release section. Hub commit `b9a8582`, not pushed.
+Verified:   `grep -n "GODL dataset; 27,248" api-projects/IDEA-LOG.md` → no output. No-AI-slop Detect over every added hub line: no patterns found.
+Surprises:  none
+Next:       Task 7.4.
+
+### Task 7.4 — 15/10/2026
+Done:       This file's Facts, Plan issues, Decisions, Owner inputs and Progress Log are copied verbatim to `DOCS/WORK/2026-10-15/RELEASE.md`; `PLAN.md` is removed; `STATUS.md` reads `Live on BEE data` with the owner's remaining options in Next up.
+Verified:   `ls PLAN.md` → not found; the Progress Log headings are present in `RELEASE.md`.
+Surprises:  none
+Next:       Owner decides on the public-apis submission (the `pre-pr` row shape), 16px body text, corridor search and bulk download.
+
+### Checkpoint — Phase 7 — 15/10/2026
+- [x] Full verification: production smoke `exit 0`; production checklist no FAIL; `git status --short` clean in both repos.
+- [x] Commit made for every task in this phase: PR #1 `a6bfb72` (7.1), PR #2 `d307644` (7.2 fix), hub `f30bf4c` (7.2), hub `b9a8582` (7.3), repo `docs: close the BEE release plan` (7.4).
+- [x] Status file updated: `Live on BEE data (29184 stations, till 26 Oct 2025); production checks pass.`
+- [x] Progress Log entry added (this section, in `RELEASE.md`).
