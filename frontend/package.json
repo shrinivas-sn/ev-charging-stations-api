@@ -1,0 +1,22 @@
+{
+  "name": "ev-charging-stations-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/prerender.mjs",
+    "preview": "vite preview",
+    "verify:seo": "node scripts/verify-seo.mjs --dist dist"
+  },
+  "dependencies": {
+    "ev-charging-stations-api": "file:..",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}

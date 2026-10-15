@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>India EV Charging Station Directory API — Free, Keyless REST API</title>
+    <meta name="description" content="Free keyless REST API for 27,000+ public electric vehicle charging stations in India. Spatial radius search, CCS-2, Type-2, Bharat DC connector specs." />
+    <link rel="canonical" href="https://ev-charging-stations-api.vercel.app/" />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="India EV Charging Station Directory API" />
+    <meta property="og:description" content="Free, keyless REST API for 27,000+ public electric vehicle charging stations across India." />
+    <meta property="og:url" content="https://ev-charging-stations-api.vercel.app/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="India EV Charging Station Directory API" />
+    <meta name="twitter:description" content="Free, keyless REST API for 27,000+ public electric vehicle charging stations across India." />
+
+    <!-- WebAPI Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebAPI",
+        "name": "India EV Charging Station Directory API",
+        "description": "Free, keyless REST API for 27,000+ public electric vehicle charging stations in India with GPS coordinates, connector types, and kW power ratings.",
+        "url": "https://ev-charging-stations-api.vercel.app",
+        "documentation": "https://ev-charging-stations-api.vercel.app/docs",
+        "provider": {
+          "@type": "Organization",
+          "name": "Open Source Community (OSC) India"
+        },
+        "license": "https://data.gov.in/godl",
+        "termsOfService": "https://data.gov.in/godl"
+      }
+    </script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-slate-950">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
