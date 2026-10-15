@@ -1,203 +1,170 @@
 export const EV_GUIDES = [
   {
     id: 'building-an-ev-route-planner-in-india',
-    title: 'Building an EV route planner: waypoints, connectors and highway stops',
+    title: 'Building an EV route planner: charging stops a car can actually use',
     // Kept short on purpose: search results truncate titles near 60 characters.
     seoTitle: 'Building an EV route planner in India',
     summary:
-      'How to sample coordinates along a corridor, query charging hubs with a radius search, and filter for the connector and capacity a vehicle actually needs.',
-    readTime: '7 min read',
+      'Sample waypoints along a route, query each with a radius search, and keep only stations where a car gets a fast DC gun — the filters run on the server.',
+    readTime: '6 min read',
     category: 'Architecture',
     content: `
 ## Overview
-A route planner does not need every station in a state. It needs the small set of stations near the corridor the driver will actually travel, filtered to the connectors the vehicle can accept.
+A route planner needs the few stations near the road the driver will take, and only those the car can use. Half of the stations on BEE's list serve only two- and three-wheelers, so filtering by vehicle is not optional.
 
-This guide uses \`/v1/stations/near\` and \`/v1/stations\` to build that set. Start the API locally with \`npm start\`; it listens on port 3000.
+This guide uses \`/v1/stations/near\`. Every filter below runs on the server, so \`total_found\` and paging reflect exactly what the car can use.
 
-## 1. Sampling waypoints along a corridor
-Take the decoded polyline of the route, step along it every 40–60 km, and run one radius query per sample. The API sorts by distance, so the first result is the closest option to that waypoint.
+## 1. One radius query per waypoint
+Step along the route's polyline every 40–60 km and run one query per point. \`vehicle=car\`, \`current=dc\` and \`min_power_kw=50\` are checked against a single gun, so a station with a slow AC point and a 30 kW DC gun does not slip through a 50 kW search.
 
 \`\`\`javascript
-const BASE_URL = 'http://localhost:3000'; // your deployment URL in production
+const BASE_URL = 'https://ev-charging-stations-api.vercel.app';
 
-async function findChargingStops(waypoints, radiusKm = 15) {
-  const stops = [];
+async function fastStopsNear(point, radiusKm = 25) {
+  const url = new URL(BASE_URL + '/v1/stations/near');
+  url.searchParams.set('lat', point.lat);
+  url.searchParams.set('lng', point.lng);
+  url.searchParams.set('radius', radiusKm);
+  url.searchParams.set('vehicle', 'car');
+  url.searchParams.set('current', 'dc');
+  url.searchParams.set('min_power_kw', 50);
+  url.searchParams.set('limit', 5);
 
-  for (const point of waypoints) {
-    const url = new URL(BASE_URL + '/v1/stations/near');
-    url.searchParams.set('lat', point.lat);
-    url.searchParams.set('lng', point.lng);
-    url.searchParams.set('radius', radiusKm);
-    url.searchParams.set('limit', '10');
+  const response = await fetch(url);
+  const body = await response.json();
+  if (!body.success) throw new Error(body.error.code + ': ' + body.error.message);
+  return body.data;
+}
 
-    const response = await fetch(url);
-    const json = await response.json();
+// Bengaluru to Mysuru, roughly every 45 km
+const waypoints = [
+  { lat: 12.9716, lng: 77.5946 },
+  { lat: 12.7209, lng: 77.2799 },
+  { lat: 12.5223, lng: 76.8970 },
+  { lat: 12.2958, lng: 76.6394 },
+];
 
-    if (!json.success) {
-      // Validation failures return 400 with error.code and error.details.
-      throw new Error(json.error.code + ': ' + json.error.message);
-    }
-
-    // Only stations that can actually charge the vehicle.
-    const usable = json.data.filter((station) =>
-      station.connectors.some((connector) => connector.type === 'CCS-2')
-    );
-
-    if (usable.length > 0) stops.push(usable[0]);
-  }
-
-  return stops;
+for (const point of waypoints) {
+  const stops = await fastStopsNear(point);
+  const best = stops[0];
+  console.log(point, best ? best.operator + ', ' + best.distance_km + ' km, CCS2 ' + best.max_kw_by_standard.CCS2 + ' kW' : 'no fast DC stop in range');
 }
 \`\`\`
 
-## 2. Filter on the server, not in the browser
-Because the API returns only the nearest \`limit\` stations, filtering afterwards can hide valid matches further out. Pass the constraint to the API instead:
+## 2. Read the power per gun, per standard
+\`max_kw_by_standard\` gives the strongest gun for each standard at the station, which is what a car receives. Each charger in \`chargers\` lists its \`guns\` with the standard and power of each one.
 
-\`\`\`javascript
-const url = new URL(BASE_URL + '/v1/stations/near');
-url.searchParams.set('lat', '12.9716');
-url.searchParams.set('lng', '77.5946');
-url.searchParams.set('radius', '25');
-url.searchParams.set('connector', 'CCS-2');   // CCS-2, CCS 2 and ccs2 all work
-url.searchParams.set('min_power_kw', '100');   // total station capacity
-\`\`\`
+## 3. Never route to a suspect location
+Radius search never returns stations whose published coordinates are impossible (for example latitude equal to longitude). If you build from \`/v1/stations\` instead, pass \`location_quality=ok\`.
 
-## 3. Which connector does the vehicle need?
-- **Passenger EVs** (Tata, MG, Mahindra, Hyundai, BYD): \`CCS-2\` for DC fast charging, \`Type-2 AC\` for destination charging.
-- **Fleet 2W / 3W**: usually \`Bharat DC-001\` (15 kW, low-voltage DC) or \`Bharat AC-001\` for slow public sockets.
-
-Each station record lists its connector mix, so compatibility can be checked exactly rather than inferred from a category.
-    `,
+## 4. Gaps are real
+If a waypoint returns nothing, widen the radius up to 100 km or relax \`min_power_kw\`. The data has no live availability, so treat a listed station as a candidate, not a guarantee.
+`,
   },
   {
     id: 'understanding-indian-ev-connector-standards',
-    title: 'Understanding Indian EV connector standards: CCS-2, Type-2, Bharat DC-001',
-    seoTitle: 'Indian EV connector standards explained',
+    title: 'Indian EV charging standards: CCS2, Type 2, Bharat AC-001, Bharat DC-001 and LEV',
+    seoTitle: 'Indian EV charging standards explained',
     summary:
-      'A comparison of the charging protocols deployed in India, their ratings, the standards behind them and which vehicles use them.',
-    readTime: '6 min read',
+      'Which charging standards appear on BEE’s station list, whether each is AC or DC, and which vehicles the Ministry of Power lists them for.',
+    readTime: '5 min read',
     category: 'Specifications',
     content: `
-## Two tracks of charging
-India runs a dual-track charging landscape: global high-voltage DC standards adopted by passenger cars, and indigenous low-voltage standards designed for light electric vehicles.
+## Overview
+The API reports seven standards. \`/v1/connectors\` returns each one with whether it is AC or DC, the vehicles it serves, its source and how many stations have it.
 
-The machine-readable version of all of this is available from \`/v1/connectors\`, including how many stations in the current dataset expose each connector.
+## Which vehicles each standard serves
+From the Ministry of Power charger table (Annexure II and III of the 2022 charging-infrastructure guidelines):
 
-### 1. CCS Type 2 (Combo 2)
-- **Standard:** IS 17017-1 / IEC 62196-3
-- **Current:** DC
-- **Power range:** roughly 30 kW to 350 kW
-- **Vehicles:** electric cars and SUVs, commercial vans, heavy commercial vehicles
+- **CCS2** and **CHAdeMO** — DC fast charging for cars.
+- **Type 2 AC** — AC charging for cars, three-wheelers and two-wheelers.
+- **Bharat AC-001** — three 3.3 kW AC guns on one 10 kW charger, for cars, three-wheelers and two-wheelers.
+- **Bharat DC-001** — low-voltage DC (15 kW); the 48 V version serves all three classes, the 72 V-or-higher version serves cars. BEE does not say which version a station has, so both classes are listed.
+- **LEV AC** and **LEV DC** — light-EV charge points for two- and three-wheelers.
 
-### 2. Type 2 (Mennekes) AC
-- **Standard:** IS 17017-1 / IEC 62196-2
-- **Current:** AC
-- **Power range:** 7.4 kW to 22 kW
-- **Vehicles:** destination charging for cars, and 2-wheelers with an adapter
+## Power belongs to the gun
+A charger's total rating is not what a vehicle receives. A Bharat AC-001 charger is 10 kW, but each of its three guns delivers 3.3 kW. Combo chargers list one rating per gun, such as 60 + 60 + 22 kW for CCS2, CHAdeMO and Type 2. The API keeps these per gun, and \`min_power_kw\` filters on them.
 
-### 3. Bharat DC-001
-- **Standard:** AIS 138-1 (Bureau of Indian Standards)
-- **Current:** low-voltage DC
-- **Rating:** 15 kW at 48–72 V
-- **Vehicles:** electric 2-wheelers, 3-wheelers and entry-level fleet cars
+\`\`\`bash
+curl -s "https://ev-charging-stations-api.vercel.app/v1/connectors"
+\`\`\`
 
-### 4. Bharat AC-001
-- **Standard:** AIS 138-2
-- **Current:** AC
-- **Rating:** three sockets of 3.3 kW, 10 kW total
-- **Vehicles:** public parking and metro park-and-ride charging for 2W and 3W
-
-### Standards that are documented but not deployed here
-GB/T (GB/T 20234.3) and CHAdeMO are listed in \`/v1/connectors\` for reference. No station in the bundled dataset exposes either connector, and the endpoint reports \`stations_with_this_connector: 0\` for them rather than implying coverage.
-    `,
+## Spellings
+\`connector=CCS2\`, \`CCS-2\`, \`ccs 2\` and \`ccs\` all mean the same standard. An unknown value returns \`404 UNKNOWN_CONNECTOR\` with the valid values in \`error.details.valid_values\`.
+`,
   },
   {
     id: 'integrating-ev-charging-api-in-python-and-nodejs',
-    title: 'Integrating the API in Python and Node.js',
+    title: 'Integrating the India EV Charging Station API in Python and Node.js',
     seoTitle: 'Integrating the API in Python and Node.js',
     summary:
-      'Dependency-light examples for radius search, filtered directory queries and state aggregates, including error envelopes and retry handling.',
+      'Paging through results, reading the error envelope, honouring Retry-After on 429, and keeping the BEE attribution — with runnable Node.js and Python.',
     readTime: '5 min read',
     category: 'Integration',
     content: `
-## Getting started
-There is no registration, no API key and no CORS configuration to do. Every response uses the same envelope: \`success\`, \`data\` and \`meta\` on the way in, and \`success\` plus \`error { code, message, details }\` on the way out.
+## Overview
+The API is keyless and read-only. Every response is either \`{ success: true, data, meta }\` or \`{ success: false, error: { code, message, details } }\`, and every success carries \`meta.attribution\`, which you should keep wherever you show the data.
 
-\`/v1\` lists every endpoint if you need to discover them at runtime.
-
-## Node.js: radius search
+## Node.js: page through a city
 \`\`\`javascript
-const BASE_URL = 'http://localhost:3000'; // your deployment URL in production
+const BASE_URL = 'https://ev-charging-stations-api.vercel.app';
 
-async function getNearestChargers(lat = 28.6139, lng = 77.209) {
-  const url = new URL(BASE_URL + '/v1/stations/near');
-  url.searchParams.set('lat', lat);
-  url.searchParams.set('lng', lng);
-  url.searchParams.set('radius', '10');
-  url.searchParams.set('limit', '5');
-
-  const response = await fetch(url);
-  const json = await response.json();
-
-  if (!response.ok) {
-    // 400 invalid parameter, 404 station not found, 429 rate limited.
-    throw new Error(json.error.code + ': ' + json.error.message);
+async function getJson(url) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(url);
+    if (response.status === 429) {
+      const wait = Number(response.headers.get('retry-after') || 60);
+      await new Promise((resolve) => setTimeout(resolve, wait * 1000));
+      continue;
+    }
+    const body = await response.json();
+    if (!body.success) throw new Error(body.error.code + ': ' + body.error.message);
+    return body;
   }
+  throw new Error('rate limited three times');
+}
 
-  console.log(json.meta.count + ' stations within ' + json.meta.radius_km + ' km');
-  for (const station of json.data) {
-    console.log(station.name, station.operator, station.distance_km + ' km');
-    console.log('  ' + station.connectors.map((c) => c.type + ' ' + c.power_kw + ' kW').join(', '));
+async function allStations(query) {
+  const out = [];
+  for (let page = 1; ; page += 1) {
+    const body = await getJson(BASE_URL + '/v1/stations?' + query + '&limit=100&page=' + page);
+    out.push(...body.data);
+    if (page >= body.meta.total_pages) return { stations: out, attribution: body.meta.attribution };
   }
 }
 
-getNearestChargers();
+const { stations, attribution } = await allStations('city=Kochi&vehicle=car');
+console.log(stations.length + ' stations in Kochi with a gun a car can use');
+console.log(attribution);
 \`\`\`
 
-## Handling the rate limit
-Requests are limited per client address and each response carries \`RateLimit-Remaining\` and \`RateLimit-Reset\`. A \`429\` also includes \`Retry-After\` in seconds — wait for it rather than retrying immediately.
-
-\`\`\`javascript
-async function getJson(url, attempt = 0) {
-  const response = await fetch(url);
-  if (response.status === 429 && attempt < 3) {
-    const wait = Number(response.headers.get('retry-after') || 5);
-    await new Promise((resolve) => setTimeout(resolve, wait * 1000));
-    return getJson(url, attempt + 1);
-  }
-  return response.json();
-}
-\`\`\`
-
-## Python: paginated directory
+## Python: fast DC chargers for cars near a point
 \`\`\`python
-import requests
+import json
+import urllib.error
+import urllib.parse
+import urllib.request
 
-BASE_URL = "http://localhost:3000"  # your deployment URL in production
+BASE_URL = "https://ev-charging-stations-api.vercel.app"
 
-def get_state_stations(state="Karnataka", limit=10):
-    response = requests.get(
-        f"{BASE_URL}/v1/stations",
-        params={"state": state, "limit": limit},
-        timeout=10,
-    )
-    response.raise_for_status()
-    payload = response.json()
+params = urllib.parse.urlencode({
+    "lat": 28.6139, "lng": 77.2090, "radius": 10,
+    "vehicle": "car", "current": "dc", "min_power_kw": 50, "limit": 5,
+})
+try:
+    with urllib.request.urlopen(f"{BASE_URL}/v1/stations/near?{params}") as response:
+        body = json.load(response)
+except urllib.error.HTTPError as error:
+    body = json.load(error)
+    raise SystemExit(f"{error.code} {body['error']['code']}: {body['error']['message']}")
 
-    if not payload["success"]:
-        raise RuntimeError(payload["error"]["code"])
-
-    meta = payload["meta"]
-    print(f"{meta['total']} stations in {state} ({meta['total_pages']} pages)")
-
-    for station in payload["data"]:
-        print(f"[{station['id']}] {station['name']} - {station['total_capacity_kw']} kW")
-
-get_state_stations()
+for station in body["data"]:
+    print(f"{station['distance_km']} km  {station['operator']}  {station['max_power_kw']} kW  {station['address']}")
+print(body["meta"]["attribution"])
 \`\`\`
 
-## Type handlers
-\`city\` and \`state\` accept padded and mixed-case input, and \`connector\` accepts common spellings such as \`CCS2\` or \`CCS 2\`. A value that matches nothing returns \`400\` with the accepted options in \`error.details.expected\` rather than an empty result set.
-    `,
+## Errors are specific
+A misspelled parameter is \`400 UNKNOWN_PARAMETER\` with the accepted names in \`error.details.allowed\`; an unknown value such as \`vehicle=truck\` is \`404 UNKNOWN_VEHICLE\` with \`error.details.valid_values\`. Nothing is silently ignored, so an empty \`data\` array really means no match.
+`,
   },
 ];

@@ -16,7 +16,7 @@ export default function StatusPage() {
   const dataset = useDataset();
   const [health, setHealth] = useState(null);
   const [meta, setMeta] = useState(null);
-  const [probe, setProbe] = useState({ state: 'idle', roundTripMs: null, serverMs: null, found: null });
+  const [probe, setProbe] = useState({ state: 'idle', roundTripMs: null, found: null });
   const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
@@ -35,19 +35,18 @@ export default function StatusPage() {
   }, [load]);
 
   const runProbe = useCallback(async () => {
-    setProbe({ state: 'running', roundTripMs: null, serverMs: null, found: null });
+    setProbe({ state: 'running', roundTripMs: null, found: null });
     const startedAt = performance.now();
     try {
       const body = await apiGet('/v1/stations/near?lat=12.9716&lng=77.5946&radius=20&limit=25');
       setProbe({
         state: 'done',
         roundTripMs: Number((performance.now() - startedAt).toFixed(1)),
-        serverMs: body.meta.took_ms,
         found: body.meta.total_found,
       });
     } catch (caught) {
       setError(caught);
-      setProbe({ state: 'error', roundTripMs: null, serverMs: null, found: null });
+      setProbe({ state: 'error', roundTripMs: null, found: null });
     }
   }, []);
 
@@ -111,12 +110,7 @@ export default function StatusPage() {
           <Row
             label="Round trip"
             value={probe.roundTripMs !== null ? formatMs(probe.roundTripMs) : '—'}
-            note="Measured in your browser, so it includes network time. Run the probe to see your own figure."
-          />
-          <Row
-            label="Server time"
-            value={probe.serverMs !== null ? formatMs(probe.serverMs) : '—'}
-            note="meta.took_ms: the API's own processing time for the query."
+            note="Measured in your browser, so it includes network time and any CDN cache hit. Run the probe to see your own figure."
           />
           <Row
             label="Probe query"
@@ -124,7 +118,7 @@ export default function StatusPage() {
             note={
               probe.found !== null
                 ? `${formatCount(probe.found)} stations matched inside the radius`
-                : 'Also validates 429 handling and error envelopes'
+                : 'Run the probe to query the live API'
             }
           />
         </dl>
@@ -136,55 +130,66 @@ export default function StatusPage() {
 
       <section className="card mt-6">
         <div className="card-header">
-          <h2 className="text-sm font-semibold text-ink">Dataset provenance</h2>
-          <span className="chip">{meta ? meta.dataset_status : dataset.datasetStatus || '—'}</span>
+          <h2 className="text-sm font-semibold text-ink">Dataset</h2>
+          <span className="chip">{dataset.snapshotLabel || '—'}</span>
         </div>
 
         <div className="border-b border-line bg-subtle px-4 py-3">
           <p className="text-sm leading-relaxed text-ink-muted">
-            <span className="font-semibold text-ink">
-              {meta && meta.provenance && meta.provenance.is_official
-                ? 'Official data.'
-                : 'This is generated sample data, not official Government of India data.'}
-            </span>{' '}
-            {meta && meta.provenance ? meta.provenance.summary : ''}
+            <span className="font-semibold text-ink">Source:</span>{' '}
+            <a className="text-accent hover:text-accent-strong" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
+              {dataset.sourceTitle}
+            </a>
+            , {dataset.sourcePublisher}. BEE publishes no licence for this file; it is republished here with
+            attribution and is not an official BEE service.
           </p>
+          <p className="mt-2 text-xs text-ink-dim">{dataset.attribution}</p>
         </div>
 
         <dl>
           <Row
-            label="Snapshot date"
-            value={(meta && meta.snapshot_date) || dataset.snapshotDate || '—'}
-            note="Date the bundled dataset was generated."
-          />
-          <Row
             label="Stations"
-            value={formatCount(meta ? meta.total_stations : dataset.totalStations)}
-            note="Records served by /v1/stations."
+            value={formatCount(meta ? meta.counts.stations : dataset.totalStations)}
+            note="Chargers at the same operator and coordinates form one station."
           />
           <Row
-            label="States &amp; union territories"
-            value={formatCount(meta ? meta.total_states : dataset.totalStates)}
-            note="Distinct state and UT values present."
+            label="Chargers / guns"
+            value={`${formatCount(meta ? meta.counts.chargers : dataset.totalChargers)} / ${formatCount(meta ? meta.counts.connectors : null)}`}
+            note="One PDF row is one charger; guns are what vehicles plug into."
           />
           <Row
-            label="Cities and districts"
-            value={`${formatCount(meta && meta.total_cities)} / ${formatCount(meta && meta.total_districts)}`}
-            note="Distinct city and district values present."
+            label="States & union territories"
+            value={formatCount(meta ? meta.counts.states : dataset.totalStates)}
+            note="All 36 have at least one station."
           />
           <Row
             label="Charge point operators"
-            value={formatCount(meta && meta.total_operators)}
-            note="Distinct operators present."
+            value={formatCount(meta ? meta.counts.operators : dataset.totalOperators)}
+            note="See /v1/operators."
           />
-          {meta && meta.provenance && meta.provenance.target_source && (
-            <Row
-              label="Intended source"
-              value={meta.provenance.target_source.publisher}
-              note={`${meta.provenance.target_source.name} — ${meta.provenance.target_source.license}. Not yet ingested.`}
-            />
-          )}
+          <Row
+            label="Suspect coordinates"
+            value={formatCount(meta ? meta.counts.suspect_locations : dataset.suspectLocations)}
+            note="Latitude equal to longitude, or outside India. Kept, flagged, and never returned by radius search."
+          />
+          <Row
+            label="Rows rejected"
+            value={formatCount(meta ? meta.counts.rejects : null)}
+            note="Rows whose numbers could not be read (an Excel overflow in place of a coordinate)."
+          />
+          <Row
+            label="PDF created"
+            value={dataset.pdfCreated || '—'}
+            note="BEE updates the list irregularly; a weekly check looks for a new file."
+          />
         </dl>
+        <p className="border-t border-line px-4 py-3 text-xs text-ink-dim">
+          Not in the source: real-time availability, prices, booking and opening hours.{' '}
+          <a className="text-accent hover:text-accent-strong" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
+            Read the data notes
+          </a>{' '}
+          for every known problem and how it is handled.
+        </p>
       </section>
 
       {error && (

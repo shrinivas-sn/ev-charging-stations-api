@@ -4,7 +4,7 @@
   "private": true,
   "description": "Keyless REST API for Indian public electric vehicle charging stations, connectors and power ratings.",
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build": "cd frontend && npm ci --no-audit --no-fund && npm run build",
     "dev": "npm --prefix frontend run dev",
     "start": "node backend/src/index.js",
     "test": "npm --prefix backend test",

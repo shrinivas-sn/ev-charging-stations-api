@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+const require = createRequire(import.meta.url);
 
 const backendData = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'backend', 'data');
 
@@ -52,8 +55,6 @@ export function buildDatasetSummary({ apiBaseUrl = null, topStates = 6 } = {}) {
     stations.find((s) => s.location_quality === 'ok' && (s.max_kw_by_standard.CCS2 || 0) >= 60 && s.state_code === 'KA') ||
     stations.find((s) => s.location_quality === 'ok');
 
-  const { source, ...example } = exampleStation;
-
   return {
     totalStations: meta.counts.stations,
     totalChargers: meta.counts.chargers,
@@ -88,8 +89,45 @@ export function buildDatasetSummary({ apiBaseUrl = null, topStates = 6 } = {}) {
       vehicle_classes: s.vehicle_classes,
       stations: standardCounts.get(s.id),
     })),
-    exampleStation: example,
+    exampleStation,
   };
+}
+
+/**
+ * Example requests and the exact JSON the API returns for them, produced by running
+ * the backend's own parser and service at build time. The docs can therefore never
+ * show a field, count or error the API does not produce.
+ */
+export function buildDocExamples() {
+  const { SPECS, parseQuery } = require('../../backend/src/lib/params.js');
+  const { ApiError } = require('../../backend/src/lib/errors.js');
+  const service = require('../../backend/src/services/stations-service.js');
+
+  const run = (pathAndQuery, spec, call) => {
+    const query = Object.fromEntries(new URL(pathAndQuery, 'http://x').searchParams);
+    try {
+      const result = call(parseQuery(query, spec));
+      return { request: pathAndQuery, status: 200, response: { success: true, data: result.data, meta: result.meta } };
+    } catch (error) {
+      if (!(error instanceof ApiError)) throw error;
+      const body = { success: false, error: { code: error.code, message: error.message } };
+      if (error.details) body.error.details = error.details;
+      return { request: pathAndQuery, status: error.status, response: body };
+    }
+  };
+
+  const near = run('/v1/stations/near?lat=12.9716&lng=77.5946&vehicle=car&current=dc&min_power_kw=50&limit=1', SPECS.near, service.getNearbyStations);
+  const stations = run('/v1/stations?state=KA&connector=CCS2&min_power_kw=50&limit=1', SPECS.stations, service.getStations);
+  const firstId = near.response.data[0].id;
+  const station = {
+    request: `/v1/stations/${firstId}`,
+    status: 200,
+    response: { success: true, data: service.getStationById(firstId), meta: service.sourceMeta() },
+  };
+  const error = run('/v1/stations?min_power=50', SPECS.stations, service.getStations);
+  const cities = run('/v1/cities?state=GA', SPECS.cities, service.getCities);
+  cities.response.data = cities.response.data.slice(0, 3);
+  return { near, stations, station, error, cities };
 }
 
 /**

@@ -54,6 +54,16 @@ export function readInjectedDataset() {
   }
 }
 
+/** Docs examples generated at build time from the real API code (see scripts/dataset-summary.mjs). */
+export function readInjectedExamples() {
+  try {
+    // eslint-disable-next-line no-undef
+    return typeof __EV_DOC_EXAMPLES__ === 'undefined' ? null : __EV_DOC_EXAMPLES__;
+  } catch {
+    return null;
+  }
+}
+
 /** Formats a count, or an em dash when the value is not known yet. */
 export function formatCount(value) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return '—';

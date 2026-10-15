@@ -13,7 +13,7 @@ export const PAGE_META = {
   '/': {
     title: 'India EV Charging Station Directory API',
     description:
-      'Keyless REST API for Indian public electric vehicle charging stations: radius search, state, city, operator and connector filters, plus a connector reference.',
+      'Keyless REST API for India’s public EV charging stations from BEE: radius search with vehicle, AC/DC, charging standard and per-gun power filters.',
   },
   '/docs': {
     title: 'API reference — India EV Charging Station API',
@@ -23,7 +23,7 @@ export const PAGE_META = {
   '/playground': {
     title: 'Radius search playground — India EV Charging API',
     description:
-      'Run live radius searches against Indian EV charging stations. Filter by connector and capacity, and see every match plotted on a map.',
+      'Run live radius searches over India’s public EV charging stations. Filter by vehicle, AC/DC, standard and power, and see every match on a map.',
   },
   '/guides': {
     title: 'Integration guides — India EV Charging API',
@@ -33,7 +33,7 @@ export const PAGE_META = {
   '/status': {
     title: 'Status and dataset — India EV Charging API',
     description:
-      'Live service status, measured latency, and the provenance, coverage and snapshot date of the bundled EV charging station dataset.',
+      'Live service status, a latency probe you can run, and the source, coverage and known data problems of the BEE charging station list.',
   },
 };
 
