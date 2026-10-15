@@ -1,31 +1,28 @@
 # Project Status: India EV Charging Station Directory API
 
 Last Updated: 2026-10-15
-Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 4 done
+Phase: Rebuilding on real BEE data — Phases 1–4 done (about 75%); remaining work in `PLAN.md`
 
 ## Current State
 
-- **Work branch:** `rebuild/bee-real-data`. Nothing from it is on `main`; the owner has not authorised a merge.
+- **Path / branch:** `E:\OSC\api-projects\projects\ev-charging-stations-api`, branch `rebuild/bee-real-data` (local only, never pushed). Nothing is on `main`; the owner has not authorised a merge.
 - **Live site** (`https://ev-charging-stations-api.vercel.app`, deployed from `main`): still serves the old generated sample (28,698 invented stations) until the rebuild ships.
-- **Real source found:** BEE "EV Public Charging Stations Data till 26th October 2025" (PDF, 1,159 pages, 39,641 charger rows). data.gov.in has only aggregate tables. Details in `PLAN.md` Facts.
-- **Real dataset built:** 29,184 stations / 39,640 chargers from all 39,641 PDF rows (1 rejected), 36 states/UTs, 70 operators, 115 suspect coordinates flagged. Ingestion: `ingest/` (Python, PDF only) → `backend/scripts/build-dataset.js`. Notes: `DOCS/DATA-NOTES.md`.
-- **API (branch):** new contract on real data — strict validation, per-gun vehicle/current/connector/power filters, paged radius search excluding suspect locations, `/v1/cities`, attribution on every response, CDN-safe caching, 429 with Retry-After. `npm test` → 119 pass, 0 fail. Local cold start 352 ms, warm ~12 ms.
-- **Test matrix:** 64 of 95 rows proven; the rest are frontend, CI and deployment rows for Phases 4–6.
-- **Done:** junk deploy-config edits discarded; old plans archived in `DOCS/WORK/2026-10-15/` with `REVIEW.md`; test matrix `DOCS/TEST-MATRIX.md` (95 rows, all unproven).
+- **Real source:** BEE "EV Public Charging Stations Data till 26th October 2025" (PDF, http only). Republished with attribution; BEE publishes no licence. Notes: `DOCS/DATA-NOTES.md`.
+- **Dataset:** 29,184 stations / 39,640 chargers, 36 states/UTs, 70 operators, 115 suspect coordinates flagged, 1 row rejected.
+- **API (branch):** strict validation, per-gun filters, paged radius search, `/v1/cities`, attribution on every response, CDN caching, 429 + Retry-After. `npm test` → 119 pass, 0 fail.
+- **Frontend (branch):** real data, new filters, MapLibre fixed, graphite + amber palette (`PICKS.md`). Mobile-check: no blockers/majors (`MOBILE.md`). Frontend tests 18 + 2 pass, SEO 0 errors.
+- **Plan:** `PLAN.md` (Phases 5–7, checker: 3 phases / 12 tasks). Previous plan archived at `DOCS/WORK/2026-10-15/PLAN-bee-rebuild-phases-1-4.md`.
+
+## Constraints and blockers
+
+- No merge or push to `main` without the owner's explicit go-ahead (any push to `main` deploys production). Pushing the branch for a preview is allowed (PLAN Task 6.3).
+- Never stop the servers on ports 3000/5173 (another agent's). They lock `frontend/node_modules`, so `npm run verify` fails locally on `npm ci` EPERM — use the split verify in `PLAN.md` Rules.
+- Git Bash: `export MSYS_NO_PATHCONV=1` before commands that pass `/route` arguments.
+- Owner inputs that may be needed: a Vercel preview protection-bypass secret (Task 6.3).
 
 ## Next up (start here)
 
-Follow `PLAN.md` (fresh plan for the remaining work, written 15/10/2026; the Phases 1–4 plan is archived at `DOCS/WORK/2026-10-15/PLAN-bee-rebuild-phases-1-4.md`).
-
-1. Phase 5 — Task 5.1: `vercel.json` (bom1, `includeFiles: backend/data/**`), test first. Then 5.2 check-upstream script, 5.3 CI + weekly BEE workflow, 5.4 api.json/README/DECISIONS (also fixes a docs string that would fail `docs-route-parity`).
-2. Phase 6: review, smoke script, push the branch for a Vercel **preview**, guide checks. Ends with a STOP for the owner.
-3. Phase 7 (only after the owner says "merge to main"): PR + merge, production gates, hub records, close the plan.
-
-Mobile-check (Task 4.5) done: no blockers or majors, see `MOBILE.md`. Probe with one viewport per browser launch (cache issue noted there). Preview: `PORT=3920 npm start`, then `API_PROXY_TARGET=http://localhost:3920 npx vite preview --port 4180` in frontend/ (ports 3000/5173 belong to the previous agent).
-
-Overall: about 75% done (Phases 1–4 done; palette reviewed in a browser: consistent at desktop and phone).
-
-## Plan issues
-
-1. Extractor test runs as `python -I ingest/test_extract.py`; page 1159 has 37 rows (local fix).
-2. Charger power is modelled per gun (`guns[].kw`, `max_power_kw`, `max_kw_by_standard`), because combo chargers list per-gun ratings and a vehicle receives the gun rating. `min_power_kw` filters on gun power. API contract amended.
+1. `PLAN.md` Phase 5, Task 5.1: write `backend/test/vercel-config.test.js` (3 tests fail first), then add `"regions": ["bom1"]`, set `includeFiles` to `backend/data/**`, drop the `/v1/(.*)` Cache-Control header.
+2. Then Tasks 5.2 (check-upstream script), 5.3 (CI + weekly BEE workflow), 5.4 (api.json, docs string, README, DECISIONS).
+3. Phase 6: review, smoke script, branch preview, guide checks — ends with a STOP for the owner.
+4. Phase 7 only after the owner says "merge to main".
