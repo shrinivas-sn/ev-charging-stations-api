@@ -281,6 +281,59 @@ function getNearbyStations(values) {
   };
 }
 
+/**
+ * Returns lightweight station pins within `radius` km for interactive map plotting.
+ * Avoids heavy charger schemas or pagination so all matching stations can be rendered.
+ */
+function getNearbyStationPins(values) {
+  const { stations } = load();
+  const filters = resolveFilters({ ...values, location_quality: "ok" });
+  const { lat, lng, radius } = values;
+  const limit = values.limit || 5000;
+
+  const latDelta = radius / 110.574;
+  const edgeLat = Math.min(89.9, Math.abs(lat) + latDelta);
+  const lngDelta = radius / (111.32 * Math.max(Math.cos(edgeLat * (Math.PI / 180)), 0.001));
+
+  const found = [];
+  for (const station of stations) {
+    if (Math.abs(station.latitude - lat) > latDelta) continue;
+    if (Math.abs(station.longitude - lng) > lngDelta) continue;
+    if (!matches(station, filters)) continue;
+    const distance = Math.round(haversineKm(lat, lng, station.latitude, station.longitude) * 100) / 100;
+    if (distance <= radius) {
+      found.push({
+        id: station.id,
+        operator: station.operator,
+        city: station.city,
+        state: station.state,
+        address: station.address,
+        latitude: station.latitude,
+        longitude: station.longitude,
+        distance_km: distance,
+        max_power_kw: station.max_power_kw,
+        total_chargers: station.total_chargers,
+        vehicle_classes: station.vehicle_classes,
+        max_kw_by_standard: station.max_kw_by_standard,
+        is_fast_dc: station._carFastDc ? 1 : 0,
+      });
+      if (found.length >= limit) break;
+    }
+  }
+  found.sort((a, b) => a.distance_km - b.distance_km || (a.id < b.id ? -1 : 1));
+
+  return {
+    data: found,
+    meta: {
+      center: { lat, lng },
+      radius_km: radius,
+      total_found: found.length,
+      filters_applied: appliedFilters({ ...filters, locationQuality: "any" }),
+      ...sourceMeta(),
+    },
+  };
+}
+
 function getStationById(id) {
   if (!STATION_ID.test(id)) {
     throw new ApiError(400, "INVALID_STATION_ID", `'${id}' is not a station id. Ids look like evs_1a2b3c4d5e.`, {
@@ -373,6 +426,7 @@ module.exports = {
   getStations,
   getStationById,
   getNearbyStations,
+  getNearbyStationPins,
   getStatesSummary,
   getCities,
   getOperators,

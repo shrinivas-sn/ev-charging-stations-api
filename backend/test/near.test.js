@@ -76,4 +76,18 @@ describe("Radius search", () => {
     const { body } = await server.get(`/v1/stations/near?${BENGALURU}`);
     assert.equal(body.meta.radius_km, 10);
   });
+
+  test("/v1/stations/near/pins returns lightweight pins without pagination", async () => {
+    const { status, body } = await server.get(`/v1/stations/near/pins?${BENGALURU}&radius=5`);
+    assert.equal(status, 200);
+    assert.ok(body.data.length > 25, "returns all matching stations rather than 25 limit");
+    for (const pin of body.data) {
+      assert.ok(pin.id.startsWith("evs_"));
+      assert.ok(typeof pin.latitude === "number");
+      assert.ok(typeof pin.longitude === "number");
+      assert.ok(pin.distance_km <= 5);
+      assert.ok(!("chargers" in pin), "omits heavy chargers structure");
+      assert.ok(!("source" in pin), "omits source field");
+    }
+  });
 });

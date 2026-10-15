@@ -50,25 +50,27 @@ function stationsFeatureCollection(stations) {
   return {
     type: 'FeatureCollection',
     features: mappableStations(stations).map((station) => ({
-        type: 'Feature',
+      type: 'Feature',
+      id: station.id,
+      properties: {
         id: station.id,
-        properties: {
-          id: station.id,
-          operator: station.operator || 'Unknown operator',
-          address: station.address || '',
-          city: station.city || '',
-          state: station.state || '',
-          max_power_kw: station.max_power_kw || 0,
-          distance_km: station.distance_km,
-          vehicles: vehicleLabel(station.vehicle_classes),
-          chargers: station.total_chargers || 0,
-          is_fast_dc: isFastDc(station) ? 1 : 0,
-          connectors: Object.entries(station.max_kw_by_standard || {})
-            .map(([id, kw]) => `${standardLabel(id)} ${kw} kW`)
-            .join(' · '),
-        },
-        geometry: { type: 'Point', coordinates: [station.longitude, station.latitude] },
-      })),
+        operator: station.operator || 'Unknown operator',
+        address: station.address || '',
+        city: station.city || '',
+        state: station.state || '',
+        max_power_kw: station.max_power_kw || 0,
+        distance_km: station.distance_km,
+        vehicles: typeof station.vehicles === 'string' ? station.vehicles : vehicleLabel(station.vehicle_classes),
+        chargers: station.total_chargers || station.chargers || 0,
+        is_fast_dc: typeof station.is_fast_dc === 'number' ? station.is_fast_dc : (isFastDc(station) ? 1 : 0),
+        connectors: station.connectors || Object.entries(station.max_kw_by_standard || {})
+          .map(([id, kw]) => `${standardLabel(id)} ${kw} kW`)
+          .join(' · '),
+        latitude: station.latitude,
+        longitude: station.longitude,
+      },
+      geometry: { type: 'Point', coordinates: [station.longitude, station.latitude] },
+    })),
   };
 }
 
@@ -113,12 +115,10 @@ function popupHtml(properties) {
               .join('')}</div>`
         : ''
       }
-      <a href="https://www.openstreetmap.org/?mlat=${properties.latitude}&mlon=${
-        properties.longitude
-      }#map=17/${properties.latitude}/${properties.longitude}"
+      <a href="https://www.google.com/maps?q=${properties.latitude},${properties.longitude}"
          target="_blank" rel="noopener noreferrer"
          style="display:block;margin-top:10px;text-align:center;background:${palette.accent};color:${palette.ink};padding:8px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;">
-        Open in OpenStreetMap
+        Open in Google Maps
       </a>
     </div>`;
 }
@@ -180,7 +180,7 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
 
       map.on('click', LAYER_STATION_DOT, (event) => {
         const feature = event.features && event.features[0];
-        if (feature && selectionRef.current) selectionRef.current(Number(feature.properties.id));
+        if (feature && selectionRef.current) selectionRef.current(String(feature.properties.id));
       });
 
       map.on('mouseenter', LAYER_STATION_DOT, () => {

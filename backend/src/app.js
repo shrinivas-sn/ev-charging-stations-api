@@ -125,6 +125,7 @@ const KNOWN_PATHS = [
   "/v1",
   "/v1/stations",
   "/v1/stations/near",
+  "/v1/stations/near/pins",
   "/v1/stations/:id",
   "/v1/states",
   "/v1/cities",

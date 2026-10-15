@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildNearQuery } from './api.js';
+import { buildNearQuery, buildNearPinsQuery } from './api.js';
 
 test('buildNearQuery emits the documented parameters in a fixed order', () => {
   assert.equal(
@@ -17,5 +17,12 @@ test('buildNearQuery omits empty filters and page 1', () => {
   assert.equal(
     buildNearQuery({ lat: 1, lng: 2, radiusKm: 5, connector: '', current: '', vehicle: '', minPowerKw: '', page: 1 }),
     '/v1/stations/near?lat=1&lng=2&radius=5&limit=25'
+  );
+});
+
+test('buildNearPinsQuery formats query for pins endpoint', () => {
+  assert.equal(
+    buildNearPinsQuery({ lat: 12.97, lng: 77.59, radiusKm: 15, vehicle: 'car', current: 'dc', connector: '', minPowerKw: '' }),
+    '/v1/stations/near/pins?lat=12.97&lng=77.59&radius=15&current=dc&vehicle=car'
   );
 });

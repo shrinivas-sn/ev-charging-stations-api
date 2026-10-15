@@ -15,7 +15,15 @@ router.get(
   })
 );
 
-// Registered before /stations/:id so "near" is never read as an id.
+// Registered before /stations/:id so "near" and "near/pins" are never read as an id.
+router.get(
+  "/stations/near/pins",
+  withErrors((req, res) => {
+    const result = service.getNearbyStationPins(parseQuery(req.query, SPECS.nearPins));
+    return res.json({ success: true, data: result.data, meta: result.meta });
+  })
+);
+
 router.get(
   "/stations/near",
   withErrors((req, res) => {

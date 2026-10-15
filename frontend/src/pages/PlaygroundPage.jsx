@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StationMap from '../components/StationMap';
-import { ApiError, apiGet, buildNearQuery } from '../lib/api';
+import { ApiError, apiGet, buildNearQuery, buildNearPinsQuery } from '../lib/api';
 import { formatCount, useDataset } from '../lib/dataset';
 import { isFastDc, standardLabel, vehicleLabel } from '../lib/stations';
 
@@ -75,10 +75,12 @@ export default function PlaygroundPage() {
 
   const [coords, setCoords] = useState({ lat: PRESETS[0].lat, lng: PRESETS[0].lng });
   const [result, setResult] = useState(null);
+  const [mapPins, setMapPins] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [hasQueried, setHasQueried] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [coordsDirty, setCoordsDirty] = useState(false);
 
   const [geoState, setGeoState] = useState({ status: 'idle', message: null });
@@ -88,8 +90,7 @@ export default function PlaygroundPage() {
   const latValidation = parseCoordinate(latText, 90);
   const lngValidation = parseCoordinate(lngText, 180);
 
-  // Commit typed coordinates only once the user pauses, so a request is never
-  // fired for a half-typed latitude.
+  // Preview coordinates on map center when typed coordinates are valid
   useEffect(() => {
     if (!coordsDirty) return undefined;
     const timer = setTimeout(() => {
@@ -102,19 +103,32 @@ export default function PlaygroundPage() {
     return () => clearTimeout(timer);
   }, [latText, lngText, coordsDirty, latValidation.ok, lngValidation.ok]);
 
-  // Fetch on every committed parameter change, cancelling the previous request.
-  useEffect(() => {
-    if (retryAfter > 0) return undefined;
+  // Execute query on demand when "Run query" is clicked
+  const executeQuery = useCallback(() => {
+    if (retryAfter > 0) return;
+    if (!latValidation.ok || !lngValidation.ok) {
+      setCoordsDirty(true);
+      return;
+    }
 
+    const targetCoords = { lat: latValidation.value, lng: lngValidation.value };
+    setCoords(targetCoords);
+    setCoordsDirty(false);
+    setHasQueried(true);
+    setLoading(true);
+    setMapLoading(true);
+    setError(null);
+    setExtraPages({ page: 1, items: [], loading: false });
+
+    if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setLoading(true);
-    setExtraPages({ page: 1, items: [], loading: false });
+    // 1. Fetch paginated directory list
     apiGet(
       buildNearQuery({
-        lat: coords.lat,
-        lng: coords.lng,
+        lat: targetCoords.lat,
+        lng: targetCoords.lng,
         radiusKm,
         limit: RESULT_LIMIT,
         connector,
@@ -127,8 +141,8 @@ export default function PlaygroundPage() {
       .then((body) => {
         setResult(body);
         setError(null);
-        setSelectedStationId((current) => {
-          if (current && body.data.some((station) => station.id === current)) return current;
+        setSelectedStationId((curr) => {
+          if (curr && body.data.some((station) => station.id === curr)) return curr;
           return body.data.length > 0 ? body.data[0].id : null;
         });
       })
@@ -143,8 +157,41 @@ export default function PlaygroundPage() {
         if (!controller.signal.aborted) setLoading(false);
       });
 
-    return () => controller.abort();
-  }, [coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw, refreshKey, retryAfter]);
+    // 2. Fetch all pins for the map
+    apiGet(
+      buildNearPinsQuery({
+        lat: targetCoords.lat,
+        lng: targetCoords.lng,
+        radiusKm,
+        connector,
+        current,
+        vehicle,
+        minPowerKw,
+      }),
+      { signal: controller.signal }
+    )
+      .then((body) => {
+        if (body && Array.isArray(body.data)) {
+          setMapPins(body.data);
+        }
+      })
+      .catch(() => {
+        // Fallback to paginated data if pins endpoint fails
+        setMapPins([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMapLoading(false);
+      });
+  }, [
+    retryAfter,
+    latValidation,
+    lngValidation,
+    radiusKm,
+    connector,
+    current,
+    vehicle,
+    minPowerKw,
+  ]);
 
   // Connector choices come from the API, so the list always matches the data.
   useEffect(() => {
@@ -196,7 +243,7 @@ export default function PlaygroundPage() {
     () => () => {
       if (loadMoreRef.current) loadMoreRef.current.abort();
     },
-    [coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw, refreshKey]
+    [coords.lat, coords.lng, radiusKm, connector, current, vehicle, minPowerKw]
   );
 
   // Count the rate-limit window down so the user knows when to retry.
@@ -263,9 +310,32 @@ export default function PlaygroundPage() {
     );
   }, []);
 
-  const stations = result ? [...result.data, ...extraPages.items] : [];
+  const listStations = result ? [...result.data, ...extraPages.items] : [];
+  const mapStations = useMemo(() => {
+    if (!hasQueried) return [];
+    if (mapPins.length > 0) return mapPins;
+    return listStations;
+  }, [hasQueried, mapPins, listStations]);
   const totalPages = result ? result.meta.total_pages : 0;
   const mapCenter = coords;
+
+  const resetFilters = useCallback(() => {
+    setConnector('');
+    setCurrent('');
+    setVehicle('');
+    setMinPowerKw('');
+    setRadiusKm(15);
+    setPresetIndex(0);
+    setLatText(String(PRESETS[0].lat));
+    setLngText(String(PRESETS[0].lng));
+    setCoords({ lat: PRESETS[0].lat, lng: PRESETS[0].lng });
+    setCoordsDirty(false);
+    setResult(null);
+    setMapPins([]);
+    setSelectedStationId(null);
+    setError(null);
+    setHasQueried(false);
+  }, []);
 
   const errorKind = useMemo(() => {
     if (!error) return null;
@@ -505,7 +575,7 @@ export default function PlaygroundPage() {
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={() => setRefreshKey((key) => key + 1)}
+                  onClick={executeQuery}
                   disabled={loading || retryAfter > 0}
                 >
                   {retryAfter > 0 ? `Rate limited — retry in ${formatRetry(retryAfter)}` : 'Run query'}
@@ -513,18 +583,12 @@ export default function PlaygroundPage() {
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() => {
-                    setConnector('');
-                    setCurrent('');
-                    setVehicle('');
-                    setMinPowerKw('');
-                    setRadiusKm(15);
-                  }}
+                  onClick={resetFilters}
                 >
                   Reset filters
                 </button>
                 <span className="hint" aria-live="polite">
-                  {loading ? 'Querying…' : 'Up to date'}
+                  {loading || mapLoading ? 'Querying…' : hasQueried ? 'Up to date' : 'Ready'}
                 </span>
               </div>
             </div>
@@ -536,7 +600,7 @@ export default function PlaygroundPage() {
               <h2 className="text-sm font-semibold text-ink">
                 Nearby stations
                 <span className="ml-2 font-normal text-ink-dim">
-                  {formatCount(result ? result.meta.total_found : null)} within {radiusKm} km
+                  {hasQueried && result ? `${formatCount(result.meta.total_found)} within ${radiusKm} km` : '—'}
                 </span>
               </h2>
             </div>
@@ -568,7 +632,7 @@ export default function PlaygroundPage() {
                   <button
                     type="button"
                     className="btn-secondary mt-2"
-                    onClick={() => setRefreshKey((key) => key + 1)}
+                    onClick={executeQuery}
                   >
                     Try again
                   </button>
@@ -577,18 +641,31 @@ export default function PlaygroundPage() {
             )}
 
             <ul className={`divide-y divide-line ${isStale ? 'opacity-60' : ''}`}>
-              {stations.length === 0 && !loading && !error && (
+              {!hasQueried && !loading && (
+                <li className="px-4 py-12 text-center text-sm text-ink-muted">
+                  Choose your search parameters and click{' '}
+                  <button
+                    type="button"
+                    onClick={executeQuery}
+                    className="font-medium text-ink underline hover:text-accent-ink"
+                  >
+                    Run query
+                  </button>{' '}
+                  to view stations on the map and in the directory.
+                </li>
+              )}
+              {hasQueried && listStations.length === 0 && !loading && !error && (
                 <li className="px-4 py-10 text-center text-sm text-ink-muted">
                   No stations matched. Try a larger radius, or clear the vehicle, current, standard
                   and power filters.
                 </li>
               )}
-              {stations.length === 0 && loading && (
+              {hasQueried && listStations.length === 0 && loading && (
                 <li className="px-4 py-10 text-center text-sm text-ink-dim">
                   Searching within {radiusKm} km…
                 </li>
               )}
-              {stations.map((station) => {
+              {listStations.map((station) => {
                 const isSelected = station.id === selectedStationId;
                 return (
                   <li key={station.id}>
@@ -618,7 +695,7 @@ export default function PlaygroundPage() {
                         </span>
                       </div>
                       <div className="mt-1.5 flex flex-wrap gap-1">
-                        {Object.entries(station.max_kw_by_standard).map(([id, kw]) => (
+                        {Object.entries(station.max_kw_by_standard || {}).map(([id, kw]) => (
                           <span key={id} className="chip">
                             {standardLabel(id)} {kw} kW
                           </span>
@@ -639,7 +716,7 @@ export default function PlaygroundPage() {
                 >
                   {extraPages.loading
                     ? 'Loading…'
-                    : `Load more (${formatCount(stations.length)} of ${formatCount(result.meta.total_found)})`}
+                    : `Load more (${formatCount(listStations.length)} of ${formatCount(result.meta.total_found)})`}
                 </button>
               </div>
             )}
@@ -650,21 +727,28 @@ export default function PlaygroundPage() {
         <div className="lg:col-span-7 lg:sticky lg:top-20">
           <section className="card">
             <div className="card-header">
-              <h2 className="text-sm font-semibold text-ink">Map</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-ink">Map</h2>
+                {hasQueried && mapStations.length > 0 && (
+                  <span className="text-xs text-ink-dim font-mono">
+                    ({formatCount(mapStations.length)} pins)
+                  </span>
+                )}
+              </div>
               <a
                 className="hint underline hover:text-ink"
-                href={`https://www.openstreetmap.org/#map=13/${mapCenter.lat}/${mapCenter.lng}`}
+                href={`https://www.google.com/maps?q=${mapCenter.lat},${mapCenter.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Open area in OpenStreetMap
+                Open center in Google Maps
               </a>
             </div>
             <div className="p-3">
               <StationMap
                 center={mapCenter}
                 radiusKm={radiusKm}
-                stations={stations}
+                stations={mapStations}
                 selectedStationId={selectedStationId}
                 onSelectStation={setSelectedStationId}
               />

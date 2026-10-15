@@ -78,3 +78,19 @@ export function buildNearQuery({ lat, lng, radiusKm, limit = 25, connector, curr
   if (page && page > 1) params.set('page', String(page));
   return `/v1/stations/near?${params.toString()}`;
 }
+
+/**
+ * Builds a /v1/stations/near/pins query string for fetching lightweight map points.
+ */
+export function buildNearPinsQuery({ lat, lng, radiusKm, connector, current, vehicle, minPowerKw }) {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+    radius: String(radiusKm),
+  });
+  if (connector) params.set('connector', connector);
+  if (current) params.set('current', current);
+  if (vehicle) params.set('vehicle', vehicle);
+  if (minPowerKw) params.set('min_power_kw', String(minPowerKw));
+  return `/v1/stations/near/pins?${params.toString()}`;
+}

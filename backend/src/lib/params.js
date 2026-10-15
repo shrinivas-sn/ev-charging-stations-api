@@ -40,6 +40,13 @@ const SPECS = {
     ...FILTERS,
     ...PAGING,
   },
+  nearPins: {
+    lat: { type: "number", min: -90, max: 90, required: true, code: "INVALID_LATITUDE" },
+    lng: { type: "number", min: -180, max: 180, required: true, code: "INVALID_LONGITUDE" },
+    radius: { type: "number", min: 0.1, max: 100, default: 10 },
+    ...FILTERS,
+    limit: { type: "int", min: 1, max: 10000, default: 5000 },
+  },
   cities: { state: text() },
   none: {},
 };
