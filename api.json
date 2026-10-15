@@ -44,7 +44,7 @@
     { "path": "/status", "base": "portal", "kind": "page" },
     { "path": "/v1", "base": "api", "kind": "api" },
     { "path": "/v1/stations", "base": "api", "kind": "api" },
-    { "path": "/v1/stations/near", "base": "api", "kind": "api" },
+    { "path": "/v1/stations/near?lat=12.9716&lng=77.5946", "base": "api", "kind": "api" },
     { "path": "/v1/stations/evs_ef45e67bd1", "base": "api", "kind": "api" },
     { "path": "/v1/states", "base": "api", "kind": "api" },
     { "path": "/v1/cities", "base": "api", "kind": "api" },
