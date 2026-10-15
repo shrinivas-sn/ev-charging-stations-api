@@ -912,3 +912,11 @@ Verified:   `python -I ingest/test_extract.py` → OK (9 tests). Full extraction
 Surprises:  263 rows first rejected were valid combo fast chargers with per-gun rating lists → gun model (Plan issue 2). PDF upstream unchanged (Content-Length 7942286, Last-Modified 22 Apr 2026, sha256 f519218f…). stations.json is 21.8 MB — watch function cold start in Task 5.1/6.2.
 Next:       Task 3.1 — rewrite backend/test/api.test.js for the Phase 3 contract (gun-based filters per issue 2), then the service layer.
 Commit:     7e21f47, fd39be6, 6398a35, 05cf474
+
+### Phase 3 — 15/10/2026
+Done:       Service, params, routes and app rewritten for the Phase 3 contract (gun-based filters per issue 2). Tests split per task: api, validation, filters, near, reference-endpoints, http, ratelimit (+ helpers.js). Also proved B-13 (missing/malformed reference table names the file).
+Verified:   `npm test` → `# pass 119 # fail 0`. Local `npm start` (port 3918): cold `/v1/stations/near?lat=12.97&lng=77.59&vehicle=car&min_power_kw=50` 0.352 s, warm 0.013 s; car+DC+50 kW near central Bengaluru → total_found 10, nearest Reliance BP 0.5 km (CCS2 60 kW). `/v1/cities` (all India) 515 KB. test-plan-check → `Test plan valid: 95 rows`, 64 proven.
+Surprises:  none beyond issue 2. Rate limit default lowered from 300 to 100 per CONVENTIONS (Decisions).
+Next:       Task 4.1 — remove frontend `file:..` dependency, rewrite scripts/dataset-summary.mjs for the new meta.json, add frontend/.env.production.
+Commit:     428342d, b468cb4, 0fd3b31, 5d5ec8c, 23ceb3c, 24819e4, plus reference-table fix
+
