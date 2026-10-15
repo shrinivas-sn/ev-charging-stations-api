@@ -1,43 +1,64 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>India EV Charging Station Directory API — Free, Keyless REST API</title>
-    <meta name="description" content="Free keyless REST API for 27,000+ public electric vehicle charging stations in India. Spatial radius search, CCS-2, Type-2, Bharat DC connector specs." />
-    <link rel="canonical" href="https://ev-charging-stations-api.vercel.app/" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <title>India EV Charging Station Directory API — keyless REST API</title>
+    <meta
+      name="description"
+      content="Keyless REST API for Indian public electric vehicle charging stations: radius search, filters and a connector reference."
+    />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="canonical" href="__SITE_URL__/" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="India EV Charging Station Directory API" />
-    <meta property="og:description" content="Free, keyless REST API for 27,000+ public electric vehicle charging stations across India." />
-    <meta property="og:url" content="https://ev-charging-stations-api.vercel.app/" />
+    <meta property="og:site_name" content="India EV Charging Station Directory API" />
+    <meta property="og:locale" content="en_IN" />
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="India EV Charging Station Directory API" />
+    <meta
+      property="og:description"
+      content="Keyless REST API for Indian public electric vehicle charging stations: radius search, filters and connector reference."
+    />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:image" content="__SITE_URL__/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="India EV Charging Station Directory API" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="India EV Charging Station Directory API" />
-    <meta name="twitter:description" content="Free, keyless REST API for 27,000+ public electric vehicle charging stations across India." />
+    <meta
+      name="twitter:description"
+      content="Keyless REST API for Indian public electric vehicle charging stations: radius search, filters and connector reference."
+    />
+    <meta name="twitter:image" content="__SITE_URL__/og-image.png" />
+    <meta name="twitter:image:alt" content="India EV Charging Station Directory API" />
 
-    <!-- WebAPI Structured Data -->
+    <!--WEBAPI-LD-START-->
+    <!-- Structured data: applies to the API landing page only -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebAPI",
         "name": "India EV Charging Station Directory API",
-        "description": "Free, keyless REST API for 27,000+ public electric vehicle charging stations in India with GPS coordinates, connector types, and kW power ratings.",
-        "url": "https://ev-charging-stations-api.vercel.app",
-        "documentation": "https://ev-charging-stations-api.vercel.app/docs",
+        "description": "Keyless REST API for Indian public electric vehicle charging stations with coordinates, connector standards and power ratings. Ships with a generated sample dataset.",
+        "url": "__SITE_URL__",
+        "documentation": "__SITE_URL__/docs",
+        "termsOfService": "__SITE_URL__/docs",
         "provider": {
           "@type": "Organization",
           "name": "Open Source Community (OSC) India"
-        },
-        "license": "https://data.gov.in/godl",
-        "termsOfService": "https://data.gov.in/godl"
+        }
       }
     </script>
+    <!--WEBAPI-LD-END-->
   </head>
-  <body class="bg-[#080c14] text-slate-100 min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

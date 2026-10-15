@@ -1,16 +1,40 @@
 # Project Status: India EV Charging Station Directory API
 
 Last Updated: 2026-10-15
-Phase: Production Ready & Verified
+Phase: Hardened, not deployed
 
 ## Current State
-- **Backend**: Express REST server with in-memory Haversine spatial index (<4ms) over 27,248 public stations across 36 States & UTs.
-- **Frontend**: React 18 + Vite with full SSG prerender (8 static pages, 404.html, sitemap.xml, robots.txt).
-- **Workbench**: Synchronized dark-mode Leaflet OpenStreetMap canvas (CartoDB Dark Matter) with radial distance circle, color-coded station pins, popups, and direct Google Maps directions links.
-- **Quality Gates**: 14/14 API integration tests passing; 0 SEO errors; 100% free & keyless.
-- **Remote Repo**: https://github.com/shrinivas-sn/ev-charging-stations-api (main up to date).
+
+- **Dataset:** Generated sample data, 28,698 stations across all 36 states and UTs, 104 cities,
+  9 operators. Deterministic generator (`backend/scripts/generate-data.js`, seed 20261015).
+  **Not official data** — labelled as such in the API, the UI and the README.
+- **Backend:** Express. Strict parameter validation (400 with codes, never silent), input
+  normalisation (connector spellings, city aliases, trimming), server-side filters on both list and
+  radius endpoints, and per-client rate limiting via `trust proxy`.
+- **Tests:** 36/36 passing (`npm test`), including provenance disclosure and per-client rate-limit
+  keying.
+- **Frontend:** React 18 + Vite, light minimalist design system, statically prerendered (8 pages,
+  `404.html`, sitemap + robots when `SITE_URL` is set).
+- **Playground:** debounced input, abortable requests, server-side connector and capacity filters,
+  inline errors with a rate-limit countdown, geolocation errors shown inline (no `alert()`).
+- **Map:** MapLibre GL + OpenFreeMap vector tiles — keyless, no request limits. Replaces the previous
+  CARTO URL (now key-gated) and the CSS tile-inversion hack.
+- **Quality gates:** SEO gate reports 0 errors / 0 warnings; `api.json` passes the pipeline manifest
+  validator.
+- **Measured latency:** ~6 ms warm for a full 25-result radius query, ~4 ms for a filtered directory
+  page; cold start longer because the 18 MB dataset is loaded on first request.
 
 ## Next up (start here)
-1. Deploy to Vercel via CLI: `vercel --prod` to bind https://ev-charging-stations-api.vercel.app.
-2. Run live health probe against production URL: `curl -s https://ev-charging-stations-api.vercel.app/health`.
-3. Submit entry to `public-apis/public-apis` in Transportation / Open Data category.
+
+1. **Ingest the official dataset.** Everything else is polish by comparison; the API currently
+   serves invented stations. See "Replacing the dataset" in `README.md`.
+2. **Deploy.** `SITE_URL=https://your-origin npm run build && npx vercel --prod`, then
+   `curl -s https://your-origin/health`. Confirm `/v1` answers and that CORS works from a browser.
+3. Submit to `public-apis/public-apis` in Transportation — only once the dataset is real.
+
+## Known limitations
+
+- Generated sample data only; no official provenance yet.
+- Dataset fields `access_type` and `status` are constant in the sample, so the UI does not present
+  them as meaningful variation.
+- `npm audit` reports advisories in the toolchain (esbuild/vite dev dependencies), not in shipped code.

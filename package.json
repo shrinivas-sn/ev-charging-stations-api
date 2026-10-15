@@ -2,11 +2,15 @@
   "name": "ev-charging-stations-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Free, keyless REST API for India's public electric vehicle charging stations, connectors, and power ratings.",
+  "description": "Keyless REST API for Indian public electric vehicle charging stations, connectors and power ratings.",
   "scripts": {
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
     "start": "node backend/src/index.js",
-    "test": "npm --prefix backend test"
+    "test": "npm --prefix backend test",
+    "generate-data": "node backend/scripts/generate-data.js",
+    "verify:seo": "npm --prefix frontend run verify:seo",
+    "verify": "npm run test && npm run build && npm run verify:seo"
   },
   "dependencies": {
     "cors": "^2.8.6",

@@ -10,57 +10,29 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/health",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/v1/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/docs",
-      "destination": "/docs/index.html"
-    },
-    {
-      "source": "/playground",
-      "destination": "/playground/index.html"
-    },
-    {
-      "source": "/status",
-      "destination": "/status/index.html"
-    },
-    {
-      "source": "/guides",
-      "destination": "/guides/index.html"
-    },
-    {
-      "source": "/guides/:id",
-      "destination": "/guides/:id/index.html"
-    }
+    { "source": "/health", "destination": "/api/index.js" },
+    { "source": "/v1", "destination": "/api/index.js" },
+    { "source": "/v1/(.*)", "destination": "/api/index.js" },
+    { "source": "/docs", "destination": "/docs/index.html" },
+    { "source": "/playground", "destination": "/playground/index.html" },
+    { "source": "/status", "destination": "/status/index.html" },
+    { "source": "/guides", "destination": "/guides/index.html" },
+    { "source": "/guides/:id", "destination": "/guides/:id/index.html" }
   ],
   "headers": [
     {
       "source": "/v1/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
         { "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=86400" }
       ]
     },
     {
       "source": "/health",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {
       "source": "/assets/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
       "source": "/(.*)",

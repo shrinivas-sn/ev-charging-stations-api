@@ -4,7 +4,8 @@ const express = require("express");
 const {
   getStatesSummary,
   getConnectors,
-  getDatasetMeta
+  getOperators,
+  getDatasetMeta,
 } = require("../services/stations-service");
 
 const router = express.Router();
@@ -14,11 +15,16 @@ const router = express.Router();
  */
 router.get("/states", (req, res) => {
   const result = getStatesSummary();
-  return res.status(200).json({
-    success: true,
-    data: result.data,
-    meta: result.meta
-  });
+  return res.status(200).json({ success: true, data: result.data, meta: result.meta });
+});
+
+/**
+ * GET /v1/operators
+ * Charge point operators present in the dataset, with station counts.
+ */
+router.get("/operators", (req, res) => {
+  const result = getOperators();
+  return res.status(200).json({ success: true, data: result.data, meta: result.meta });
 });
 
 /**
@@ -26,11 +32,7 @@ router.get("/states", (req, res) => {
  */
 router.get("/connectors", (req, res) => {
   const result = getConnectors();
-  return res.status(200).json({
-    success: true,
-    data: result.data,
-    meta: result.meta
-  });
+  return res.status(200).json({ success: true, data: result.data, meta: result.meta });
 });
 
 /**
@@ -41,9 +43,7 @@ router.get("/meta", (req, res) => {
   return res.status(200).json({
     success: true,
     data: meta,
-    meta: {
-      fetched_at: new Date().toISOString()
-    }
+    meta: { fetched_at: new Date().toISOString() },
   });
 });
 

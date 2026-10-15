@@ -1,102 +1,201 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { apiGet } from '../lib/api';
+import { formatCount, formatMs, useDataset } from '../lib/dataset';
+
+function Row({ label, value, note }) {
+  return (
+    <div className="grid gap-1 border-b border-line px-4 py-3 last:border-0 sm:grid-cols-3 sm:items-baseline">
+      <dt className="text-sm text-ink-muted">{label}</dt>
+      <dd className="text-sm font-medium text-ink sm:col-span-1">{value}</dd>
+      <dd className="text-xs text-ink-dim">{note || ''}</dd>
+    </div>
+  );
+}
 
 export default function StatusPage() {
+  const dataset = useDataset();
   const [health, setHealth] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState(null);
+  const [probe, setProbe] = useState({ state: 'idle', roundTripMs: null, serverMs: null, found: null });
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetch('/health')
-      .then((res) => res.json())
-      .then((data) => {
-        setHealth(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setHealth({ status: 'offline', error: err.message });
-        setLoading(false);
-      });
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      const [healthBody, metaBody] = await Promise.all([apiGet('/health'), apiGet('/v1/meta')]);
+      setHealth(healthBody);
+      setMeta(metaBody.data);
+    } catch (caught) {
+      setError(caught);
+    }
   }, []);
 
-  return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="border-b border-slate-800 pb-4">
-        <h1 className="text-xl sm:text-2xl font-mono font-bold text-white uppercase tracking-tight">
-          System Telemetry &amp; Gateway Status
-        </h1>
-        <p className="text-slate-400 text-xs font-mono mt-0.5">
-          Real-time service health, latency benchmarks, and dataset parity metrics.
-        </p>
-      </div>
+  useEffect(() => {
+    load();
+  }, [load]);
 
-      {/* Gateway State Panel */}
-      <div className="panel-technical rounded p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-emerald-500 rounded-sm"></div>
-          <div>
-            <div className="text-white font-bold text-sm">
-              {loading ? 'PROBING_GATEWAY...' : health?.status === 'ok' ? 'GATEWAY: OPERATIONAL' : 'GATEWAY: DISRUPTED'}
-            </div>
-            <div className="text-slate-400 text-[11px]">EDGE_ROUTER: VERCEL_SERVERLESS_GLOBAL</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-slate-400">STATUS_CODE:</span>
-          <span className="px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded font-bold">
-            200 OK
+  const runProbe = useCallback(async () => {
+    setProbe({ state: 'running', roundTripMs: null, serverMs: null, found: null });
+    const startedAt = performance.now();
+    try {
+      const body = await apiGet('/v1/stations/near?lat=12.9716&lng=77.5946&radius=20&limit=25');
+      setProbe({
+        state: 'done',
+        roundTripMs: Number((performance.now() - startedAt).toFixed(1)),
+        serverMs: body.meta.took_ms,
+        found: body.meta.total_found,
+      });
+    } catch (caught) {
+      setError(caught);
+      setProbe({ state: 'error', roundTripMs: null, serverMs: null, found: null });
+    }
+  }, []);
+
+  const online = Boolean(health && health.status === 'ok');
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+      <header className="max-w-2xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+          Status and dataset
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+          Live values read from the running service. Nothing on this page is a fixed claim: if a
+          probe fails it says so.
+        </p>
+      </header>
+
+      <section className="card mt-8">
+        <div className="card-header">
+          <h2 className="text-sm font-semibold text-ink">Service</h2>
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+              online ? 'bg-ok/10 text-ok' : 'bg-subtle text-ink-muted'
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`h-1.5 w-1.5 rounded-full ${online ? 'bg-ok' : 'bg-ink-dim'}`}
+            />
+            {health ? (online ? 'Responding' : 'Degraded') : 'Checking…'}
           </span>
         </div>
-      </div>
+        <dl>
+          <Row label="Health endpoint" value="/health" note="Returns 200 with status ok when the service is up." />
+          <Row
+            label="Service version"
+            value={health ? health.version : '—'}
+            note={health ? health.service : 'Waiting for response'}
+          />
+          <Row
+            label="Uptime"
+            value={health ? `${health.uptime_seconds}s` : '—'}
+            note="Process uptime since the current instance started."
+          />
+          <Row
+            label="Stations indexed"
+            value={formatCount(health ? health.stations_indexed : null)}
+            note="Counted from the loaded dataset, not from configuration."
+          />
+        </dl>
+      </section>
 
-      {/* Metric Breakdown Table */}
-      <div className="panel-technical rounded">
-        <div className="panel-header font-mono text-xs font-bold text-white uppercase">
-          CORE_DATABASE_BENCHMARKS
+      <section className="card mt-6">
+        <div className="card-header">
+          <h2 className="text-sm font-semibold text-ink">Latency probe</h2>
+          <button type="button" className="btn-secondary" onClick={runProbe}>
+            {probe.state === 'running' ? 'Running…' : 'Run probe'}
+          </button>
         </div>
-        <div className="p-0 overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-slate-900/60 text-slate-400 border-b border-slate-800">
-              <tr>
-                <th className="p-3">Metric Parameter</th>
-                <th className="p-3">Verified Value</th>
-                <th className="p-3">SLO Target</th>
-                <th className="p-3">Parity Source</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-300">
-              <tr className="hover:bg-slate-900/40">
-                <td className="p-3 text-white font-semibold">Total Indexed Stations</td>
-                <td className="p-3 text-emerald-400 font-bold">27,248</td>
-                <td className="p-3 text-slate-400">&gt; 25,000</td>
-                <td className="p-3 text-slate-400">BEE / data.gov.in (GODL-India)</td>
-              </tr>
-              <tr className="hover:bg-slate-900/40">
-                <td className="p-3 text-white font-semibold">Geographic Coverage</td>
-                <td className="p-3 text-white">36 States &amp; UTs</td>
-                <td className="p-3 text-slate-400">100% Pan-India</td>
-                <td className="p-3 text-slate-400">Local Gov Directory (LGD)</td>
-              </tr>
-              <tr className="hover:bg-slate-900/40">
-                <td className="p-3 text-white font-semibold">Spatial Lookup Latency</td>
-                <td className="p-3 text-emerald-400 font-bold">&lt; 3.8 ms</td>
-                <td className="p-3 text-slate-400">&lt; 20 ms</td>
-                <td className="p-3 text-slate-400">In-memory Spatial Trigonometry</td>
-              </tr>
-              <tr className="hover:bg-slate-900/40">
-                <td className="p-3 text-white font-semibold">Max Query Radius</td>
-                <td className="p-3 text-white">100.0 km</td>
-                <td className="p-3 text-slate-400">100 km cap</td>
-                <td className="p-3 text-slate-400">Haversine Spatial Bounds</td>
-              </tr>
-              <tr className="hover:bg-slate-900/40">
-                <td className="p-3 text-white font-semibold">Default Page Size</td>
-                <td className="p-3 text-white">25 stations (max 100)</td>
-                <td className="p-3 text-slate-400">Envelope Cap</td>
-                <td className="p-3 text-slate-400">RFC 7807 Pagination Spec</td>
-              </tr>
-            </tbody>
-          </table>
+        <dl>
+          <Row
+            label="Round trip"
+            value={probe.roundTripMs !== null ? formatMs(probe.roundTripMs) : '—'}
+            note="Measured in your browser, so it includes network time. Run the probe to see your own figure."
+          />
+          <Row
+            label="Server time"
+            value={probe.serverMs !== null ? formatMs(probe.serverMs) : '—'}
+            note="meta.took_ms: the API's own processing time for the query."
+          />
+          <Row
+            label="Probe query"
+            value="Bengaluru, 20 km radius"
+            note={
+              probe.found !== null
+                ? `${formatCount(probe.found)} stations matched inside the radius`
+                : 'Also validates 429 handling and error envelopes'
+            }
+          />
+        </dl>
+        <p className="border-t border-line px-4 py-3 text-xs text-ink-dim">
+          Earlier versions of this page published a fixed &ldquo;&lt; 3.8 ms&rdquo; figure and an SLO
+          table. Those were not measurements, so they have been removed.
+        </p>
+      </section>
+
+      <section className="card mt-6">
+        <div className="card-header">
+          <h2 className="text-sm font-semibold text-ink">Dataset provenance</h2>
+          <span className="chip">{meta ? meta.dataset_status : dataset.datasetStatus || '—'}</span>
         </div>
-      </div>
+
+        <div className="border-b border-line bg-subtle px-4 py-3">
+          <p className="text-sm leading-relaxed text-ink-muted">
+            <span className="font-semibold text-ink">
+              {meta && meta.provenance && meta.provenance.is_official
+                ? 'Official data.'
+                : 'This is generated sample data, not official Government of India data.'}
+            </span>{' '}
+            {meta && meta.provenance ? meta.provenance.summary : ''}
+          </p>
+        </div>
+
+        <dl>
+          <Row
+            label="Snapshot date"
+            value={(meta && meta.snapshot_date) || dataset.snapshotDate || '—'}
+            note="Date the bundled dataset was generated."
+          />
+          <Row
+            label="Stations"
+            value={formatCount(meta ? meta.total_stations : dataset.totalStations)}
+            note="Records served by /v1/stations."
+          />
+          <Row
+            label="States &amp; union territories"
+            value={formatCount(meta ? meta.total_states : dataset.totalStates)}
+            note="Distinct state and UT values present."
+          />
+          <Row
+            label="Cities and districts"
+            value={`${formatCount(meta && meta.total_cities)} / ${formatCount(meta && meta.total_districts)}`}
+            note="Distinct city and district values present."
+          />
+          <Row
+            label="Charge point operators"
+            value={formatCount(meta && meta.total_operators)}
+            note="Distinct operators present."
+          />
+          {meta && meta.provenance && meta.provenance.target_source && (
+            <Row
+              label="Intended source"
+              value={meta.provenance.target_source.publisher}
+              note={`${meta.provenance.target_source.name} — ${meta.provenance.target_source.license}. Not yet ingested.`}
+            />
+          )}
+        </dl>
+      </section>
+
+      {error && (
+        <div className="mt-6 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm" role="alert">
+          <p className="font-medium text-danger">Could not read live status</p>
+          <p className="mt-1 text-ink-muted">{error.message}</p>
+          <button type="button" className="btn-secondary mt-3" onClick={load}>
+            Retry
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,324 +1,556 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StationMap from '../components/StationMap';
+import { ApiError, apiGet, buildNearQuery } from '../lib/api';
+import { formatCount, formatMs, useDataset } from '../lib/dataset';
 
-const CITIES = [
-  { name: 'Bengaluru (MG Road)', lat: 12.9716, lng: 77.5946 },
-  { name: 'New Delhi (Connaught Place)', lat: 28.6315, lng: 77.2167 },
-  { name: 'Mumbai (BKC)', lat: 19.0657, lng: 72.8688 },
-  { name: 'Hyderabad (Hitec City)', lat: 17.4435, lng: 78.3772 },
-  { name: 'Chennai (Guindy)', lat: 13.0067, lng: 80.2024 },
-  { name: 'Pune (Shivajinagar)', lat: 18.5314, lng: 73.8446 },
-  { name: 'Ahmedabad (SG Highway)', lat: 23.0338, lng: 72.5085 },
-  { name: 'Kolkata (Salt Lake)', lat: 22.5804, lng: 88.4237 }
+const PRESETS = [
+  { label: 'Bengaluru, Karnataka', lat: 12.9716, lng: 77.5946 },
+  { label: 'New Delhi', lat: 28.6139, lng: 77.209 },
+  { label: 'Mumbai, Maharashtra', lat: 19.076, lng: 72.8777 },
+  { label: 'Hyderabad, Telangana', lat: 17.385, lng: 78.4867 },
+  { label: 'Chennai, Tamil Nadu', lat: 13.0827, lng: 80.2707 },
+  { label: 'Pune, Maharashtra', lat: 18.5204, lng: 73.8567 },
+  { label: 'Ahmedabad, Gujarat', lat: 23.0225, lng: 72.5714 },
+  { label: 'Kolkata, West Bengal', lat: 22.5726, lng: 88.3639 },
 ];
 
-const CONNECTOR_FILTERS = [
-  { label: 'ALL PLUGS', value: '' },
-  { label: 'CCS-2 (DC)', value: 'CCS-2' },
-  { label: 'TYPE-2 (AC)', value: 'Type-2 AC' },
-  { label: 'BHARAT DC', value: 'Bharat DC-001' }
+const CONNECTORS = [
+  { value: '', label: 'Any connector' },
+  { value: 'CCS-2', label: 'CCS-2 (DC)' },
+  { value: 'Type-2 AC', label: 'Type-2 AC' },
+  { value: 'Bharat DC-001', label: 'Bharat DC-001' },
+  { value: 'Bharat AC-001', label: 'Bharat AC-001' },
 ];
+
+const POWER_OPTIONS = [
+  { value: '', label: 'Any capacity' },
+  { value: '40', label: '40 kW and above' },
+  { value: '74.8', label: '74.8 kW and above' },
+  { value: '142', label: '142 kW and above (DC fast)' },
+  { value: '284', label: '284 kW and above (ultra fast)' },
+];
+
+const DEBOUNCE_MS = 450;
+const RESULT_LIMIT = 25;
+
+function parseCoordinate(text, bound) {
+  const trimmed = String(text).trim();
+  if (trimmed === '') return { ok: false, message: 'Required' };
+  const value = Number(trimmed);
+  if (!Number.isFinite(value)) return { ok: false, message: 'Enter a number' };
+  if (value < -bound || value > bound) {
+    return { ok: false, message: `Must be between -${bound} and ${bound}` };
+  }
+  return { ok: true, value };
+}
+
+function formatRetry(seconds) {
+  if (seconds === null || seconds === undefined) return null;
+  if (seconds <= 0) return null;
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  if (minutes === 0) return `${rest}s`;
+  return `${minutes}m ${String(rest).padStart(2, '0')}s`;
+}
 
 export default function PlaygroundPage() {
-  const [selectedCity, setSelectedCity] = useState(CITIES[0]);
-  const [lat, setLat] = useState(CITIES[0].lat.toString());
-  const [lng, setLng] = useState(CITIES[0].lng.toString());
-  const [radius, setRadius] = useState('15');
-  const [connectorFilter, setConnectorFilter] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const [error, setError] = useState(null);
-  const [selectedStationId, setSelectedStationId] = useState(null);
+  const dataset = useDataset();
 
-  const handleCitySelect = (e) => {
-    const city = CITIES.find((c) => c.name === e.target.value);
-    if (city) {
-      setSelectedCity(city);
-      setLat(city.lat.toString());
-      setLng(city.lng.toString());
+  const [presetIndex, setPresetIndex] = useState(0);
+  const [latText, setLatText] = useState(String(PRESETS[0].lat));
+  const [lngText, setLngText] = useState(String(PRESETS[0].lng));
+  const [radiusKm, setRadiusKm] = useState(15);
+  const [connector, setConnector] = useState('');
+  const [minPowerKw, setMinPowerKw] = useState('');
+
+  const [coords, setCoords] = useState({ lat: PRESETS[0].lat, lng: PRESETS[0].lng });
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedStationId, setSelectedStationId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [coordsDirty, setCoordsDirty] = useState(false);
+
+  const [geoState, setGeoState] = useState({ status: 'idle', message: null });
+  const [retryAfter, setRetryAfter] = useState(0);
+
+  const abortRef = useRef(null);
+  const latValidation = parseCoordinate(latText, 90);
+  const lngValidation = parseCoordinate(lngText, 180);
+
+  // Commit typed coordinates only once the user pauses, so a request is never
+  // fired for a half-typed latitude.
+  useEffect(() => {
+    if (!coordsDirty) return undefined;
+    const timer = setTimeout(() => {
+      if (latValidation.ok && lngValidation.ok) {
+        setCoords({ lat: latValidation.value, lng: lngValidation.value });
+        setPresetIndex(-1);
+        setCoordsDirty(false);
+      }
+    }, DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [latText, lngText, coordsDirty, latValidation.ok, lngValidation.ok]);
+
+  // Fetch on every committed parameter change, cancelling the previous request.
+  useEffect(() => {
+    if (retryAfter > 0) return undefined;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    apiGet(
+      buildNearQuery({
+        lat: coords.lat,
+        lng: coords.lng,
+        radiusKm,
+        limit: RESULT_LIMIT,
+        connector,
+        minPowerKw,
+      }),
+      { signal: controller.signal }
+    )
+      .then((body) => {
+        setResult(body);
+        setError(null);
+        setSelectedStationId((current) => {
+          if (current && body.data.some((station) => station.id === current)) return current;
+          return body.data.length > 0 ? body.data[0].id : null;
+        });
+      })
+      .catch((caught) => {
+        if (caught.name === 'AbortError') return;
+        setError(caught);
+        if (caught instanceof ApiError && caught.isRateLimited && caught.retryAfterSeconds) {
+          setRetryAfter(caught.retryAfterSeconds);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [coords.lat, coords.lng, radiusKm, connector, minPowerKw, refreshKey, retryAfter]);
+
+  // Count the rate-limit window down so the user knows when to retry.
+  useEffect(() => {
+    if (retryAfter <= 0) return undefined;
+    const timer = setInterval(() => {
+      setRetryAfter((seconds) => {
+        if (seconds <= 1) {
+          setError(null);
+          return 0;
+        }
+        return seconds - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [retryAfter]);
+
+  const applyPreset = (event) => {
+    const index = Number(event.target.value);
+    setPresetIndex(index);
+    if (index >= 0) {
+      const preset = PRESETS[index];
+      setLatText(String(preset.lat));
+      setLngText(String(preset.lng));
+      setCoords({ lat: preset.lat, lng: preset.lng });
+      setCoordsDirty(false);
+      setGeoState({ status: 'idle', message: null });
     }
   };
 
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser.');
+  const useMyLocation = useCallback(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoState({
+        status: 'error',
+        message: 'This browser does not expose a location API. Enter coordinates manually.',
+      });
       return;
     }
+
+    setGeoState({ status: 'locating', message: null });
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const userLat = Number(pos.coords.latitude.toFixed(4));
-        const userLng = Number(pos.coords.longitude.toFixed(4));
-        setLat(userLat.toString());
-        setLng(userLng.toString());
-        setSelectedCity(null);
+      (position) => {
+        const lat = Number(position.coords.latitude.toFixed(4));
+        const lng = Number(position.coords.longitude.toFixed(4));
+        setLatText(String(lat));
+        setLngText(String(lng));
+        setCoords({ lat, lng });
+        setPresetIndex(-1);
+        setCoordsDirty(false);
+        setGeoState({ status: 'ready', message: `Using your position ${lat}, ${lng}` });
       },
-      (err) => {
-        alert(`Location access denied or unavailable: ${err.message}`);
-      }
+      (positionError) => {
+        const messages = {
+          1: 'Location permission was denied. Enter coordinates or pick a city instead.',
+          2: 'Your position is unavailable right now. Enter coordinates or pick a city instead.',
+          3: 'Locating timed out. Try again, or enter coordinates manually.',
+        };
+        setGeoState({
+          status: 'error',
+          message: messages[positionError.code] || 'Could not read your location.',
+        });
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
     );
-  };
+  }, []);
 
-  const runQuery = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const url = `/v1/stations/near?lat=${lat}&lng=${lng}&radius=${radius}&limit=25`;
-      const res = await fetch(url);
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.error?.message || 'Failed to query nearby stations');
-      }
-      setResponse(json);
-      if (json.data && json.data.length > 0) {
-        setSelectedStationId(json.data[0].id);
-      } else {
-        setSelectedStationId(null);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stations = result ? result.data : [];
+  const mapCenter = coords;
 
-  useEffect(() => {
-    runQuery();
-  }, [lat, lng, radius]);
+  const errorKind = useMemo(() => {
+    if (!error) return null;
+    if (error instanceof ApiError && error.isRateLimited) return 'rate-limit';
+    if (error instanceof ApiError && error.status === 0) return 'network';
+    if (error instanceof ApiError && error.isValidation) return 'validation';
+    return 'server';
+  }, [error]);
 
-  // Client-side connector filtering
-  const allStations = response?.data || [];
-  const filteredStations = connectorFilter
-    ? allStations.filter((st) =>
-        st.connectors?.some((c) => c.type.toLowerCase().includes(connectorFilter.toLowerCase()))
-      )
-    : allStations;
-
-  const centerCoords = {
-    lat: parseFloat(lat) || 12.9716,
-    lng: parseFloat(lng) || 77.5946
-  };
+  const isStale = Boolean(error && result);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-mono font-bold text-white uppercase tracking-tight">
-            Spatial Proximity &amp; Mapping Workbench
-          </h1>
-          <p className="text-slate-400 text-xs font-mono mt-0.5">
-            Interactive Haversine spatial lookup &amp; live OpenStreetMap telemetry across 27,248 stations.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="text-slate-400">DATA_ENGINE:</span>
-          <span className="text-emerald-400 font-bold">HAVERSINE_SPATIAL_V1</span>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <header className="max-w-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+          Radius search playground
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+          Query <code className="text-xs">/v1/stations/near</code> against the bundled sample
+          dataset of {formatCount(dataset.totalStations)} stations. Coordinates, radius, connector
+          and capacity filters are all applied by the API, not in the browser.
+        </p>
+      </header>
 
-      {/* Main Workbench Layout: Controls + List (Left) & Map (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Query Parameters & Stations Feed (5 Cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          {/* Controls Box */}
-          <div className="panel-technical rounded text-xs font-mono">
-            <div className="panel-header flex items-center justify-between">
-              <span className="font-bold text-white uppercase">SEARCH_PARAMETERS</span>
-              <span className="text-slate-400">RADIUS: {radius} KM</span>
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-12">
+        {/* Controls */}
+        <div className="space-y-4 lg:col-span-5">
+          <section className="card">
+            <div className="card-header">
+              <h2 className="text-sm font-semibold text-ink">Search parameters</h2>
+              <span className="hint">
+                {radiusKm} km radius · {RESULT_LIMIT} max results
+              </span>
             </div>
 
-            <div className="p-4 space-y-3.5">
-              <div className="space-y-1">
-                <label className="text-slate-300 font-semibold block">METRO_PRESET</label>
+            <div className="space-y-4 p-4">
+              <div>
+                <label className="label" htmlFor="preset">
+                  City preset
+                </label>
                 <select
-                  value={selectedCity ? selectedCity.name : ''}
-                  onChange={handleCitySelect}
-                  className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  id="preset"
+                  className="field mt-1.5"
+                  value={presetIndex}
+                  onChange={applyPreset}
                 >
-                  <option value="" disabled>Select metro area</option>
-                  {CITIES.map((c) => (
-                    <option key={c.name} value={c.name}>{c.name}</option>
+                  <option value={-1}>Custom coordinates</option>
+                  {PRESETS.map((preset, index) => (
+                    <option key={preset.label} value={index}>
+                      {preset.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold block">LATITUDE</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label" htmlFor="lat">
+                    Latitude
+                  </label>
                   <input
-                    type="text"
-                    value={lat}
-                    onChange={(e) => setLat(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    id="lat"
+                    className={`field mt-1.5 font-mono ${
+                      coordsDirty && !latValidation.ok ? 'border-danger' : ''
+                    }`}
+                    value={latText}
+                    onChange={(event) => {
+                      setLatText(event.target.value);
+                      setCoordsDirty(true);
+                    }}
+                    inputMode="decimal"
+                    autoComplete="off"
+                    aria-invalid={coordsDirty && !latValidation.ok}
+                    aria-describedby="lat-error"
                   />
+                  <p id="lat-error" className="mt-1 text-xs text-danger" role="status">
+                    {coordsDirty && !latValidation.ok ? latValidation.message : ''}
+                  </p>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-semibold block">LONGITUDE</label>
+                <div>
+                  <label className="label" htmlFor="lng">
+                    Longitude
+                  </label>
                   <input
-                    type="text"
-                    value={lng}
-                    onChange={(e) => setLng(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    id="lng"
+                    className={`field mt-1.5 font-mono ${
+                      coordsDirty && !lngValidation.ok ? 'border-danger' : ''
+                    }`}
+                    value={lngText}
+                    onChange={(event) => {
+                      setLngText(event.target.value);
+                      setCoordsDirty(true);
+                    }}
+                    inputMode="decimal"
+                    autoComplete="off"
+                    aria-invalid={coordsDirty && !lngValidation.ok}
+                    aria-describedby="lng-error"
                   />
+                  <p id="lng-error" className="mt-1 text-xs text-danger" role="status">
+                    {coordsDirty && !lngValidation.ok ? lngValidation.message : ''}
+                  </p>
                 </div>
               </div>
 
-              <button
-                onClick={handleUseMyLocation}
-                className="w-full py-1.5 px-3 text-xs font-mono text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                <span>LOCATE: USE CURRENT GPS COORDS</span>
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  disabled={geoState.status === 'locating'}
+                  className="btn-secondary w-full"
+                >
+                  {geoState.status === 'locating' ? 'Reading your location…' : 'Use my location'}
+                </button>
+                {geoState.message && (
+                  <p
+                    className={`mt-2 rounded-md border px-2.5 py-1.5 text-xs ${
+                      geoState.status === 'error'
+                        ? 'border-danger/30 bg-danger/5 text-danger'
+                        : 'border-line bg-subtle text-ink-muted'
+                    }`}
+                    role={geoState.status === 'error' ? 'alert' : undefined}
+                  >
+                    {geoState.message}
+                  </p>
+                )}
+              </div>
 
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-300 font-semibold">SEARCH_RADIUS</span>
-                  <span className="text-blue-400 font-bold">{radius} km</span>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <label className="label" htmlFor="radius">
+                    Radius
+                  </label>
+                  <span className="text-sm font-medium text-ink">{radiusKm} km</span>
                 </div>
                 <input
+                  id="radius"
                   type="range"
-                  min="2"
-                  max="50"
+                  min="1"
+                  max="100"
                   step="1"
-                  value={radius}
-                  onChange={(e) => setRadius(e.target.value)}
-                  className="w-full accent-blue-600"
+                  value={radiusKm}
+                  onChange={(event) => setRadiusKm(Number(event.target.value))}
+                  className="mt-2 w-full accent-accent"
                 />
-              </div>
-
-              {/* Plug Filter Tabs */}
-              <div className="space-y-1 pt-1 border-t border-slate-800">
-                <label className="text-slate-400 text-[11px] block">CONNECTOR_FILTER</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
-                  {CONNECTOR_FILTERS.map((f) => (
-                    <button
-                      key={f.value}
-                      onClick={() => setConnectorFilter(f.value)}
-                      className={`px-1.5 py-1 text-[10px] font-mono rounded border transition-colors ${
-                        connectorFilter === f.value
-                          ? 'bg-blue-600 text-white border-blue-500 font-bold'
-                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+                <div className="mt-1 flex justify-between text-xs text-ink-dim">
+                  <span>1 km</span>
+                  <span>API maximum 100 km</span>
                 </div>
               </div>
 
-              <button
-                onClick={runQuery}
-                disabled={loading}
-                className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs rounded disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'CALCULATING_PROXIMITY...' : 'EXECUTE /v1/stations/near'}
-              </button>
-            </div>
-          </div>
+              <div className="grid gap-3 border-t border-line pt-4 sm:grid-cols-2">
+                <div>
+                  <label className="label" htmlFor="connector">
+                    Connector
+                  </label>
+                  <select
+                    id="connector"
+                    className="field mt-1.5"
+                    value={connector}
+                    onChange={(event) => setConnector(event.target.value)}
+                  >
+                    {CONNECTORS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label" htmlFor="power">
+                    Minimum capacity
+                  </label>
+                  <select
+                    id="power"
+                    className="field mt-1.5"
+                    value={minPowerKw}
+                    onChange={(event) => setMinPowerKw(event.target.value)}
+                  >
+                    {POWER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-          {/* Results List */}
-          <div className="panel-technical rounded">
-            <div className="panel-header flex items-center justify-between font-mono text-xs">
-              <span className="text-white font-bold">
-                NEARBY_STATIONS ({filteredStations.length})
-              </span>
-              {response && (
-                <span className="text-slate-400 text-[11px]">
-                  TOTAL_IN_RADIUS: <strong className="text-emerald-400">{response.meta.total_found}</strong>
+              <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setRefreshKey((key) => key + 1)}
+                  disabled={loading || retryAfter > 0}
+                >
+                  {retryAfter > 0 ? `Rate limited — retry in ${formatRetry(retryAfter)}` : 'Run query'}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setConnector('');
+                    setMinPowerKw('');
+                    setRadiusKm(15);
+                  }}
+                >
+                  Reset filters
+                </button>
+                <span className="hint" aria-live="polite">
+                  {loading ? 'Querying…' : 'Up to date'}
                 </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Results */}
+          <section className="card">
+            <div className="card-header">
+              <h2 className="text-sm font-semibold text-ink">
+                Nearby stations
+                <span className="ml-2 font-normal text-ink-dim">
+                  {formatCount(result ? result.meta.total_found : null)} within {radiusKm} km
+                </span>
+              </h2>
+              {result && !error && (
+                <span className="hint">responded in {formatMs(result.meta.took_ms)}</span>
               )}
             </div>
 
             {error && (
-              <div className="p-3 bg-red-950/40 border-b border-red-800 text-red-200 text-xs font-mono">
-                QUERY_ERROR: {error}
+              <div
+                className={`border-b border-line px-4 py-3 text-sm ${
+                  errorKind === 'rate-limit'
+                    ? 'bg-warn/5 text-warn'
+                    : 'bg-danger/5 text-danger'
+                }`}
+                role="alert"
+              >
+                <p className="font-medium">
+                  {errorKind === 'rate-limit'
+                    ? 'Rate limit reached'
+                    : errorKind === 'network'
+                      ? 'Network error'
+                      : errorKind === 'validation'
+                        ? 'Invalid query'
+                        : 'Request failed'}
+                </p>
+                <p className="mt-0.5 text-ink-muted">
+                  {error.message}
+                  {retryAfter > 0 && ` Retrying is possible in ${formatRetry(retryAfter)}.`}
+                  {isStale && ' The results below are from the previous successful query.'}
+                </p>
+                {retryAfter === 0 && (
+                  <button
+                    type="button"
+                    className="btn-secondary mt-2"
+                    onClick={() => setRefreshKey((key) => key + 1)}
+                  >
+                    Try again
+                  </button>
+                )}
               </div>
             )}
 
-            <div className="divide-y divide-slate-800/80 max-h-[460px] overflow-y-auto">
-              {filteredStations.length === 0 ? (
-                <div className="p-6 text-center text-xs font-mono text-slate-500">
-                  NO STATIONS FOUND WITHIN {radius} KM. TRY EXPANDING RADIUS SLIDER.
-                </div>
-              ) : (
-                filteredStations.map((st) => {
-                  const isSelected = selectedStationId === st.id;
-                  return (
-                    <div
-                      key={st.id}
-                      onClick={() => setSelectedStationId(st.id)}
-                      className={`p-3.5 space-y-1.5 cursor-pointer transition-colors ${
-                        isSelected ? 'bg-slate-800/70 border-l-2 border-blue-500' : 'hover:bg-slate-900/40'
+            <ul className={`divide-y divide-line ${isStale ? 'opacity-60' : ''}`}>
+              {stations.length === 0 && !loading && !error && (
+                <li className="px-4 py-10 text-center text-sm text-ink-muted">
+                  No stations matched. Try a larger radius, or clear the connector and capacity
+                  filters.
+                </li>
+              )}
+              {stations.length === 0 && loading && (
+                <li className="px-4 py-10 text-center text-sm text-ink-dim">
+                  Searching within {radiusKm} km…
+                </li>
+              )}
+              {stations.map((station) => {
+                const isSelected = station.id === selectedStationId;
+                const isFastDc = station.total_capacity_kw >= 50;
+                return (
+                  <li key={station.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStationId(station.id)}
+                      className={`w-full px-4 py-3 text-left transition-colors ${
+                        isSelected ? 'bg-accent-soft' : 'hover:bg-subtle'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2 font-mono text-xs">
-                        <div>
-                          <div className="text-white font-bold text-xs line-clamp-1">{st.name}</div>
-                          <div className="text-slate-400 text-[11px] font-sans line-clamp-1">{st.address}</div>
-                        </div>
-                        <span className="shrink-0 px-1.5 py-0.5 bg-blue-950 text-blue-300 border border-blue-800 rounded font-bold text-[11px]">
-                          {st.distance_km} km
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="text-sm font-medium leading-snug text-ink">
+                          {station.name}
+                        </span>
+                        <span className="shrink-0 font-mono text-xs text-accent-strong">
+                          {station.distance_km} km
                         </span>
                       </div>
-
-                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-slate-400">
-                        <span>CPO: {st.operator}</span>
-                        <span>•</span>
-                        <span className="text-emerald-400 font-semibold">{st.total_capacity_kw} kW</span>
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${st.latitude},${st.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="ml-auto text-blue-400 hover:underline"
-                        >
-                          Directions ↗
-                        </a>
+                      <p className="mt-0.5 text-xs leading-relaxed text-ink-dim">
+                        {station.address}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
+                        <span>{station.operator}</span>
+                        <span className="font-medium text-ink">
+                          {station.total_capacity_kw} kW
+                        </span>
+                        {isFastDc && <span className="chip-accent">DC fast</span>}
+                        {station.availability && <span>Open {station.availability}</span>}
+                        <span className="font-mono text-[11px] text-ink-dim">
+                          {station.latitude}, {station.longitude}
+                        </span>
                       </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         </div>
 
-        {/* Right Column: Interactive Leaflet OpenStreetMap Canvas (7 Cols) */}
-        <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-20">
-          <div className="panel-technical rounded">
-            <div className="panel-header flex items-center justify-between font-mono text-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span className="text-white font-bold">LIVE_TELEMETRY_MAP</span>
-              </div>
-              <span className="text-slate-400">CARTO_DARK_MATTER // OSM</span>
+        {/* Map */}
+        <div className="lg:col-span-7 lg:sticky lg:top-20">
+          <section className="card">
+            <div className="card-header">
+              <h2 className="text-sm font-semibold text-ink">Map</h2>
+              <a
+                className="hint underline hover:text-accent"
+                href={`https://www.openstreetmap.org/#map=13/${mapCenter.lat}/${mapCenter.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open area in OpenStreetMap
+              </a>
             </div>
-
             <div className="p-3">
               <StationMap
-                center={centerCoords}
-                radiusKm={Number(radius) || 15}
-                stations={filteredStations}
+                center={mapCenter}
+                radiusKm={radiusKm}
+                stations={stations}
                 selectedStationId={selectedStationId}
-                onSelectStation={(id) => setSelectedStationId(id)}
+                onSelectStation={setSelectedStationId}
               />
             </div>
-
-            <div className="px-4 py-2.5 bg-slate-950/60 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[#0d9488]"></span>
-                  <span>DC Fast (&ge;50kW)</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
-                  <span>Standard AC / Fleet</span>
-                </span>
-              </div>
-              <div>Click any pin or list item to pan &amp; view telemetry</div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-4 py-2.5 text-xs text-ink-muted">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+                DC fast (≥ 50 kW)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-ink-dim" aria-hidden="true" />
+                AC or lower capacity
+              </span>
+              <span>Basemap: OpenFreeMap · data © OpenStreetMap contributors</span>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>

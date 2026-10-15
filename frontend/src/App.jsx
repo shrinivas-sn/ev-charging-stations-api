@@ -8,10 +8,13 @@ import PlaygroundPage from './pages/PlaygroundPage';
 import GuidesPage from './pages/GuidesPage';
 import StatusPage from './pages/StatusPage';
 import NotFoundPage from './pages/NotFoundPage';
+import { usePageMeta } from './lib/seo';
 
 export function AppContent() {
+  usePageMeta();
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#080c14] text-slate-100">
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
       <Navbar />
       <main className="flex-1">
         <Routes>

@@ -3,22 +3,19 @@ import { Link } from 'react-router-dom';
 
 export default function NotFoundPage() {
   return (
-    <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4 font-mono">
-      <div className="w-12 h-12 bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-blue-400 font-bold text-lg rounded">
-        404
-      </div>
-      <h1 className="text-xl font-bold text-white uppercase tracking-tight">
-        404_ROUTE_NOT_FOUND
-      </h1>
-      <p className="text-slate-400 text-xs font-sans max-w-sm mx-auto">
-        The requested path does not map to any active frontend view or API endpoint documentation.
+    <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
+      <p className="font-mono text-sm text-ink-dim">404</p>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">Page not found</h1>
+      <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+        That URL does not match any page. If you were looking for an API endpoint, the index lives at{' '}
+        <code className="text-xs">/v1</code> and the reference is under <code className="text-xs">/docs</code>.
       </p>
-      <div className="pt-2">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-blue-400 text-xs font-mono border border-slate-800 rounded transition-colors"
-        >
-          ← RETURN_TO_HOME
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <Link to="/" className="btn-primary">
+          Back to overview
+        </Link>
+        <Link to="/docs" className="btn-secondary">
+          API reference
         </Link>
       </div>
     </div>
