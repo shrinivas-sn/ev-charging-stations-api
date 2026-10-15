@@ -922,3 +922,9 @@ Surprises:  none beyond issue 2. Rate limit default lowered from 300 to 100 per 
 Next:       Task 4.1 — remove frontend `file:..` dependency, rewrite scripts/dataset-summary.mjs for the new meta.json, add frontend/.env.production.
 Commit:     428342d, b468cb4, 0fd3b31, 5d5ec8c, 23ceb3c, 24819e4, plus reference-table fix
 
+### Phase 4 — 15/10/2026 (checkpoint open)
+Done:       Tasks 4.1–4.5. Mobile-check final run: no blockers or majors on /, /docs, /playground, /status (`MOBILE.md`). Fixed the 11px map attribution (14px on phones) and the nav drawer (focus, Tab cycle, Escape, scroll lock). Palette changed to graphite + amber on owner request (`PICKS.md`).
+Verified:   frontend tests 18 + build tests 2 pass; `verify:seo` 0 errors. Nav drawer 6/6 steps on 8/8 runs; text-legibility 0 failing nodes.
+Surprises:  The probe hangs on the second page in one browser: `stale-while-revalidate` on `/v1/*` makes Chrome revalidate in the background and DevTools never marks it finished. Workaround: one viewport per browser launch. Touch-affordance offender is a MapLibre vendor rule (`popup-track-pointer`, unused), accepted.
+Next:       Review the palette in a browser; run `npm run verify` (blocked locally by the :5173 lock, see issue 4); then Task 5.1.
+Commit:     see `fix(ui): nav drawer focus and attribution legibility`

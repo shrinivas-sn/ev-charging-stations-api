@@ -11,3 +11,4 @@ Stack: tailwind
 Motion: none
 Fit check: 2026-10-15 vs CONVENTIONS.md (differs from mandi-api dark earthy and calendar-api dark mode) — NO CONSTRAINTS SOURCE
 Picked by: Claude, on owner request
+Mobile: 2026-10-15 — pass (0 blockers, 0 majors; 1 accepted vendor rule, warns logged) — see MOBILE.md

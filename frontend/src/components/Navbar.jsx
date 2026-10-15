@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 
 const LINKS = [
@@ -17,6 +17,50 @@ function navClass({ isActive }) {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Open drawer: focus moves into it, Tab cycles between its links and the toggle,
+  // Escape closes it and returns focus, the page behind does not scroll, and it
+  // closes itself if the viewport grows past the md breakpoint.
+  useEffect(() => {
+    if (!open) return undefined;
+    const panel = panelRef.current;
+    const focusables = () => [...panel.querySelectorAll('a[href]'), toggleRef.current];
+    focusables()[0]?.focus();
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusables();
+      const index = items.indexOf(document.activeElement);
+      const next = event.shiftKey
+        ? items[(index - 1 + items.length) % items.length]
+        : items[(index + 1) % items.length];
+      event.preventDefault();
+      next.focus();
+    }
+
+    const desktop = window.matchMedia('(min-width: 768px)');
+    function onDesktop(event) {
+      if (event.matches) setOpen(false);
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    desktop.addEventListener('change', onDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      desktop.removeEventListener('change', onDesktop);
+    };
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
@@ -57,9 +101,11 @@ export default function Navbar() {
           </a>
 
           <button
+            ref={toggleRef}
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
+            aria-controls="mobile-nav"
             aria-label="Toggle navigation"
             className="rounded-md border border-line-strong p-1.5 text-ink-muted md:hidden"
           >
@@ -71,7 +117,12 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <nav className="border-t border-line bg-surface px-4 py-2 md:hidden">
+        <nav
+          id="mobile-nav"
+          ref={panelRef}
+          aria-label="Main"
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-line bg-surface px-4 py-2 md:hidden"
+        >
           {LINKS.map((link) => (
             <NavLink
               key={link.to}
