@@ -905,3 +905,10 @@ Verified:   `npm test` → `# pass 36  # fail 0` (old suite, before any code cha
 Surprises:  Owner instructed mid-session "don't make any merge to main right now" — recorded in Owner inputs and Decisions; Task 6.3 now waits for an explicit go-ahead.
 Next:       Task 2.1 — create `ingest/` (requirements, fetch script, extractor, unittest).
 Commit:     e810ccd, 56fe4ab, 866b055, aa81875
+
+### Phase 2 — 15/10/2026
+Done:       ingest/ extractor (pdfplumber 0.11.4) with last-row recovery; reference tables (states per ISO 3166-2:IN, standards per MoP Annexure II/III, 70 operators); normaliser + build script; real dataset committed; DOCS/DATA-NOTES.md.
+Verified:   `python -I ingest/test_extract.py` → OK (9 tests). Full extraction → `rows_total 39641 missing_cells 0 pages 1-1159 of 1159` (8m05s). `node backend/scripts/build-dataset.js ingest/out/raw-rows.json` → `rows 39641 stations 29184 chargers 39640 suspect 115 mixed_admin 65 rejects 1 states 36 operators 70`. reference + normalise + dataset tests → 43 pass, 0 fail. `npm test` → 61 pass, 18 fail (all 18 in the old api.test.js, expected until Phase 3).
+Surprises:  263 rows first rejected were valid combo fast chargers with per-gun rating lists → gun model (Plan issue 2). PDF upstream unchanged (Content-Length 7942286, Last-Modified 22 Apr 2026, sha256 f519218f…). stations.json is 21.8 MB — watch function cold start in Task 5.1/6.2.
+Next:       Task 3.1 — rewrite backend/test/api.test.js for the Phase 3 contract (gun-based filters per issue 2), then the service layer.
+Commit:     7e21f47, fd39be6, 6398a35, 05cf474
