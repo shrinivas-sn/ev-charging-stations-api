@@ -443,6 +443,7 @@ status file and in the session's final message.)*
 | 2 | 15/10 | 5.4 | Nothing said about the old rate-limit figure in `DOCS/DECISIONS.md` | The audit entry there says limits were "raised to 300/15 min"; `backend/src/app.js` has used 100/15 min (line 16: `RATE_LIMIT_MAX \|\| 100`) | record only, no code change | Old entry left alone (DECISIONS is append-only); the new 15/10 section states 100/15 min | owner: none needed |
 | 3 | 15/10 | 6.3 | Preview smoke runs against the deployment URL | Every path answers `302` with `Protected by Vercel Authentication` (curl on `/health`, `/v1/stations?limit=1`, `/docs`) | blocks one verification, not the build or CI | CI recorded green; preview smoke and the cold-start measurement left for the owner-supplied bypass secret (Failure handling) | owner: a "Protection Bypass for Automation" secret, or turn preview protection off for this project |
 | 4 | 15/10 | 6.1 | Review would cover the branch's own code | The prerender step prints `useLayoutEffect does nothing on the server` per page; the only `useLayoutEffect` in the tree is inside `react-router` / `react-router-dom` (3 and 7 occurrences) | none on the shipped HTML (SEO gate and mobile-check pass) | Logged, not fixed: a fix means changing a dependency, which is outside this plan | owner: none needed |
+| 5 | 15/10 | 7.2 | The production stage would pass once the manifest listed the routes | First `run-checks.js --stage production` FAILed `routes-live`: `/v1/stations/near` answers `400` (lat/lng are required) where api.json declared `200`. `resolveRoute` uses `route.path` unchanged, and `/v1/stations/near` with no query is an invalid request by design | blocks the production gate | Fix-forward branch `fix/manifest-near-route`: the route now carries `?lat=12.9716&lng=77.5946`, the convention already used by lgd, calendar, gst-hsn and msp (`docs-route-parity` strips the query, so parity is unaffected). New test `backend/test/manifest-routes.test.js` fails first, then passes; production re-run is all PASS | owner: merge the fix-forward PR |
 
 ---
 
@@ -516,3 +517,15 @@ Surprises:  Preview deployments are behind Vercel Authentication, so Task 6.3's 
 Slop:       Script comments and check names read clean (no banned words, no empty phrases, no em dashes).
 Next:       Owner: a Vercel protection-bypass secret (or protection off) so the preview smoke and the region check can run, then "merge to main" to start Phase 7.
 Commit:     `test: live smoke script` (6.2); none for 6.1 and 6.4; push only for 6.3
+
+### Task 7.1 — 15/10/2026
+Done:       Owner go-ahead recorded in Owner inputs. PR #1 "Rebuild on real BEE station data" from `rebuild/bee-real-data`; checks green (`node` 31 s, `ingest` 7 s, Vercel preview), merged as `a6bfb72` with a merge commit and the branch kept.
+Verified:   Production deployment `7098276415` → `success`; `/health` → `200`; `/v1/meta` returns the BEE counts (29184 stations, 39640 chargers) and the attribution string.
+Slop:       PR body Detect: no patterns found (one em dash, inside the quoted attribution).
+Next:       Task 7.2 — production gates.
+
+### Task 7.2 — 15/10/2026 (started)
+Done:       `node scripts/smoke.mjs --base https://ev-charging-stations-api.vercel.app` → `smoke ok (9 checks)`, exit 0, including `the function runs in Mumbai`; that closes the region half of Plan issue 3. `record-live.js` wrote the production checklist. Its first run FAILed `routes-live` — Plan issue 5.
+Verified:   With the api.json fix in the working tree, `run-checks.js --stage production` → `production: pass`, 14 rows PASS, including `routes-live: 15 routes answered as declared` and `docs-route-parity: 9 documented paths match 8 manifest routes`.
+Surprises:  The same run continues into the `pre-pr` stage for public-apis and exits 3 there on `row-shape` (the row's description is 178 characters, the limit is 100, and it ends with a period). That is submission work, out of this plan's scope — flagged to the owner, not fixed.
+Next:       Owner merges the fix-forward PR; then re-run the production gates and finish 7.2, 7.3 and 7.4.
