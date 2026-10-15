@@ -385,7 +385,7 @@ export default function PlaygroundPage() {
                   <p
                     className={`mt-2 rounded-md border px-2.5 py-1.5 text-xs ${
                       geoState.status === 'error'
-                        ? 'border-danger/30 bg-danger/5 text-danger'
+                        ? 'border-danger bg-danger-soft text-danger'
                         : 'border-line bg-subtle text-ink-muted'
                     }`}
                     role={geoState.status === 'error' ? 'alert' : undefined}
@@ -411,7 +411,7 @@ export default function PlaygroundPage() {
                   step="1"
                   value={radiusKm}
                   onChange={(event) => setRadiusKm(Number(event.target.value))}
-                  className="mt-2 w-full accent-accent"
+                  className="mt-2 w-full accent-ink"
                 />
                 <div className="mt-1 flex justify-between text-xs text-ink-dim">
                   <span>1 km</span>
@@ -545,8 +545,8 @@ export default function PlaygroundPage() {
               <div
                 className={`border-b border-line px-4 py-3 text-sm ${
                   errorKind === 'rate-limit'
-                    ? 'bg-warn/5 text-warn'
-                    : 'bg-danger/5 text-danger'
+                    ? 'bg-warn-soft text-ink'
+                    : 'bg-danger-soft text-danger'
                 }`}
                 role="alert"
               >
@@ -604,7 +604,7 @@ export default function PlaygroundPage() {
                           {station.operator}
                           <span className="ml-1.5 font-normal text-ink-dim">· {station.city}</span>
                         </span>
-                        <span className="shrink-0 font-mono text-xs text-accent-strong">
+                        <span className="shrink-0 font-mono text-xs text-ink">
                           {station.distance_km} km
                         </span>
                       </div>
@@ -652,7 +652,7 @@ export default function PlaygroundPage() {
             <div className="card-header">
               <h2 className="text-sm font-semibold text-ink">Map</h2>
               <a
-                className="hint underline hover:text-accent"
+                className="hint underline hover:text-ink"
                 href={`https://www.openstreetmap.org/#map=13/${mapCenter.lat}/${mapCenter.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -671,7 +671,7 @@ export default function PlaygroundPage() {
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-4 py-2.5 text-xs text-ink-muted">
               <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
+                <span className="h-2.5 w-2.5 rounded-full bg-accent ring-1 ring-ink" aria-hidden="true" />
                 Car DC fast (CCS2/CHAdeMO ≥ 50 kW)
               </span>
               <span className="flex items-center gap-1.5">

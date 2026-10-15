@@ -109,7 +109,7 @@ export default function DocsPage() {
           <p>
             {formatCount(dataset.totalStations)} stations and {formatCount(dataset.totalChargers)} chargers
             from{' '}
-            <a className="text-accent hover:text-accent-strong" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
+            <a className="link" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
               {dataset.sourceTitle}
             </a>
             .
@@ -232,7 +232,7 @@ export default function DocsPage() {
           </div>
           <p className="text-sm text-ink-muted">
             Known problems in the source and how they are handled are listed in the{' '}
-            <a className="text-accent hover:text-accent-strong" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
+            <a className="link" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
               data notes
             </a>
             .

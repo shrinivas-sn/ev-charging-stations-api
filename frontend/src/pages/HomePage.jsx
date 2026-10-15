@@ -95,7 +95,7 @@ export default function HomePage() {
               does not have them.
             </p>
             <p className="mt-2 text-sm">
-              <Link to="/status" className="font-medium text-accent hover:text-accent-strong">
+              <Link to="/status" className="link">
                 Source, coverage and known data problems →
               </Link>
             </p>
@@ -200,7 +200,7 @@ export default function HomePage() {
           Invalid input is never silently ignored: a malformed or unknown parameter is a{' '}
           <code className="text-xs">400</code>, an unknown value is a <code className="text-xs">404</code> that lists
           the valid ones.{' '}
-          <Link to="/docs" className="text-accent hover:text-accent-strong">
+          <Link to="/docs" className="link">
             Full reference →
           </Link>
         </p>

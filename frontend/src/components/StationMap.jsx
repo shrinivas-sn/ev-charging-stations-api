@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { isFastDc, mappableStations, standardLabel, vehicleLabel } from '../lib/stations';
+import { mapColors, palette } from '../lib/palette';
 
 /**
  * Interactive radius map.
@@ -78,25 +79,25 @@ function popupHtml(properties) {
 
   return `
     <div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:12px 14px;min-width:232px;max-width:284px;">
-      <div style="font-size:13px;font-weight:600;color:#18181b;line-height:1.35;">${escapeHtml(
+      <div style="font-size:15px;font-weight:600;color:${palette.ink};line-height:1.35;">${escapeHtml(
         properties.operator
       )}${properties.city ? ` · ${escapeHtml(properties.city)}` : ''}</div>
-      <div style="margin-top:2px;font-size:11px;color:#71717a;line-height:1.4;">${escapeHtml(
+      <div style="margin-top:2px;font-size:14px;color:${palette.muted};line-height:1.4;">${escapeHtml(
         properties.address
       )}</div>
-      <dl style="margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px;color:#52525b;">
-        <dt style="color:#71717a;">Power</dt><dd style="margin:0;color:#18181b;">up to ${escapeHtml(
+      <dl style="margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14px;color:${palette.muted};">
+        <dt style="color:${palette.muted};">Power</dt><dd style="margin:0;color:${palette.ink};">up to ${escapeHtml(
           properties.max_power_kw
         )} kW per gun</dd>
-        <dt style="color:#71717a;">Vehicles</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
+        <dt style="color:${palette.muted};">Vehicles</dt><dd style="margin:0;color:${palette.ink};">${escapeHtml(
           properties.vehicles
         )}</dd>
-        <dt style="color:#71717a;">Chargers</dt><dd style="margin:0;color:#18181b;">${escapeHtml(
+        <dt style="color:${palette.muted};">Chargers</dt><dd style="margin:0;color:${palette.ink};">${escapeHtml(
           properties.chargers
         )}</dd>
         ${
           distance
-            ? `<dt style="color:#71717a;">Distance</dt><dd style="margin:0;color:#115e59;font-weight:600;">${distance}</dd>`
+            ? `<dt style="color:${palette.muted};">Distance</dt><dd style="margin:0;color:${palette.ink};font-weight:600;">${distance}</dd>`
             : ''
         }
       </dl>
@@ -105,7 +106,7 @@ function popupHtml(properties) {
           ? `<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:4px;">${connectors
               .map(
                 (connector) =>
-                  `<span style="border:1px solid #e4e4e7;background:#f4f4f5;border-radius:4px;padding:1px 5px;font-size:10px;color:#52525b;">${escapeHtml(
+                  `<span style="border:1px solid ${palette.line};background:${palette.subtle};border-radius:4px;padding:1px 5px;font-size:13px;color:${palette.ink};">${escapeHtml(
                     connector
                   )}</span>`
               )
@@ -116,7 +117,7 @@ function popupHtml(properties) {
         properties.longitude
       }#map=17/${properties.latitude}/${properties.longitude}"
          target="_blank" rel="noopener noreferrer"
-         style="display:block;margin-top:10px;text-align:center;background:#0f766e;color:#ffffff;padding:6px 8px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;">
+         style="display:block;margin-top:10px;text-align:center;background:${palette.accent};color:${palette.ink};padding:8px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;">
         Open in OpenStreetMap
       </a>
     </div>`;
@@ -216,13 +217,13 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
         id: LAYER_RADIUS_FILL,
         type: 'fill',
         source: SOURCE_RADIUS,
-        paint: { 'fill-color': '#0f766e', 'fill-opacity': 0.06 },
+        paint: { 'fill-color': mapColors.radiusFill, 'fill-opacity': 0.05 },
       });
       map.addLayer({
         id: LAYER_RADIUS_LINE,
         type: 'line',
         source: SOURCE_RADIUS,
-        paint: { 'line-color': '#0f766e', 'line-width': 1, 'line-dasharray': [3, 3] },
+        paint: { 'line-color': mapColors.radiusLine, 'line-width': 1, 'line-dasharray': [3, 3] },
       });
     } else {
       map.getSource(SOURCE_RADIUS).setData(windowFeature);
@@ -240,7 +241,7 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
         source: SOURCE_STATIONS,
         paint: {
           'circle-radius': 9,
-          'circle-color': '#0f766e',
+          'circle-color': mapColors.selected,
           'circle-opacity': 0.12,
         },
       });
@@ -251,9 +252,9 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
         source: SOURCE_STATIONS,
         paint: {
           'circle-radius': 5,
-          'circle-color': ['case', ['==', ['get', 'is_fast_dc'], 1], '#0f766e', '#71717a'],
+          'circle-color': ['case', ['==', ['get', 'is_fast_dc'], 1], mapColors.fastFill, mapColors.otherFill],
           'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': ['case', ['==', ['get', 'is_fast_dc'], 1], mapColors.fastStroke, mapColors.otherStroke],
         },
       });
     } else {
@@ -270,7 +271,7 @@ export default function StationMap({ center, radiusKm, stations = [], selectedSt
           'circle-radius': 11,
           'circle-color': 'transparent',
           'circle-stroke-width': 2.5,
-          'circle-stroke-color': '#115e59',
+          'circle-stroke-color': mapColors.selected,
         },
       });
     }

@@ -24,9 +24,9 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
           <span
             aria-hidden="true"
-            className="flex h-7 w-7 items-center justify-center rounded-md bg-accent text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-md bg-ink"
           >
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-accent">
               <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
             </svg>
           </span>

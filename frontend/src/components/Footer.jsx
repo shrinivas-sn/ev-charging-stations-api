@@ -32,7 +32,7 @@ export default function Footer() {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="-mx-1 inline-flex min-h-6 items-center rounded px-1 text-ink-muted hover:text-accent"
+                    className="-mx-1 inline-flex min-h-6 items-center rounded px-1 text-ink-muted hover:text-ink"
                   >
                     {label}
                   </Link>

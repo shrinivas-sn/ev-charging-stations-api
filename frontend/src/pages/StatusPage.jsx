@@ -69,7 +69,7 @@ export default function StatusPage() {
           <h2 className="text-sm font-semibold text-ink">Service</h2>
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
-              online ? 'bg-ok/10 text-ok' : 'bg-subtle text-ink-muted'
+              online ? 'bg-ok-soft text-ink' : 'bg-subtle text-ink-muted'
             }`}
           >
             <span
@@ -137,7 +137,7 @@ export default function StatusPage() {
         <div className="border-b border-line bg-subtle px-4 py-3">
           <p className="text-sm leading-relaxed text-ink-muted">
             <span className="font-semibold text-ink">Source:</span>{' '}
-            <a className="text-accent hover:text-accent-strong" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
+            <a className="link" href={dataset.sourcePageUrl || '#'} rel="noopener noreferrer" target="_blank">
               {dataset.sourceTitle}
             </a>
             , {dataset.sourcePublisher}. BEE publishes no licence for this file; it is republished here with
@@ -185,7 +185,7 @@ export default function StatusPage() {
         </dl>
         <p className="border-t border-line px-4 py-3 text-xs text-ink-dim">
           Not in the source: real-time availability, prices, booking and opening hours.{' '}
-          <a className="text-accent hover:text-accent-strong" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
+          <a className="link" href={dataset.dataNotesUrl || '#'} rel="noopener noreferrer" target="_blank">
             Read the data notes
           </a>{' '}
           for every known problem and how it is handled.
@@ -193,7 +193,7 @@ export default function StatusPage() {
       </section>
 
       {error && (
-        <div className="mt-6 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm" role="alert">
+        <div className="mt-6 rounded-lg border border-danger bg-danger-soft px-4 py-3 text-sm" role="alert">
           <p className="font-medium text-danger">Could not read live status</p>
           <p className="mt-1 text-ink-muted">{error.message}</p>
           <button type="button" className="btn-secondary mt-3" onClick={load}>
