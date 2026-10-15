@@ -1,0 +1,23 @@
+{
+  "dataset_name": "State, District, City and Location wise Electric Vehicle (EV) Charging Stations in India",
+  "source_ministry": "Ministry of Power / Bureau of Energy Efficiency (BEE)",
+  "catalog_url": "https://data.gov.in",
+  "license": "Government Open Data License - India (GODL-India)",
+  "license_url": "https://data.gov.in/godl",
+  "snapshot_date": "2026-05-15",
+  "verified_at": "2026-10-15T12:00:00Z",
+  "total_stations": 27248,
+  "total_states": 36,
+  "top_operators": [
+    "Tata Power EZ Charge",
+    "Jio-bp pulse",
+    "Statiq",
+    "Kazam",
+    "Ather Grid",
+    "Zeon Charging",
+    "ChargeZone",
+    "CESL (Convergence Energy Services)",
+    "BESCOM"
+  ],
+  "disclaimer": "This API provides directory, location, and connector specifications. It does not provide real-time socket availability telemetry or payment processing."
+}

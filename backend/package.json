@@ -1,0 +1,20 @@
+{
+  "name": "ev-charging-stations-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend service for Indian EV Charging Station Directory API",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0"
+  }
+}

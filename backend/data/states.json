@@ -1,0 +1,536 @@
+[
+  {
+    "state": "Maharashtra",
+    "state_code": "MH",
+    "total_stations": 3420,
+    "major_cities": [
+      "Mumbai",
+      "Pune",
+      "Nagpur",
+      "Nashik",
+      "Thane"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 986
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 690
+      },
+      {
+        "operator": "Statiq",
+        "count": 490
+      }
+    ]
+  },
+  {
+    "state": "Delhi",
+    "state_code": "DL",
+    "total_stations": 2860,
+    "major_cities": [
+      "New Delhi",
+      "South Delhi",
+      "North Delhi",
+      "East Delhi",
+      "Dwarka"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 866
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 551
+      },
+      {
+        "operator": "Statiq",
+        "count": 399
+      }
+    ]
+  },
+  {
+    "state": "Karnataka",
+    "state_code": "KA",
+    "total_stations": 2780,
+    "major_cities": [
+      "Bengaluru",
+      "Mysuru",
+      "Hubballi",
+      "Mangaluru",
+      "Belagavi"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 825
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 525
+      },
+      {
+        "operator": "Statiq",
+        "count": 382
+      }
+    ]
+  },
+  {
+    "state": "Tamil Nadu",
+    "state_code": "TN",
+    "total_stations": 2420,
+    "major_cities": [
+      "Chennai",
+      "Coimbatore",
+      "Madurai",
+      "Tiruchirappalli",
+      "Salem"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 701
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 497
+      },
+      {
+        "operator": "Statiq",
+        "count": 319
+      }
+    ]
+  },
+  {
+    "state": "Gujarat",
+    "state_code": "GJ",
+    "total_stations": 2150,
+    "major_cities": [
+      "Ahmedabad",
+      "Surat",
+      "Vadodara",
+      "Rajkot",
+      "Gandhinagar"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 641
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 437
+      },
+      {
+        "operator": "Statiq",
+        "count": 307
+      }
+    ]
+  },
+  {
+    "state": "Uttar Pradesh",
+    "state_code": "UP",
+    "total_stations": 2010,
+    "major_cities": [
+      "Noida",
+      "Lucknow",
+      "Ghaziabad",
+      "Kanpur",
+      "Varanasi"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 564
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 397
+      },
+      {
+        "operator": "Statiq",
+        "count": 289
+      }
+    ]
+  },
+  {
+    "state": "Telangana",
+    "state_code": "TS",
+    "total_stations": 1480,
+    "major_cities": [
+      "Hyderabad",
+      "Warangal",
+      "Nizamabad",
+      "Karimnagar"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 452
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 282
+      },
+      {
+        "operator": "Statiq",
+        "count": 197
+      }
+    ]
+  },
+  {
+    "state": "Rajasthan",
+    "state_code": "RJ",
+    "total_stations": 1390,
+    "major_cities": [
+      "Jaipur",
+      "Jodhpur",
+      "Udaipur",
+      "Kota"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 428
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 273
+      },
+      {
+        "operator": "Statiq",
+        "count": 190
+      }
+    ]
+  },
+  {
+    "state": "Kerala",
+    "state_code": "KL",
+    "total_stations": 1240,
+    "major_cities": [
+      "Kochi",
+      "Thiruvananthapuram",
+      "Kozhikode",
+      "Thrissur"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 405
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 252
+      },
+      {
+        "operator": "Statiq",
+        "count": 189
+      }
+    ]
+  },
+  {
+    "state": "Haryana",
+    "state_code": "HR",
+    "total_stations": 1150,
+    "major_cities": [
+      "Gurugram",
+      "Faridabad",
+      "Panchkula"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 353
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 222
+      },
+      {
+        "operator": "Statiq",
+        "count": 151
+      }
+    ]
+  },
+  {
+    "state": "West Bengal",
+    "state_code": "WB",
+    "total_stations": 980,
+    "major_cities": [
+      "Kolkata",
+      "Howrah",
+      "Siliguri"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 279
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 193
+      },
+      {
+        "operator": "Statiq",
+        "count": 151
+      }
+    ]
+  },
+  {
+    "state": "Andhra Pradesh",
+    "state_code": "AP",
+    "total_stations": 920,
+    "major_cities": [
+      "Visakhapatnam",
+      "Vijayawada",
+      "Tirupati"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 281
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 173
+      },
+      {
+        "operator": "Statiq",
+        "count": 137
+      }
+    ]
+  },
+  {
+    "state": "Madhya Pradesh",
+    "state_code": "MP",
+    "total_stations": 880,
+    "major_cities": [
+      "Indore",
+      "Bhopal",
+      "Gwalior"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 263
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 163
+      },
+      {
+        "operator": "Statiq",
+        "count": 110
+      }
+    ]
+  },
+  {
+    "state": "Punjab",
+    "state_code": "PB",
+    "total_stations": 810,
+    "major_cities": [
+      "Ludhiana",
+      "Amritsar",
+      "Jalandhar"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 249
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 161
+      },
+      {
+        "operator": "Statiq",
+        "count": 116
+      }
+    ]
+  },
+  {
+    "state": "Odisha",
+    "state_code": "OD",
+    "total_stations": 640,
+    "major_cities": [
+      "Bhubaneswar",
+      "Cuttack"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 198
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 154
+      },
+      {
+        "operator": "Statiq",
+        "count": 74
+      }
+    ]
+  },
+  {
+    "state": "Goa",
+    "state_code": "GA",
+    "total_stations": 420,
+    "major_cities": [
+      "Panaji",
+      "Margao"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 138
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 68
+      },
+      {
+        "operator": "Statiq",
+        "count": 65
+      }
+    ]
+  },
+  {
+    "state": "Chandigarh",
+    "state_code": "CH",
+    "total_stations": 360,
+    "major_cities": [
+      "Chandigarh"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 88
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 74
+      },
+      {
+        "operator": "Statiq",
+        "count": 53
+      }
+    ]
+  },
+  {
+    "state": "Assam",
+    "state_code": "AS",
+    "total_stations": 320,
+    "major_cities": [
+      "Guwahati",
+      "Dibrugarh"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 97
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 61
+      },
+      {
+        "operator": "Ather Grid",
+        "count": 44
+      }
+    ]
+  },
+  {
+    "state": "Bihar",
+    "state_code": "BR",
+    "total_stations": 310,
+    "major_cities": [
+      "Patna",
+      "Gaya"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 84
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 70
+      },
+      {
+        "operator": "Statiq",
+        "count": 46
+      }
+    ]
+  },
+  {
+    "state": "Uttarakhand",
+    "state_code": "UK",
+    "total_stations": 290,
+    "major_cities": [
+      "Dehradun",
+      "Haridwar"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 86
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 55
+      },
+      {
+        "operator": "Statiq",
+        "count": 42
+      }
+    ]
+  },
+  {
+    "state": "Himachal Pradesh",
+    "state_code": "HP",
+    "total_stations": 210,
+    "major_cities": [
+      "Shimla",
+      "Dharamshala"
+    ],
+    "top_operators": [
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 56
+      },
+      {
+        "operator": "Jio-bp pulse",
+        "count": 37
+      },
+      {
+        "operator": "Statiq",
+        "count": 32
+      }
+    ]
+  },
+  {
+    "state": "Jharkhand",
+    "state_code": "JH",
+    "total_stations": 208,
+    "major_cities": [
+      "Ranchi",
+      "Jamshedpur"
+    ],
+    "top_operators": [
+      {
+        "operator": "Jio-bp pulse",
+        "count": 44
+      },
+      {
+        "operator": "Tata Power EZ Charge",
+        "count": 41
+      },
+      {
+        "operator": "Statiq",
+        "count": 30
+      }
+    ]
+  }
+]
