@@ -928,3 +928,7 @@ Verified:   frontend tests 18 + build tests 2 pass; `verify:seo` 0 errors. Nav d
 Surprises:  The probe hangs on the second page in one browser: `stale-while-revalidate` on `/v1/*` makes Chrome revalidate in the background and DevTools never marks it finished. Workaround: one viewport per browser launch. Touch-affordance offender is a MapLibre vendor rule (`popup-track-pointer`, unused), accepted.
 Next:       Review the palette in a browser; run `npm run verify` (blocked locally by the :5173 lock, see issue 4); then Task 5.1.
 Commit:     see `fix(ui): nav drawer focus and attribution legibility`
+
+### Phase 4 checkpoint — 15/10/2026
+Verified:   `npm test` 119 pass; frontend tests 18 + build tests 2 pass; build prerenders 8 pages + 404; `verify:seo` 0 errors. `npm run verify` as one command not run: its `npm ci` fails locally with EPERM while the previous agent's :5173 server locks `frontend/node_modules` (issue 4); CI (Task 5.2) will run it clean. Palette reviewed in browser screenshots (home desktop/phone, playground) — consistent, no change.
+Next:       Task 5.1.

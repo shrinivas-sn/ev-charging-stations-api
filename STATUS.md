@@ -1,7 +1,7 @@
 # Project Status: India EV Charging Station Directory API
 
 Last Updated: 2026-10-15
-Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 3 done
+Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 4 done
 
 ## Current State
 
@@ -15,14 +15,13 @@ Phase: Rebuilding on real BEE data (`PLAN.md`), Phase 3 done
 
 ## Next up (start here)
 
-1. Look at the new graphite + amber palette in a browser (screenshots in `frontend/.mobile-check/`, not yet reviewed).
-2. Phase 4 checkpoint: `npm run verify` (root `npm run build` runs `npm ci`, which fails locally with EPERM while the old :5173 server locks `frontend/node_modules`; frontend tests 20/20 and SEO 0 errors pass).
-3. Phase 5: vercel.json (bom1, includeFiles), CI + weekly BEE check, api.json and README.
-4. Phase 6: review, preview deploy, smoke test. No merge to main without the owner.
+1. Phase 5 starts at Task 5.1 (vercel.json: bom1, includeFiles). Re-read the Vercel brief's TTL first (PLAN Phase 5 "Re-check first").
+2. Phase 5 (rest): vercel.json (bom1, includeFiles), CI + weekly BEE check, api.json and README.
+3. Phase 6: review, preview deploy, smoke test. No merge to main without the owner.
 
 Mobile-check (Task 4.5) done: no blockers or majors, see `MOBILE.md`. Probe with one viewport per browser launch (cache issue noted there). Preview: `PORT=3920 npm start`, then `API_PROXY_TARGET=http://localhost:3920 npx vite preview --port 4180` in frontend/ (ports 3000/5173 belong to the previous agent).
 
-Overall: about 75% done (Phases 1–3 done; Phase 4 done apart from the palette look and the checkpoint).
+Overall: about 75% done (Phases 1–4 done; palette reviewed in a browser: consistent at desktop and phone).
 
 ## Plan issues
 
