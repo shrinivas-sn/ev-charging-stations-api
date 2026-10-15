@@ -21,8 +21,10 @@ Phase: Hardened, not deployed
   CARTO URL (now key-gated) and the CSS tile-inversion hack.
 - **Quality gates:** SEO gate reports 0 errors / 0 warnings; `api.json` passes the pipeline manifest
   validator.
-- **Measured latency:** ~6 ms warm for a full 25-result radius query, ~4 ms for a filtered directory
-  page; cold start longer because the 18 MB dataset is loaded on first request.
+- **Measured latency:** ~6–7 ms warm for a full 25-result radius query and ~4 ms for a filtered
+  directory page. The first request after a cold start pays 330–410 ms to load and index the 19.7 MB
+  `stations.json`; every request after that is warm. Measured on a local Node 22 process, not against
+  a deployed instance — serverless cold start will differ.
 
 ## Next up (start here)
 
