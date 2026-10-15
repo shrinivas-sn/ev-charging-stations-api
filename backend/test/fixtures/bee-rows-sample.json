@@ -1,0 +1,2491 @@
+{
+ "source_file": "EV_PCS_Data_29277.pdf",
+ "sha256": "f519218fa96a04f57b3c56e919a8045133e7df1307a77710cca0076ab25b6882",
+ "size_bytes": 7942286,
+ "pages_in_file": 1159,
+ "pages_extracted": "1,28,581,1159",
+ "header": [
+  "CPO Name",
+  "Govt/Private",
+  "State",
+  "District",
+  "City/Village",
+  "Location",
+  "Latitude",
+  "Longitude",
+  "Types of Chargers Installed/ Connector",
+  "Charger Rating",
+  "Connector Rating",
+  "No. of Connector"
+ ],
+ "rows_total": 137,
+ "missing_cells": 0,
+ "rows": [
+  {
+   "page": 1,
+   "row": 1,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Andaman & Nicobar",
+    "South Andamans",
+    "South Andaman",
+    "Iocl Dealer Govind Nagar Swaraj Dweep (Havelock No.2)",
+    "12.034186",
+    "92.992718",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 2,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Andaman & Nicobar",
+    "South Andamans",
+    "South Andaman",
+    "Iocl Dealer S.No.45/1 Bimblitan Port Blair",
+    "11.604053",
+    "92.694109",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 3,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Andaman & Nicobar",
+    "South Andamans",
+    "South Andaman",
+    "Marina Refueling Station Vill-Austinabad Po-Brijgunj Tehsil-Port Blair Dist.\nSouth Anda",
+    "11.637410",
+    "92.735160",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 4,
+   "cells": [
+    "Tata Power",
+    "Private",
+    "Andaman & Nicobar",
+    "South Andamans",
+    "Port Blair",
+    "Gennext Motors , Pahargaon, Ground Floor New, Pahargaon, Port Blair,\nAndaman And Nicobar Islands 744103",
+    "11.630305",
+    "92.724835",
+    "CCS-II",
+    "25",
+    "25",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 5,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "27, 962, Chittoor-Bangalore Rd, Near Tvs Showroom, Ram Nagar Colony,\nChittoor, Andhra Pradesh 517001",
+    "13.208240",
+    "79.091059",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 6,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "P Kothakota, Chavatapalli, Chittoor, Nh-18A, Chittoor Tirupati Road,\nChittoor, Chittoor, Andhra Pradesh 517124",
+    "13.395837",
+    "79.098628",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 7,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "F5Hq+Pph, Sh 61, Panapakam, Andhra Pradesh 517112",
+    "13.479711",
+    "79.189436",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 8,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "H7Hq+M8M, Chittoor, Andhra Pradesh 517101",
+    "13.579204",
+    "79.288332",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 9,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "M, Balaji Nagar, Thondavada Village, Nh-140, Chandragiri, Tirupati, Andhra\nPradesh 517505",
+    "13.585804",
+    "79.333717",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 10,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Opp Narayana Junior College, Near Chennai - Anatapur Highway - 517102",
+    "13.615353",
+    "79.313392",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 11,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Hitec Nissan, 714/ 2B Tukivakam, 200 Ft. Chennai, Bangalore Tirupathi\nBypass Rd, Tirupati, Andhra Pradesh 517520",
+    "13.615964",
+    "79.480223",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 12,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Anantapur - Tirupati Hwy, Saibaba Colony, Thatithopu, Tirupati, Andhra\nPradesh 517101",
+    "13.617293",
+    "79.371649",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 13,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Vedhavyasa Bhavan, Air Bypass Road, Royal Nagar, Tirupati, Andhra Pradesh",
+    "13.622645",
+    "79.414697",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 14,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Vedhavyasa Bhavan, Air Bypass Road, Royal Nagar, Tirupati, Andhra Pradesh",
+    "13.622645",
+    "79.414697",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 15,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "D No 19/8, 181/E8, Air Bypass Rd, Opposite D Mart, Yadava Colony, Royal\nNagar, Tirupati, Andhra Pradesh 517501",
+    "13.622753",
+    "79.420758",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 16,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Kanigiri - Tirupathi Rd, Sv Auto Nagar, Tirupati, Andhra Pradesh",
+    "13.629277",
+    "79.461988",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 17,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Plot No :28 Akkarampalle Main Road, Beside Nandini Bakery, Tirupati,\nAndhra Pradesh 517501",
+    "13.644741",
+    "79.437938",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 18,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "2, Tmb Road, Srinivasa Nagar, Madura Nagar, Tirupati, Andhra Pradesh\n517501",
+    "13.650289",
+    "79.423984",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 19,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Tirupati",
+    "Tirupati",
+    "Pn Rd, Srikalahasti, Andhra Pradesh 517644",
+    "13.758817",
+    "79.707775",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 20,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Near Honda Show Room, Ground, 8/87-2, Raja Street, Gudur, Spsr Nellore,\nAndhra Pradesh, 524101.",
+    "14.138390",
+    "79.862630",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 21,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Bus Stop, Dnt Colony, Grand Trunk Road, Venkata Reddy Nagar, Nellore,\nAndhra Pradesh 524004",
+    "14.405013",
+    "79.951682",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 22,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Sportello Presto Restaurant Private Limited Near Sakshi News Paper Survey\nNo 200-1, Nh45, Kondayapalem, Nellore, Andhra Pradesh 524002",
+    "14.413488",
+    "79.982189",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 23,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Opp. Lic Main Branch, Kondayapalem Gate Main Rd, Near Mgb Felicity Mall,\nSujathamma Colony, Dargamitta, Nellore, Andhra Pradesh 524003",
+    "14.428871",
+    "79.966426",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 24,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Lecturers Colony, Lecturer'S Colony, Magunta Layout, Nellore, Andhra\nPradesh 524003",
+    "14.435977",
+    "79.975689",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 25,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Lecturers Colony, Lecturer'S Colony, Magunta Layout, Nellore, Andhra\nPradesh 524003",
+    "14.435977",
+    "79.975689",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 26,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Cxqc+942, Opposite To Reliance Mart, Near Kvr Petrol Bunk, Dargamitta,\nNellore, Andhra Pradesh 524003",
+    "14.438390",
+    "79.970272",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 27,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Cxqx+Qw5, Guntur-Chennai Hwy, Chintareddy Palem, Nellore, Andhra\nPradesh 524002",
+    "14.439406",
+    "79.999846",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 28,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Sri Potti Sriramulu Nellore",
+    "Nellore",
+    "Balaji Nagar Rd, Balaji Nagar, Nellore, Andhra Pradesh 524002",
+    "14.450535",
+    "79.992435",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1,
+   "row": 29,
+   "cells": [
+    "Ather",
+    "Private",
+    "Andhra Pradesh",
+    "Guntur",
+    "Guntur",
+    "N.R.T Centre, Chilakaluripet, Andhra Pradesh 522616",
+    "16.095078",
+    "80.165872",
+    "LEV DC Charge Point\n(IS-17017-2-7)",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 30,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Andhra Pradesh",
+    "Nandyal",
+    "NANDYAL",
+    "YERAMUKKAPALLI VILLAGE, NATIONAL HIGHWAY - 18, , City=NANDYAL,\nDistrict=NANDYAL, State=Andhra Pradesh",
+    "15.453480",
+    "78.499950",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 31,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Andhra Pradesh",
+    "PRAKASAM",
+    "SURAREDDYPALEM",
+    "SURAREDDYPALEM NH 16, TANGUUR MANDAL, SURAREDDYPALEM,\nPRAKASAM, Andhra Pradesh",
+    "15.408004",
+    "80.038852",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 32,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lohit",
+    "Lohit",
+    "Digaru Paya",
+    "27.910478",
+    "96.088021",
+    "Bharat AC-001",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 33,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Changlang",
+    "Changlang",
+    "Kharsang",
+    "27.417341",
+    "96.019966",
+    "Bharat AC-001",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 34,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "Pasighat",
+    "28.036389",
+    "95.335833",
+    "Bharat AC-001",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 35,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lower Subansiri",
+    "Lower Subansiri",
+    "Ziro",
+    "27.575336",
+    "93.832457",
+    "Bharat AC-001",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 36,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "ARUNACHAL PRADESH",
+    "Papum pare",
+    "Papumpare",
+    "\"C\" Sector Main Road P.O. : Itanagar District : Papum Pare",
+    "27.097516",
+    "93.624418",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 37,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Dibang Valley",
+    "Dibang Valley",
+    "Anini Town Dist- Dibang Valley Plot No 220",
+    "28.791775",
+    "95.897501",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 38,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Papum pare",
+    "Papumpare",
+    "Banderdewa Bandardewa Dist : Papumpare",
+    "27.100754",
+    "93.826423",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 39,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "ARUNACHAL PRADESH",
+    "Papum pare",
+    "Papumpare",
+    "Banderdewa Dist. Papumpare Dist. Papumpare",
+    "27.109763",
+    "93.823985",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 40,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Changlang",
+    "Changlang",
+    "C/O- Dukhum Inthem Singpho Goju Village Bordumsa Dist- Changlang",
+    "27.496607",
+    "95.902135",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 41,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Changlang",
+    "Changlang",
+    "C/O- Sri Thinghom Taiju Pautangsung Near Tirap River Changang Circle Dist-\nChangla",
+    "27.133025",
+    "95.733254",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 42,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Namsai",
+    "Namsai",
+    "Chainage 829.872 Manmow Village P.O& P.S- Namsai Dist- Namsai",
+    "27.684776",
+    "27.684776",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 43,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "Debbi Filling Station Mirku Dapi Village East Siang District",
+    "28.063267",
+    "95.324356",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 44,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "ARUNACHAL PRADESH",
+    "Papum pare",
+    "Papumpare",
+    "Dist. Papumpare",
+    "27.102037",
+    "93.669901",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 45,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Tirap",
+    "Tirap",
+    "Ep Mema Fuel Station Hanyakkong Rumborduria Dist. Tiraparunachal\nPradesh",
+    "27.015530",
+    "95.493560",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 46,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lower Dibang Valley",
+    "Lower Dibang Valley",
+    "Kabang Gamno Energy Station 12 Kms Miuli Ati Mayudia Township\nCircle-Roing P.O & P.S-Roing Lowe",
+    "28.189867",
+    "95.803473",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 47,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Kamle",
+    "Kamle",
+    "<ĞƐŚŝ͛^\u0003&ŝůůŝŶŐ\u0003^ƚĂƚŝŽŶ\u0003sŝůůĂŐĞ͗\u0003ZĂŐĂ\u0003/ŝ\u0003\u0018ŝƐƚƌŝĐƚ͗\u0003<ĂŵůĞĂƌƵŶĂĐŚĂů\u0003WƌĂĚĞƐŚ",
+    "27.797970",
+    "94.071104",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 48,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Tirap",
+    "Tirap",
+    "M/S Tirap Fuel Station Khonsa Town Dist: Tirap Arunachal Pradesh",
+    "26.984240",
+    "95.510540",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 49,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Siang",
+    "Siang",
+    "Mani Aabing Automobiles Pulung Area Near Pangin Tinali Dist.\nSiangarunachal Pradesh",
+    "28.214498",
+    "94.992718",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 50,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Leparada",
+    "Leparada",
+    "Mito Basar Automobiles And Services Basar Town Area Bame Likhabali\nRoaddist. Leparada",
+    "27.969906",
+    "94.683103",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 51,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "ARUNACHAL PRADESH",
+    "Papum pare",
+    "Papumpare",
+    "Naharlagun Naharlagun Dist : Papumpare",
+    "27.107630",
+    "93.703296",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 52,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Changlang",
+    "Changlang",
+    "Nampong Town Vill- Namgoi P.O- Nampong Dist- Changlang",
+    "27.292231",
+    "96.092751",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 53,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Namsai",
+    "Namsai",
+    "Namsai Town Towards Diyun Road Vill Namsai Dist- Namsai",
+    "27.662492",
+    "95.885695",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 54,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "ARUNACHAL PRADESH",
+    "Papum pare",
+    "Papumpare",
+    "Nirjuli Nh-52A Dist. Papum Pare Arunachal Pradesh",
+    "27.129416",
+    "93.734149",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 55,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Papum pare",
+    "Papumpare",
+    "Nirjuli Nirjuli Dist : Papumpare",
+    "27.127149",
+    "93.731411",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 56,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lower Dibang Valley",
+    "Lower Dibang Valley",
+    "Opposite Post Office Plot No 415 Roing Town Dist- Lower Dibang Valley",
+    "28.139200",
+    "95.842500",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 57,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "P.O - Mebo Dist- East Siang Pin-791104 A.P",
+    "28.163600",
+    "95.407200",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 58,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Namsai",
+    "Namsai",
+    "P.O Namsai Dist - Namsai Arunachal Pradesh",
+    "27.666534",
+    "95.874388",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 59,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Leparada",
+    "Leparada",
+    "P.O. Basar Dist. West-Siang Arunachal Pradesh",
+    "27.983190",
+    "27.983190",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 60,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "P.O. Pashighat Dist. East Siang Arunachal Pradesh.",
+    "28.045456",
+    "95.331625",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 61,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lohit",
+    "Lohit",
+    "P.O.Tezu Arunachal Pradesh Arunachal Pradesh",
+    "27.926566",
+    "96.158969",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 62,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Papum pare",
+    "Papumpare",
+    "Raytmmr Fuel Station Midpu-I Doimukh Papumpare Arunachal Pradesh",
+    "27.159541",
+    "93.750634",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 63,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Papum pare",
+    "Papumpare",
+    "Relum Filling Station Village Nirjuli Papumpare Arunachal Pradesh",
+    "27.136020",
+    "93.748189",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 64,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lower Dibang Valley",
+    "Lower Dibang Valley",
+    "Remi Village Besides Nh 52 Dambuk Circle P.O & P.S- Dambuk",
+    "28.272217",
+    "95.614793",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 65,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "Ruksin P.O. Pasighat-791102 Dist. East Siang Arunachal Pradesh",
+    "27.844289",
+    "95.227746",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 66,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Papum pare",
+    "Papumpare",
+    "Sagalee Papumpare District Arunachal Pradesh",
+    "27.250694",
+    "93.496278",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 67,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Shi Yomi",
+    "Shi-Yomi",
+    "Shi-Yomi Energy Station Plot No. 2 Rinya Premises Linggok Tato Village Shi\nYomi District",
+    "28.531072",
+    "94.380174",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 68,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "West Siang",
+    "West Siang",
+    "Sipu Colony Aalo Town P.O & P.S- Aalo Dist- West Siang",
+    "28.167000",
+    "94.794000",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 69,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "Lower Siang",
+    "Lower Siang",
+    "Smt Yadap. Apang P.O. Lekabali Dist. West Siang",
+    "27.659627",
+    "94.704679",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 70,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "T Lego Filling Station Oyan Village Dist. East Siangarunachal Pradesh",
+    "27.881413",
+    "95.317279",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 28,
+   "row": 71,
+   "cells": [
+    "IOCL",
+    "Govt.",
+    "Arunachal Pradesh",
+    "East Siang",
+    "East Siang",
+    "Talut Tamuk Filling Station Vill-Rani Po/Ps-Sille Oyan East Siang District",
+    "27.971594",
+    "95.331275",
+    "LEV AC Charge point",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 72,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "VIJAYANAGARA",
+    "KUDILIGI,\nVIJAYANAGARA",
+    "DOOR NO 236, AMALAPURA, KAYSANAKERI, KUDLIGI, , City=KUDILIGI,\nVIJAYANAGARA, District=VIJAYANAGARA, State=Karnataka",
+    "14.834574",
+    "76.431294",
+    "CCS",
+    "120",
+    "120",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 73,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Davanagere",
+    "ANGODU",
+    "DOOR NO.1186 & 1187, SY. NO. 12/2 & 12/3 (NH-4), , City=ANGODU,\nDistrict=DAVANGERE, State=Karnataka",
+    "14.397617",
+    "76.028903",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 74,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Davanagere",
+    "SURAHONNE",
+    "DOOR NO.1906, SH-26, HONNALI TALUQ, , City=SURAHONNE,\nDistrict=DAVANGERE, State=Karnataka",
+    "14.140153",
+    "75.557329",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 75,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Davanagere",
+    "OPP TO SIMLA\nDHABA,HARIHAR TALUK",
+    "DOOR NO.519, SH-25, NANDITAVARE POST, , City=OPP TO SIMLA\nDHABA,HARIHAR TALUK, District=DAVANGERE, State=Karnataka",
+    "14.490303",
+    "75.795284",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 76,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Davanagere",
+    "OPP TO SIMLA\nDHABA,HARIHAR TALUK",
+    "DOOR NO.519, SH-25, NANDITAVARE POST, , City=OPP TO SIMLA\nDHABA,HARIHAR TALUK, District=DAVANGERE, State=Karnataka",
+    "14.490303",
+    "75.795284",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 77,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Dakshina Kannada",
+    "BAJPE",
+    "DR B BHASKARA RAO PREMISE, BAJPE MAIN ROAD, , City=BAJPE,\nDistrict=DAKSHIN KANNADA, State=Karnataka",
+    "12.979285",
+    "74.882437",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 78,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "GADAG",
+    "GADAG",
+    "GADAG TO HULKOTI ON NH67, TALUKA GADAG, , City=GADAG,\nDistrict=GADAG, State=Karnataka",
+    "15.407140",
+    "75.602889",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 79,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "KOPPAL",
+    "GANGAVATY",
+    "GANGAVATHI MAIN ROAD, NEAR MEGHA RESORT, , City=GANGAVATY,\nDistrict=KOPPAL, State=Karnataka",
+    "15.394083",
+    "76.519269",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 80,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "KOPPAL",
+    "GINIGERA",
+    "GINEGERA-BUDIGUMPA ROAD, MAIN ROAD, , City=GINIGERA,\nDistrict=KOPPAL, State=Karnataka",
+    "15.356952",
+    "76.266100",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 81,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Belagavi",
+    "JABAPUR VILLAGE,\nHUKKERI",
+    "GOKAK-SANKESHWAR ROAD, JABAPUR, HUKKERI, , City=JABAPUR VILLAGE,\nHUKKERI, District=BELGAUM, State=Karnataka",
+    "16.240719",
+    "74.592384",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 82,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "DHARWAD",
+    "HUBLI",
+    "GOKUL ROAD, OPP AKSHAY PARK, RAVI NAGAR CROSS, , City=HUBLI,\nDistrict=DHARWAD, State=Karnataka",
+    "15.374473",
+    "75.183792",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 83,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Shivamogga",
+    "SHIMOGA",
+    "GOPALA EXTENSION, KHATA NO.F 179&1643, F 156, , City=SHIMOGA,\nDistrict=SHIMOGA, State=Karnataka",
+    "13.934562",
+    "75.546385",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 84,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "BIDAR",
+    "BIDAR",
+    "GOUR VILLAGE, BASAVAKALYAN, TALUKA, , City=BIDAR, District=BIDAR,\nState=Karnataka",
+    "17.921190",
+    "76.935866",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 85,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "YADGIR",
+    "SHAHAPUR",
+    "HALLISAGAR VILLAGE, SHAHPUR- YADGIR ROAD, , City=SHAHAPUR,\nDistrict=YADGIR, State=Karnataka",
+    "16.695700",
+    "76.843200",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 86,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Shivamogga",
+    "ANAVATTI",
+    "HANAGAL ROAD, KOTIPURA VILLAGE, , City=ANAVATTI, District=SHIMOGA,\nState=Karnataka",
+    "14.578215",
+    "75.148366",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 87,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "HAVERI",
+    "HAVERI",
+    "HANGAL ROAD,, ALADAKATTI VILLAGE, , City=HAVERI, District=HAVERI,\nState=Karnataka",
+    "12.805124",
+    "74.858023",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 88,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "HAVERI",
+    "HAVERI",
+    "HANGAL ROAD,, ALADAKATTI VILLAGE, , City=HAVERI, District=HAVERI,\nState=Karnataka",
+    "12.805124",
+    "74.858023",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 89,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "GADAG",
+    "GADAG",
+    "HARTI VILLAGE, OPP. KANNADA HIGH SCHOOL ON SH06, , City=GADAG,\nDistrict=GADAG, State=Karnataka",
+    "15.336220",
+    "75.570420",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 90,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "HASSAN",
+    "HOLENARSIPURA",
+    "HASSAN - MYSORE ROAD, SY. NO.188, SH 57,, , City=HOLENARSIPURA,\nDistrict=HASSAN, State=Karnataka",
+    "12.782854",
+    "76.246257",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 91,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Mysuru",
+    "K R NAGAR",
+    "HASSAN-MYSORE ROAD, #, , City=K R NAGAR, District=MYSORE,\nState=Karnataka",
+    "12.448982",
+    "76.385039",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 92,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "CHITRADURGA",
+    "CHITRADURGA",
+    "HIRIYUR, HIRIYUR, , City=CHITRADURGA, District=CHITRADURGA,\nState=Karnataka",
+    "13.933769",
+    "76.626553",
+    "CCS",
+    "120",
+    "120",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 93,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Shivamogga",
+    "SHIMOGA",
+    "HOLEBEVANAHALLI VILLAGE, SHIMOGA TALUK, , City=SHIMOGA,\nDistrict=SHIMOGA, State=Karnataka",
+    "13.939450",
+    "75.625930",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 94,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "VIJAYANAGARA",
+    "HOSAHALLI",
+    "HOSAHALLI VILLAGE, #, , City=HOSAHALLI, District=VIJAYANAGARA,\nState=Karnataka",
+    "14.639643",
+    "76.466874",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 95,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "VIJAYANAGARA",
+    "KUDLIGI",
+    "HOSPET-KUDLIGI ROAD, #, , City=KUDLIGI, District=VIJAYANAGARA,\nState=Karnataka",
+    "14.917334",
+    "76.375487",
+    "CCS",
+    "120",
+    "120",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 96,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Bagalkote",
+    "HOOLAGERI",
+    "HUBLI BIJAPUR ROAD, HOOLAGERI VILLAGE, , City=HOOLAGERI,\nDistrict=BAGALKOT, State=Karnataka",
+    "16.108231",
+    "75.589804",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 97,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Belagavi",
+    "GHATAPRABHA",
+    "HUKKERI GOKAK ROAD, GHATAPRABHA, , City=GHATAPRABHA,\nDistrict=BELGAUM, State=Karnataka",
+    "16.243392",
+    "74.740244",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 98,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "HAVERI",
+    "RANEBENNUR",
+    "HULAHALLI VILAGE,, ON NH4, , City=RANEBENNUR, District=HAVERI,\nState=Karnataka",
+    "14.648595",
+    "75.597530",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 99,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "CHITRADURGA",
+    "HOSADURGA",
+    "HULIYAR ROAD, CST 81173660, , City=HOSADURGA, District=CHITRADURGA,\nState=Karnataka",
+    "13.791011",
+    "76.298891",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 581,
+   "row": 100,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "Karnataka",
+    "Chikkaballapura",
+    "CHICKABALLAPUR",
+    "HUNEGAL VILLAGE, RHS OF NH 7, , City=CHICKABALLAPUR,\nDistrict=CHIKBALLAPUR, State=Karnataka",
+    "13.494152",
+    "77.754201",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 101,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "PURBA MEDINIPUR",
+    "THIKRA",
+    "VILLAGE - THIKRA, PO & PS - RAMNAGAR, , City=THIKRA, District=PURBA\nMEDINIPUR, State=West Bengal",
+    "21.667840",
+    "87.544818",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 102,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "HOOGHLY",
+    "GURAP",
+    "VILLAGE & PO GHOSLA, PS DHANIAKHALI, VIL GURAP, , City=GURAP,\nDistrict=HOOGHLY, State=West Bengal",
+    "23.049289",
+    "88.120437",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 103,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "HOOGHLY",
+    "GOPALPUR",
+    "VILLAGE GOPALPUR, PS DHANIAKHALI, , City=GOPALPUR, District=HOOGHLY,\nState=West Bengal",
+    "23.001566",
+    "88.147514",
+    "CCS",
+    "30",
+    "30",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 104,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "UTTAR DINAJPUR",
+    "RAIGANJ",
+    "VILLAGE- KHANTA, RASAKHOWA BAZAR, , City=RAIGANJ, District=UTTAR\nDINAJPUR, State=West Bengal",
+    "25.851236",
+    "88.045761",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 105,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "UTTAR DINAJPUR",
+    "TUNIDIHI",
+    "VILLAGE TUNGIDIGHI, BALARAMPUR ROAD, , City=TUNIDIHI, District=UTTAR\nDINAJPUR, State=West Bengal",
+    "25.874206",
+    "87.857666",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 106,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "NADIA",
+    "BARNIA",
+    "VILLAGE-BARNIA, PO-PARNIA, PS-PALASHIPARA, , City=BARNIA,\nDistrict=NADIA, State=West Bengal",
+    "23.778653",
+    "88.382199",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 107,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "BANKURA",
+    "CHELEMA",
+    "VILLAGE-CHELEMA, BANKURA, , City=CHELEMA, District=BANKURA,\nState=West Bengal",
+    "23.483810",
+    "87.388756",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 108,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "COOCHBEHAR",
+    "COOCHBEHAR",
+    "VILL-CHAMTA, PO-COLONY CHAMTA, PS-TUFANGANJ, , City=COOCHBEHAR,\nDistrict=COOCHBEHAR, State=West Bengal",
+    "26.292300",
+    "89.656542",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 109,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "DAKSHIN DINAJPUR",
+    "HILLI",
+    "VILL-FATEPUR, PO-HILI, , City=HILLI, District=DAKSHIN DINAJPUR, State=West\nBengal",
+    "25.273370",
+    "88.981698",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 110,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "MURSHIDABAD",
+    "GOKARNA",
+    "VILL-GOKARNA, P.O- HAZARPUR-NABAGRAM, , City=GOKARNA,\nDistrict=MURSHIDABAD, State=West Bengal",
+    "24.057764",
+    "88.134820",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 111,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "DAKSHIN DINAJPUR",
+    "GANGARAMPUR",
+    "VILL-RAGHUNATHBATI, PO-KALIDIGHI, , City=GANGARAMPUR,\nDistrict=DAKSHIN DINAJPUR, State=West Bengal",
+    "25.403585",
+    "88.539505",
+    "CCS",
+    "60",
+    "60",
+    "2"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 112,
+   "cells": [
+    "BPCL",
+    "Govt.",
+    "West Bengal",
+    "MALDA",
+    "MALDA",
+    "VILL-UTTAR NOAPARA, PO - NALAGOLA, PS - BAMANGOLA, ,\nCity=NALAGOLA, District=MALDA WEST BENGAL, State=West Bengal",
+    "25.259473",
+    "88.421637",
+    "Bharat AC",
+    "3",
+    "3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 113,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Y.S.R Kadapa",
+    "Hematpur",
+    "Baba Damodar Filling Station,Birbhanpur, Hematpur",
+    "22.739300",
+    "87.603121",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 114,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Paschim Medinipur",
+    "Manteswar",
+    "Farha Service Station,Mouza Hatdanga Manteswar Block",
+    "23.425120",
+    "88.159677",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 115,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Nadia",
+    "Nazirpur",
+    "M/S Joy Maa Kali Service Station,Nazirpur",
+    "23.875650",
+    "88.540480",
+    "Type-II AC",
+    "7",
+    "7",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 116,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Nadia",
+    "Debogram",
+    "M/S Kanai Fuel Station,Debogram",
+    "23.710600",
+    "88.406280",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 117,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "South 24 Parganas",
+    "Hospital More",
+    "M/S Kanthalberia Fuel Centre,Hospital More",
+    "22.297352",
+    "88.696548",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 118,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "South 24 Parganas",
+    "Pujali",
+    "M/S Pujali Petrol Pump,Pujali",
+    "22.467177",
+    "88.151773",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 119,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "North 24 Parganas",
+    "Helencha",
+    "M/S Shree Krishna Petrol Pump,Helencha",
+    "23.196080",
+    "88.849420",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 120,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "South 24 Parganas",
+    "Krishnachandrapur",
+    "Maa Tripura Service Station,Krishnachandrapur",
+    "22.110685",
+    "88.426294",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 121,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "North 24 Parganas",
+    "Madertala",
+    "Madina Service Station,Madertala",
+    "22.630430",
+    "88.751200",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 122,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Purulia",
+    "Arsha",
+    "Ms Hsd Souvik Service Centre,Near Kantadih Railway Gate, Kantadih, Arsha",
+    "23.236501",
+    "86.309923",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 123,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "South 24 Parganas",
+    "Priyor More",
+    "Ms/Hsd Rangina Hp Service Station,Priyor More",
+    "22.147430",
+    "88.459015",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 124,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "South 24 Parganas",
+    "Pathar Pratima",
+    "Ms/Hsd Sitanath Hp Service Station,Pathar Pratima",
+    "21.811890",
+    "88.373461",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 125,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Howrah",
+    "Eksara",
+    "Ms/Hsd Sm Filling Centre,Eksara",
+    "22.627325",
+    "88.291949",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 126,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Paschim Medinipur",
+    "Puratan Bazar",
+    "Mshd Jha Fuels ,Puratan Bazar",
+    "22.336570",
+    "87.336077",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 127,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Paschim Medinipur",
+    "Keshpur",
+    "Mshsd Bishnupriya Filling Station,Muktichak, Bogchari, Keshpur",
+    "22.520595",
+    "87.429691",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 128,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Purba Bardhaman",
+    "Belkash",
+    "Mshsd Maa Manasa Service Station,Belkash",
+    "23.258752",
+    "87.785525",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 129,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Paschim Medinipur",
+    "Onda",
+    "Mshsd Ratanpur Filling Centre,Plot No 406, Mouza Ratanpur, Onda",
+    "23.114374",
+    "87.071463",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 130,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Hooghly",
+    "Nasibpur",
+    "Nashibpur Service Station,Nasibpur",
+    "22.811015",
+    "88.273092",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 131,
+   "cells": [
+    "HPCL",
+    "Govt.",
+    "West Bengal",
+    "Bankura",
+    "Onda",
+    "Swapan Filling Station,Onda",
+    "23.106332",
+    "87.259091",
+    "Type-II AC",
+    "7.4",
+    "7.4",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 132,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Purba Bardhaman",
+    "Norja More",
+    "M/S Alinagar Filling Station,Norja More",
+    "23.424235",
+    "87.901173",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 133,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Purba Bardhaman",
+    "Abhirampur, Mankar",
+    "Maa Rakshakali Filling Station,Abhirampur, Mankar",
+    "23.437737",
+    "87.662228",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 134,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Paschim Bardhaman",
+    "Runakuria Ghat",
+    "Maji Auto Service,Runakuria Ghat",
+    "23.845639",
+    "87.000271",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 135,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Bankura",
+    "Katjuridanga",
+    "Mshsd Bankura Filling Station,Katjuridanga",
+    "23.250068",
+    "87.030921",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 136,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Purulia",
+    "Para Dubra Road",
+    "Mshsd P K Automobile,Para Dubra Road",
+    "23.527681",
+    "86.518670",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  },
+  {
+   "page": 1159,
+   "row": 137,
+   "cells": [
+    "UJOY",
+    "Private",
+    "West Bengal",
+    "Purulia",
+    "Ghongha,",
+    "Mshsd Satyajit Filling Station,Ghongha,",
+    "23.413098",
+    "86.317443",
+    "Bharat AC-001",
+    "3.3",
+    "3.3",
+    "1"
+   ]
+  }
+ ]
+}

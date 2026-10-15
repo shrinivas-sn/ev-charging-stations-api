@@ -8,9 +8,9 @@
     "dev": "npm --prefix frontend run dev",
     "start": "node backend/src/index.js",
     "test": "npm --prefix backend test",
-    "generate-data": "node backend/scripts/generate-data.js",
     "verify:seo": "npm --prefix frontend run verify:seo",
-    "verify": "npm run test && npm run build && npm run verify:seo"
+    "verify": "npm run test && npm run build && npm run verify:seo",
+    "build-data": "node backend/scripts/build-dataset.js ingest/out/raw-rows.json"
   },
   "dependencies": {
     "cors": "^2.8.6",
