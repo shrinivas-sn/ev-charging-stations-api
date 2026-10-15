@@ -5,7 +5,7 @@ Phase: Rebuilding on real BEE data — Phase 6 done except the preview smoke, wh
 
 ## Current State
 
-- **Path / branch:** `E:\OSC\api-projects\projects\ev-charging-stations-api`, branch `rebuild/bee-real-data` (local only, never pushed). Nothing is on `main`; the owner has not authorised a merge.
+- **Path / branch:** `E:\OSC\api-projects\projects\ev-charging-stations-api`, branch `rebuild/bee-real-data`, pushed to `origin` on 15/10/2026 for the Vercel preview (Task 6.3). Nothing is on `main`; the owner has not authorised a merge.
 - **Live site** (`https://ev-charging-stations-api.vercel.app`, deployed from `main`): still serves the old generated sample (28,698 invented stations) until the rebuild ships.
 - **Real source:** BEE "EV Public Charging Stations Data till 26th October 2025" (PDF, http only). Republished with attribution; BEE publishes no licence. Notes: `DOCS/DATA-NOTES.md`.
 - **Dataset:** 29,184 stations / 39,640 chargers, 36 states/UTs, 70 operators, 115 suspect coordinates flagged, 1 row rejected.
