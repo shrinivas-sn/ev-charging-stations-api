@@ -230,6 +230,57 @@ function getStations(values = {}) {
   return { data: slice.map((s) => projectStation(s)), meta: { ...meta, filters_applied: appliedFilters(filters), ...sourceMeta() } };
 }
 
+const EARTH_RADIUS_KM = 6371.0088;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const toRad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toRad;
+  const dLng = (lng2 - lng1) * toRad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/**
+ * Stations within `radius` km of (lat, lng), nearest first. Suspect coordinates are
+ * never returned: a wrong location is worse than no result for someone driving there.
+ */
+function getNearbyStations(values) {
+  const { stations } = load();
+  const filters = resolveFilters({ ...values, location_quality: "ok" });
+  const { lat, lng, radius } = values;
+  const page = values.page || 1;
+  const limit = values.limit || DEFAULT_LIMIT;
+
+  // Cheap bounding box first; the longitude span uses the circle's pole-ward edge so it never clips.
+  const latDelta = radius / 110.574;
+  const edgeLat = Math.min(89.9, Math.abs(lat) + latDelta);
+  const lngDelta = radius / (111.32 * Math.max(Math.cos(edgeLat * (Math.PI / 180)), 0.001));
+
+  const found = [];
+  for (const station of stations) {
+    if (Math.abs(station.latitude - lat) > latDelta) continue;
+    if (Math.abs(station.longitude - lng) > lngDelta) continue;
+    if (!matches(station, filters)) continue;
+    const distance = Math.round(haversineKm(lat, lng, station.latitude, station.longitude) * 100) / 100;
+    if (distance <= radius) found.push({ station, distance });
+  }
+  found.sort((a, b) => a.distance - b.distance || (a.station.id < b.station.id ? -1 : 1));
+
+  const { slice, meta } = paginate(found, page, limit);
+  const { total, ...pageMeta } = meta;
+  return {
+    data: slice.map(({ station, distance }) => ({ ...projectStation(station), distance_km: distance })),
+    meta: {
+      center: { lat, lng },
+      radius_km: radius,
+      total_found: total,
+      ...pageMeta,
+      filters_applied: appliedFilters({ ...filters, locationQuality: "any" }),
+      ...sourceMeta(),
+    },
+  };
+}
+
 function getStationById(id) {
   if (!STATION_ID.test(id)) {
     throw new ApiError(400, "INVALID_STATION_ID", `'${id}' is not a station id. Ids look like evs_1a2b3c4d5e.`, {
@@ -271,6 +322,7 @@ module.exports = {
   MAX_RADIUS_KM,
   getStations,
   getStationById,
+  getNearbyStations,
   getStatesSummary,
   getDatasetMeta,
   sourceMeta,
