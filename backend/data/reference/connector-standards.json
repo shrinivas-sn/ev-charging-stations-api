@@ -1,0 +1,102 @@
+{
+  "source": "Ministry of Power, amendment to the revised consolidated Guidelines & Standards for Charging Infrastructure for EVs (14.01.2022): Annexure II (charger types and vehicles served) and Annexure III (BIS standards notified 01.11.2021)",
+  "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf",
+  "checked": "2026-10-15",
+  "vehicle_class_note": "car = four-wheeler (4W); two_three_wheeler = 2W/3W, as the Annexure II 'Charging vehicle' column lists them",
+  "standards": [
+    {
+      "id": "CCS2",
+      "name": "CCS2 (Combined Charging System)",
+      "current": "DC",
+      "vehicle_classes": ["car"],
+      "description": "DC fast charging gun; Annexure II lists CCS for 4W at 200-750 V or higher.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "CHADEMO",
+      "name": "CHAdeMO",
+      "current": "DC",
+      "vehicle_classes": ["car"],
+      "description": "DC fast charging gun; Annexure II lists CHAdeMO for 4W at 200-500 V or higher.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "TYPE2_AC",
+      "name": "Type 2 AC",
+      "current": "AC",
+      "vehicle_classes": ["car", "two_three_wheeler"],
+      "description": "AC charging at 380-415 V; Annexure II lists Type-2 AC for 4W, 3W and 2W.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "BHARAT_DC001",
+      "name": "Bharat DC-001",
+      "current": "DC",
+      "vehicle_classes": ["car", "two_three_wheeler"],
+      "description": "Low-voltage DC charger (15 kW). Annexure II lists the 48 V variant for 4W, 3W and 2W, and the 72 V-or-higher variant for 4W; the BEE data does not say which variant.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "BHARAT_AC001",
+      "name": "Bharat AC-001",
+      "current": "AC",
+      "vehicle_classes": ["car", "two_three_wheeler"],
+      "description": "230 V AC charger with three 3.3 kW guns (10 kW total); Annexure II lists it for 4W, 3W and 2W.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "LEV_AC",
+      "name": "Light EV AC charge point",
+      "current": "AC",
+      "vehicle_classes": ["two_three_wheeler"],
+      "description": "Light EV AC charge point up to 7 kW (charging device IS-17017-22-1, socket IS-60309). Annexure III lists light-EV charge points separately from parking-bay (car) charge points.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    },
+    {
+      "id": "LEV_DC",
+      "name": "Light EV DC charge point",
+      "current": "DC",
+      "vehicle_classes": ["two_three_wheeler"],
+      "description": "Light EV DC charge point up to 7 kW (charging device IS-17017-25, vehicle connector IS-17017-2-6). The BEE data also lists an IS-17017-2-7 connector variant.",
+      "source_url": "http://beeindia.gov.in/WriteReadData/RTF1984/Amendment_to_revised_consolidated_Guidelines_dated_14012022.pdf"
+    }
+  ],
+  "raw_types": {
+    "LEV AC Charge point": { "standards": ["LEV_AC"], "lev_variant": null },
+    "LEV AC Charge Point": { "standards": ["LEV_AC"], "lev_variant": null },
+    "LEV DC Charge Point (IS-17017-2-7)": { "standards": ["LEV_DC"], "lev_variant": "IS-17017-2-7" },
+    "LEV DC Charge Point (IS-17017-2-6)": { "standards": ["LEV_DC"], "lev_variant": "IS-17017-2-6" },
+    "LEV DC": { "standards": ["LEV_DC"], "lev_variant": null },
+    "Bharat AC-001": { "standards": ["BHARAT_AC001"], "lev_variant": null },
+    "Bharat AC": { "standards": ["BHARAT_AC001"], "lev_variant": null },
+    "Bharat DC-001": { "standards": ["BHARAT_DC001"], "lev_variant": null },
+    "CCS": { "standards": ["CCS2"], "lev_variant": null },
+    "CCS-II": { "standards": ["CCS2"], "lev_variant": null },
+    "Type-II AC": { "standards": ["TYPE2_AC"], "lev_variant": null },
+    "Type II": { "standards": ["TYPE2_AC"], "lev_variant": null },
+    "CHAdeMO": { "standards": ["CHADEMO"], "lev_variant": null },
+    "CHAdeMo": { "standards": ["CHADEMO"], "lev_variant": null },
+    "CHADEMO": { "standards": ["CHADEMO"], "lev_variant": null },
+    "Combo (CCS-II+CHAdeMO)": { "standards": ["CCS2", "CHADEMO"], "lev_variant": null },
+    "Combo (CCS-II + CHAdeMo + Type II)": { "standards": ["CCS2", "CHADEMO", "TYPE2_AC"], "lev_variant": null },
+    "Combo(CCS-II+Type-II)": { "standards": ["CCS2", "TYPE2_AC"], "lev_variant": null },
+    "Combo ( Bharat AC-001 + Type-II AC)": { "standards": ["BHARAT_AC001", "TYPE2_AC"], "lev_variant": null }
+  },
+  "query_aliases": {
+    "ccs": "CCS2",
+    "ccs2": "CCS2",
+    "ccsii": "CCS2",
+    "combo2": "CCS2",
+    "chademo": "CHADEMO",
+    "type2": "TYPE2_AC",
+    "type2ac": "TYPE2_AC",
+    "typeii": "TYPE2_AC",
+    "typeiiac": "TYPE2_AC",
+    "bharatdc001": "BHARAT_DC001",
+    "bharatdc": "BHARAT_DC001",
+    "bharatac001": "BHARAT_AC001",
+    "bharatac": "BHARAT_AC001",
+    "levac": "LEV_AC",
+    "levdc": "LEV_DC"
+  }
+}

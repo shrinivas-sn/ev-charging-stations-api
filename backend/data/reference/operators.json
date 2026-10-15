@@ -1,0 +1,496 @@
+{
+  "source": "CPO Name and Govt/Private columns of the BEE PDF; canonical names rejoin words split by line wraps in the PDF",
+  "note": "every raw spelling must appear in exactly one aliases list; ownership is taken from the PDF and was consistent across all rows of each operator (checked 2026-10-15)",
+  "operators": [
+    {
+      "canonical": "Ather",
+      "ownership": "private",
+      "aliases": [
+        "Ather"
+      ]
+    },
+    {
+      "canonical": "B G Enterprises",
+      "ownership": "private",
+      "aliases": [
+        "B G Enterprises"
+      ]
+    },
+    {
+      "canonical": "BBMP",
+      "ownership": "govt",
+      "aliases": [
+        "BBMP"
+      ]
+    },
+    {
+      "canonical": "BECIL",
+      "ownership": "govt",
+      "aliases": [
+        "BECIL"
+      ]
+    },
+    {
+      "canonical": "BEL",
+      "ownership": "govt",
+      "aliases": [
+        "BEL"
+      ]
+    },
+    {
+      "canonical": "BHEL",
+      "ownership": "govt",
+      "aliases": [
+        "BHEL"
+      ]
+    },
+    {
+      "canonical": "BMTC",
+      "ownership": "govt",
+      "aliases": [
+        "BMTC"
+      ]
+    },
+    {
+      "canonical": "BPCL",
+      "ownership": "govt",
+      "aliases": [
+        "BPCL"
+      ]
+    },
+    {
+      "canonical": "BPM",
+      "ownership": "private",
+      "aliases": [
+        "BPM"
+      ]
+    },
+    {
+      "canonical": "BSES Yamuna",
+      "ownership": "govt",
+      "aliases": [
+        "BSES Yamuna"
+      ]
+    },
+    {
+      "canonical": "Bagirathi",
+      "ownership": "private",
+      "aliases": [
+        "Bagirathi"
+      ]
+    },
+    {
+      "canonical": "Bescom",
+      "ownership": "govt",
+      "aliases": [
+        "Bescom"
+      ]
+    },
+    {
+      "canonical": "Blink",
+      "ownership": "private",
+      "aliases": [
+        "Blink"
+      ]
+    },
+    {
+      "canonical": "Blusmart",
+      "ownership": "private",
+      "aliases": [
+        "Blusmart"
+      ]
+    },
+    {
+      "canonical": "Corporation of Chennai",
+      "ownership": "govt",
+      "aliases": [
+        "CORPORAT ION OF CHENNAI"
+      ]
+    },
+    {
+      "canonical": "DELTA",
+      "ownership": "private",
+      "aliases": [
+        "DELTA"
+      ]
+    },
+    {
+      "canonical": "DPAR",
+      "ownership": "govt",
+      "aliases": [
+        "DPAR"
+      ]
+    },
+    {
+      "canonical": "E-Fill",
+      "ownership": "private",
+      "aliases": [
+        "E-Fill"
+      ]
+    },
+    {
+      "canonical": "EEE Taxi",
+      "ownership": "private",
+      "aliases": [
+        "EEE Taxi"
+      ]
+    },
+    {
+      "canonical": "EESL",
+      "ownership": "govt",
+      "aliases": [
+        "EESL"
+      ]
+    },
+    {
+      "canonical": "Electrify",
+      "ownership": "private",
+      "aliases": [
+        "Electrify"
+      ]
+    },
+    {
+      "canonical": "Electriva",
+      "ownership": "private",
+      "aliases": [
+        "Electriva"
+      ]
+    },
+    {
+      "canonical": "Evi Tech",
+      "ownership": "private",
+      "aliases": [
+        "Evi Tech"
+      ]
+    },
+    {
+      "canonical": "Exicom",
+      "ownership": "private",
+      "aliases": [
+        "Exicom"
+      ]
+    },
+    {
+      "canonical": "Fortum",
+      "ownership": "private",
+      "aliases": [
+        "Fortum"
+      ]
+    },
+    {
+      "canonical": "Gensol",
+      "ownership": "private",
+      "aliases": [
+        "Gensol"
+      ]
+    },
+    {
+      "canonical": "HAREDA",
+      "ownership": "govt",
+      "aliases": [
+        "HAREDA"
+      ]
+    },
+    {
+      "canonical": "HPCL",
+      "ownership": "govt",
+      "aliases": [
+        "HPCL"
+      ]
+    },
+    {
+      "canonical": "Hero Vida",
+      "ownership": "private",
+      "aliases": [
+        "Hero Vida"
+      ]
+    },
+    {
+      "canonical": "Hyderabad Metro Corporation Ltd",
+      "ownership": "govt",
+      "aliases": [
+        "Hyderabad metro corporatio n ltd"
+      ]
+    },
+    {
+      "canonical": "Hyundai",
+      "ownership": "private",
+      "aliases": [
+        "Hyundai"
+      ]
+    },
+    {
+      "canonical": "IOCL",
+      "ownership": "govt",
+      "aliases": [
+        "IOCL"
+      ]
+    },
+    {
+      "canonical": "JBM",
+      "ownership": "private",
+      "aliases": [
+        "JBM"
+      ]
+    },
+    {
+      "canonical": "Joule",
+      "ownership": "private",
+      "aliases": [
+        "Joule"
+      ]
+    },
+    {
+      "canonical": "KAZAM",
+      "ownership": "private",
+      "aliases": [
+        "KAZAM"
+      ]
+    },
+    {
+      "canonical": "KERC",
+      "ownership": "govt",
+      "aliases": [
+        "KERC"
+      ]
+    },
+    {
+      "canonical": "KSEB",
+      "ownership": "govt",
+      "aliases": [
+        "KSEB"
+      ]
+    },
+    {
+      "canonical": "KSRTC",
+      "ownership": "govt",
+      "aliases": [
+        "KSRTC"
+      ]
+    },
+    {
+      "canonical": "Lioncharge",
+      "ownership": "private",
+      "aliases": [
+        "Lioncharge"
+      ]
+    },
+    {
+      "canonical": "MSEDCL",
+      "ownership": "govt",
+      "aliases": [
+        "MSEDCL"
+      ]
+    },
+    {
+      "canonical": "Magenta mobility",
+      "ownership": "private",
+      "aliases": [
+        "Magenta mobility"
+      ]
+    },
+    {
+      "canonical": "Mojo Green",
+      "ownership": "private",
+      "aliases": [
+        "Mojo Green"
+      ]
+    },
+    {
+      "canonical": "NTPC",
+      "ownership": "govt",
+      "aliases": [
+        "NTPC"
+      ]
+    },
+    {
+      "canonical": "Nikol",
+      "ownership": "private",
+      "aliases": [
+        "Nikol"
+      ]
+    },
+    {
+      "canonical": "OK Green",
+      "ownership": "private",
+      "aliases": [
+        "OK Green"
+      ]
+    },
+    {
+      "canonical": "OLA",
+      "ownership": "private",
+      "aliases": [
+        "OLA"
+      ]
+    },
+    {
+      "canonical": "Okaya",
+      "ownership": "private",
+      "aliases": [
+        "Okaya"
+      ]
+    },
+    {
+      "canonical": "PGCIL",
+      "ownership": "govt",
+      "aliases": [
+        "PGCIL"
+      ]
+    },
+    {
+      "canonical": "Plug & Go",
+      "ownership": "private",
+      "aliases": [
+        "Plug &Go"
+      ]
+    },
+    {
+      "canonical": "Power bank green",
+      "ownership": "private",
+      "aliases": [
+        "Power bank green"
+      ]
+    },
+    {
+      "canonical": "Prakriti",
+      "ownership": "private",
+      "aliases": [
+        "Prakriti"
+      ]
+    },
+    {
+      "canonical": "Prouna",
+      "ownership": "private",
+      "aliases": [
+        "Prouna"
+      ]
+    },
+    {
+      "canonical": "REIL",
+      "ownership": "govt",
+      "aliases": [
+        "REIL"
+      ]
+    },
+    {
+      "canonical": "Reliance BP",
+      "ownership": "private",
+      "aliases": [
+        "Reliance BP"
+      ]
+    },
+    {
+      "canonical": "Setrans Mobility",
+      "ownership": "private",
+      "aliases": [
+        "Setrans Mobility"
+      ]
+    },
+    {
+      "canonical": "Sharify",
+      "ownership": "private",
+      "aliases": [
+        "Sharify"
+      ]
+    },
+    {
+      "canonical": "Smart e Trasure",
+      "ownership": "private",
+      "aliases": [
+        "Smart e Trasure"
+      ]
+    },
+    {
+      "canonical": "Sun mobility",
+      "ownership": "private",
+      "aliases": [
+        "Sun mobility"
+      ]
+    },
+    {
+      "canonical": "Surat Municipal Corporation",
+      "ownership": "govt",
+      "aliases": [
+        "Surat Municipal Corporatio n"
+      ]
+    },
+    {
+      "canonical": "TCIL",
+      "ownership": "govt",
+      "aliases": [
+        "TCIL"
+      ]
+    },
+    {
+      "canonical": "TN Golf Federation",
+      "ownership": "govt",
+      "aliases": [
+        "TN Golf Federatrio n"
+      ]
+    },
+    {
+      "canonical": "TVESAS",
+      "ownership": "private",
+      "aliases": [
+        "TVESAS"
+      ]
+    },
+    {
+      "canonical": "Tata Power",
+      "ownership": "private",
+      "aliases": [
+        "Tata Power"
+      ]
+    },
+    {
+      "canonical": "Tech Mahindra",
+      "ownership": "private",
+      "aliases": [
+        "Tech Mahindra"
+      ]
+    },
+    {
+      "canonical": "Tellus",
+      "ownership": "private",
+      "aliases": [
+        "Tellus"
+      ]
+    },
+    {
+      "canonical": "Tesco charge zone",
+      "ownership": "private",
+      "aliases": [
+        "Tesco charge zone"
+      ]
+    },
+    {
+      "canonical": "Transport Department Chennai",
+      "ownership": "govt",
+      "aliases": [
+        "Transport Departmen t Chennai"
+      ]
+    },
+    {
+      "canonical": "UJOY",
+      "ownership": "private",
+      "aliases": [
+        "UJOY"
+      ]
+    },
+    {
+      "canonical": "UPPCL",
+      "ownership": "govt",
+      "aliases": [
+        "UPPCL"
+      ]
+    },
+    {
+      "canonical": "Zeon charging",
+      "ownership": "private",
+      "aliases": [
+        "Zeon charging"
+      ]
+    }
+  ]
+}
