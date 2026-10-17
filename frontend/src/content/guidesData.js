@@ -167,4 +167,190 @@ print(body["meta"]["attribution"])
 A misspelled parameter is \`400 UNKNOWN_PARAMETER\` with the accepted names in \`error.details.allowed\`; an unknown value such as \`vehicle=truck\` is \`404 UNKNOWN_VEHICLE\` with \`error.details.valid_values\`. Nothing is silently ignored, so an empty \`data\` array really means no match.
 `,
   },
+  {
+    id: 'bee-ev-charging-station-dataset-access',
+    title: 'Accessing Bureau of Energy Efficiency (BEE) EV Charging Data via REST API',
+    seoTitle: 'BEE EV charging station dataset via API',
+    summary:
+      'How India’s central nodal agency (BEE) tracks 29,000+ public EV chargers, how coordinate sanitization works, and how to query the official dataset without scraping PDFs.',
+    readTime: '6 min read',
+    category: 'Open Data',
+    content: `
+## Overview
+The Bureau of Energy Efficiency (BEE), operating under the Ministry of Power, serves as the central nodal agency for rollout of Public Charging Stations (PCS) across India. BEE periodically releases national master registries detailing operational stations, charger models, and charge point operators (CPOs).
+
+Historically, this data is distributed across unwieldy government PDF tables ("EV Public Charging Stations Data till 26th October 2025") with unformatted addresses and inconsistent coordinate pairs. This keyless REST API ingests, sanitizes, and indexes the entire 29,184-station dataset for direct developer querying.
+
+## 1. What BEE data contains (and what it omits)
+BEE's operational station registry provides critical structural parameters:
+- **Station Location**: State, district, city, raw address string, and geographic coordinates.
+- **Operator Identity**: CPO names including Tata Power, Jio-bp, Ather, Statiq, ChargeZone, and state DISCOMs.
+- **Installed Hardware**: Total number of chargers and individual connector guns (CCS2, Type 2, Bharat DC-001, LEV).
+- **Power Capacity**: Total rated capacity per station in kilowatts (kW).
+
+However, BEE publishes a static infrastructure census. It does **not** provide live socket occupancy (available vs busy) or dynamic tariff billing. Applications should use this API as an authoritative geospatial directory, not a real-time booking ledger.
+
+## 2. Location sanitization & the location_quality filter
+Raw government registries contain human entry errors: typos, swapped latitude/longitude pairs, or coordinate zeros (0.0, 0.0) where GPS reception failed.
+
+The directory API runs continuous spatial geometry validation:
+- All stations returned by default or by radius search have passed boundary clipping within the sovereign borders of India.
+- When querying the full directory via \`/v1/stations\`, pass \`location_quality=ok\` to automatically exclude stations with unverified or suspect coordinates.
+
+\`\`\`bash
+# Query verified stations in Pune with fast DC chargers
+curl -s "https://ev-charging-stations-api.vercel.app/v1/stations?city=Pune&current=dc&location_quality=ok&limit=10"
+\`\`\`
+
+## 3. Querying by State and District
+BEE organizes public charging infrastructure along state-level nodal agencies. You can aggregate and slice infrastructure data programmatically by administrative geography:
+
+\`\`\`javascript
+const BASE_URL = 'https://ev-charging-stations-api.vercel.app';
+
+// Fetch summary counts for Karnataka
+const response = await fetch(\`\${BASE_URL}/v1/stations?state=Karnataka&limit=1\`);
+const { meta } = await response.json();
+
+console.log(\`Total verified charging stations in Karnataka: \${meta.total_found}\`);
+console.log(\`Data attribution: \${meta.attribution}\`);
+\`\`\`
+
+## 4. Government Attribution Guidelines
+Every success response returns an immutable \`meta.attribution\` string citing BEE and the dataset release date. Applications displaying this data must present this attribution note to comply with open government data usage guidelines.
+`,
+  },
+  {
+    id: 'building-keyless-ev-charging-map-maplibre',
+    title: 'Building a Keyless EV Charging Map with MapLibre GL and OpenFreeMap',
+    seoTitle: 'Building a keyless EV charging map',
+    summary:
+      'Render thousands of Indian EV chargers on a responsive map using open-source MapLibre GL JS and OpenFreeMap vector tiles with zero proprietary API keys.',
+    readTime: '7 min read',
+    category: 'Architecture',
+    content: `
+## Overview
+Building a nationwide EV charging station locator using proprietary mapping APIs like Google Maps Platform or Mapbox can quickly run up thousands of dollars in tile requests and geocoding bills.
+
+By pairing **MapLibre GL JS** (an open-source WebGL vector map library) with **OpenFreeMap** (free vector map tile hosting) and this keyless EV Charging Station API, you can deploy a zero-cost, high-performance charging map.
+
+## 1. MapLibre GL + OpenFreeMap setup
+OpenFreeMap provides production-grade vector tiles hosted on Cloudflare with zero rate limits or registration keys.
+
+\`\`\`html
+<!-- Include MapLibre GL CSS & JS -->
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+\`\`\`
+
+Initialize the map container with the OpenFreeMap vector style:
+
+\`\`\`javascript
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+const map = new maplibregl.Map({
+  container: 'map-container',
+  style: 'https://tiles.openfreemap.org/styles/liberty',
+  center: [77.5946, 12.9716], // Bengaluru center [lng, lat]
+  zoom: 11,
+});
+\`\`\`
+
+## 2. Converting API radius responses to GeoJSON
+When the user pans or searches a location, query \`/v1/stations/near\` and convert the \`data\` array into a standard GeoJSON FeatureCollection:
+
+\`\`\`javascript
+async function loadStations(lat, lng, radiusKm = 15) {
+  const url = new URL('https://ev-charging-stations-api.vercel.app/v1/stations/near');
+  url.searchParams.set('lat', lat);
+  url.searchParams.set('lng', lng);
+  url.searchParams.set('radius', radiusKm);
+  url.searchParams.set('limit', 100);
+
+  const res = await fetch(url);
+  const json = await res.json();
+  if (!json.success) return null;
+
+  return {
+    type: 'FeatureCollection',
+    features: json.data.map((station) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [station.coordinates.lng, station.coordinates.lat],
+      },
+      properties: {
+        id: station.id,
+        name: station.name,
+        operator: station.operator,
+        powerKw: station.max_power_kw,
+        hasDc: station.chargers.some((c) => c.current === 'dc'),
+        address: station.address,
+      },
+    })),
+  };
+}
+\`\`\`
+
+## 3. Clustered circle rendering
+When displaying hundreds of chargers in dense urban centers like Delhi NCR or Mumbai, render points using MapLibre's native clustering engine so the browser maintains 60 FPS:
+
+\`\`\`javascript
+map.on('load', async () => {
+  const geojson = await loadStations(12.9716, 77.5946, 25);
+
+  map.addSource('stations', {
+    type: 'geojson',
+    data: geojson,
+    cluster: true,
+    clusterMaxZoom: 14,
+    clusterRadius: 50,
+  });
+
+  // Cluster circles
+  map.addLayer({
+    id: 'clusters',
+    type: 'circle',
+    source: 'stations',
+    filter: ['has', 'point_count'],
+    paint: {
+      'circle-color': '#059669', // Emerald
+      'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 32],
+    },
+  });
+
+  // Cluster numbers
+  map.addLayer({
+    id: 'cluster-count',
+    type: 'symbol',
+    source: 'stations',
+    filter: ['has', 'point_count'],
+    layout: {
+      'text-field': '{point_count_abbreviated}',
+      'text-size': 12,
+    },
+    paint: { 'text-color': '#ffffff' },
+  });
+
+  // Individual unclustered station points
+  map.addLayer({
+    id: 'unclustered-point',
+    type: 'circle',
+    source: 'stations',
+    filter: ['!', ['has', 'point_count']],
+    paint: {
+      'circle-color': ['case', ['get', 'hasDc'], '#10b981', '#3b82f6'],
+      'circle-radius': 7,
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#ffffff',
+    },
+  });
+});
+\`\`\`
+
+## 4. Mobile responsiveness & touch UX
+On mobile devices, ensure gesture interactions (pinch-to-zoom and two-finger drag) do not hijack page scrolling. Add navigation controls with large touch targets (\`min-width: 44px\`) and bind station click popups with full operator and power ratings.
+`,
+  },
 ];

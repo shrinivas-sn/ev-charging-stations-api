@@ -28,7 +28,7 @@ export const PAGE_META = {
   '/guides': {
     title: 'Integration guides — India EV Charging API',
     description:
-      'Guides to building an EV route planner, understanding Indian charging connector standards, and integrating the API in Python and Node.js.',
+      'Technical guides to building an EV route planner, Indian connector standards, BEE dataset access, and keyless MapLibre charging maps.',
   },
   '/status': {
     title: 'Status and dataset — India EV Charging API',
