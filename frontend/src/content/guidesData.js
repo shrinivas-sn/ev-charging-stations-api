@@ -282,7 +282,6 @@ async function loadStations(lat, lng, radiusKm = 15) {
       },
       properties: {
         id: station.id,
-        name: station.name,
         operator: station.operator,
         powerKw: station.max_power_kw,
         hasDc: station.chargers.some((c) => c.current === 'dc'),
@@ -315,7 +314,7 @@ map.on('load', async () => {
     source: 'stations',
     filter: ['has', 'point_count'],
     paint: {
-      'circle-color': '#059669', // Emerald
+      'circle-color': 'teal',
       'circle-radius': ['step', ['get', 'point_count'], 18, 10, 24, 50, 32],
     },
   });
@@ -330,7 +329,7 @@ map.on('load', async () => {
       'text-field': '{point_count_abbreviated}',
       'text-size': 12,
     },
-    paint: { 'text-color': '#ffffff' },
+    paint: { 'text-color': 'white' },
   });
 
   // Individual unclustered station points
@@ -340,10 +339,10 @@ map.on('load', async () => {
     source: 'stations',
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-color': ['case', ['get', 'hasDc'], '#10b981', '#3b82f6'],
+      'circle-color': ['case', ['get', 'hasDc'], 'teal', 'blue'],
       'circle-radius': 7,
       'circle-stroke-width': 2,
-      'circle-stroke-color': '#ffffff',
+      'circle-stroke-color': 'white',
     },
   });
 });
