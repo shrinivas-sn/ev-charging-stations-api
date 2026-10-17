@@ -64,7 +64,16 @@
     "targets": [
       {
         "repo": "public-apis/public-apis",
-        "pr": null
+        "pr": 8133,
+        "row": {
+          "title": "India EV Charging Stations",
+          "url": "https://ev-charging-stations-api.vercel.app/docs",
+          "description": "Directory of public EV charging stations across India with connector and power specs",
+          "category": "Transportation",
+          "auth": "No",
+          "https": "Yes",
+          "cors": "Yes"
+        }
       }
     ]
   }
