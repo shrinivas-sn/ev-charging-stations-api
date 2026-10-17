@@ -74,11 +74,10 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-14 px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:space-y-10 sm:px-6 sm:py-8">
       <section className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <span className="chip">Keyless · CORS enabled · No sign-up</span>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
             India EV charging station directory API
           </h1>
           <p className="mt-4 max-w-prose text-base leading-relaxed text-ink-muted">
